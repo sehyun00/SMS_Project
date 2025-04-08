@@ -1,6 +1,5 @@
 // src/styles/theme/index.ts
 // 테마 관련 파일 통합 인덱스
-
 import { lightColors, darkColors, Colors } from './colors';
 import spacing, { Spacing } from './spacing';
 import typography, { Typography } from './typography';
@@ -24,4 +23,7 @@ export const darkTheme: Theme = {
 
 export type { Colors, Spacing, Typography };
 export { lightColors, darkColors, spacing, typography };
-export default { lightTheme, darkTheme };
+
+// 객체 리터럴 대신 변수로 선언하고 내보내기
+const themes = { lightTheme, darkTheme };
+export default themes;

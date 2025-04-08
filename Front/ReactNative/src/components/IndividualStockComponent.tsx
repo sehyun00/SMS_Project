@@ -1,11 +1,13 @@
 // 경로: src/components/IndividualStockComponent.tsx
 // 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > IndividualStockComponent.tsx
 import React from 'react';
-import { View, Text, ViewStyle, TextStyle } from 'react-native';
+import { View, Text } from 'react-native';
 
 // HOC 임포트
 import withTheme from '../hoc/withTheme';
 import createStyles from '../styles/components/individualStockComponent.styles';
+// 공통 Theme 타입 가져오기 - 프로젝트 전체에서 일관된 테마 타입 사용
+import { Theme } from '../types/theme';
 
 // 주식 데이터 인터페이스 정의
 interface Stock {
@@ -15,23 +17,14 @@ interface Stock {
   ratio: number;
 }
 
-// 테마 인터페이스 정의
-interface Theme {
-  colors: {
-    text: string;
-    background: string;
-    // 기타 테마 관련 속성들
-  };
-  // 기타 테마 속성들
-}
-
 // 컴포넌트 props 인터페이스 정의
 interface IndividualStockComponentProps {
   stock: Stock;
   theme: Theme;
 }
 
-const IndividualStockComponent: React.FC<IndividualStockComponentProps> = ({ stock, theme }) => {
+// React.memo를 사용하여 불필요한 리렌더링 방지
+const IndividualStockComponent: React.FC<IndividualStockComponentProps> = React.memo(({ stock, theme }) => {
   const styles = createStyles(theme);
   
   return (
@@ -44,6 +37,10 @@ const IndividualStockComponent: React.FC<IndividualStockComponentProps> = ({ sto
       <Text style={styles.stockRatio}>{stock.ratio}%</Text>
     </View>
   );
-};
+});
 
+// 디버깅을 위한 displayName 설정
+IndividualStockComponent.displayName = 'IndividualStockComponent';
+
+// withTheme HOC로 감싸서 내보내기
 export default withTheme(IndividualStockComponent);

@@ -3,11 +3,13 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// 네비게이션 구성 임포트
-import AppNavigator from './src/navigation/AppNavigator';
+// 파일 확장자 확인 및 경로 검증
+import AppNavigator from './src/navigation/AppNavigator'; 
 
-// 테마 프로바이더 임포트
-import { ThemeProvider } from './src/styles/theme';
+// ThemeProvider 임포트 방식 확인
+import { ThemeProvider } from './src/styles/theme/ThemeContext';
+// 또는
+// import ThemeProvider from './src/styles/theme';
 
 const App = () => {
   return (

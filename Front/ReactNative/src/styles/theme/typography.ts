@@ -26,6 +26,7 @@ export interface Typography {
   };
 }
 
+
 // 기본 타이포그래피 설정
 const typography: Typography = {
   fontSize: {

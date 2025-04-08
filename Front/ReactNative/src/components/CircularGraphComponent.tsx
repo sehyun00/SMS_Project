@@ -1,12 +1,14 @@
 // 경로: src/components/CircularGraphComponent.tsx
 // 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > CircularGraphComponent.tsx
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 
 // 스타일 임포트
 import withTheme from '../hoc/withTheme';
 import createStyles from '../styles/components/circularGraphComponent.styles';
+// 전역 Theme 타입 가져오기
+import { Theme } from '../types/theme'; // 공통 Theme 인터페이스 사용
 
 // 데이터 아이템 인터페이스 정의
 interface DataItem {
@@ -21,19 +23,10 @@ interface ChartDataItem extends DataItem {
   legendFontSize: number;
 }
 
-// 테마 인터페이스 정의
-interface Theme {
-  colors: {
-    text: string;
-    // 기타 테마 색상 속성들
-  };
-  // 기타 테마 속성들
-}
-
 // 컴포넌트 props 인터페이스 정의
 interface CircularGraphComponentProps {
   data: DataItem[];
-  theme: Theme;
+  theme: Theme; // 공통 Theme 타입 사용
 }
 
 const CircularGraphComponent: React.FC<CircularGraphComponentProps> = ({ data, theme }) => {
@@ -52,7 +45,6 @@ const CircularGraphComponent: React.FC<CircularGraphComponentProps> = ({ data, t
   };
   
   const screenWidth: number = Dimensions.get('window').width;
-  const centerX: number = screenWidth * 0.425;
 
   return (
     <View style={styles.container}>
@@ -74,6 +66,9 @@ const CircularGraphComponent: React.FC<CircularGraphComponentProps> = ({ data, t
     </View>
   );
 };
+
+// 디버깅을 위한 displayName 설정
+CircularGraphComponent.displayName = 'IndividualStockComponent';
 
 // HOC로 감싸서 내보내기
 export default withTheme(CircularGraphComponent);

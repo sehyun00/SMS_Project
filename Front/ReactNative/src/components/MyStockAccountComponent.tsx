@@ -11,6 +11,8 @@ import IndividualStockComponent from './IndividualStockComponent';
 // 스타일 임포트
 import withTheme from '../hoc/withTheme';
 import createStyles from '../styles/components/myStockAccountComponent.styles';
+// 공통 Theme 타입 가져오기
+import { Theme } from '../types/theme';
 
 // 주식 데이터 인터페이스 정의
 interface StockData {
@@ -24,23 +26,13 @@ interface StockWithRatioAndColor extends StockData {
   color: string;
 }
 
-// 테마 인터페이스 정의
-interface Theme {
-  colors: {
-    primary: string;
-    placeholder: string;
-    text: string;
-    // 기타 테마 색상 속성들
-  };
-  // 기타 테마 속성들
-}
-
 // 컴포넌트 props 인터페이스 정의
 interface MyStockAccountComponentProps {
   theme: Theme;
 }
 
-const MyStockAccountComponent: React.FC<MyStockAccountComponentProps> = ({ theme }) => {
+// React.memo를 사용하여 불필요한 리렌더링 방지
+const MyStockAccountComponent: React.FC<MyStockAccountComponentProps> = React.memo(({ theme }) => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
   
@@ -123,6 +115,9 @@ const MyStockAccountComponent: React.FC<MyStockAccountComponentProps> = ({ theme
       </View>
     </ScrollView>
   );
-};
+});
+
+// 디버깅을 위한 컴포넌트 이름 설정
+MyStockAccountComponent.displayName = 'MyStockAccountComponent';
 
 export default withTheme(MyStockAccountComponent);
