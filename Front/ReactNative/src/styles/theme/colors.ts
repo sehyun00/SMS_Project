@@ -1,49 +1,44 @@
-// 토스증권 색상을 기반으로 한 색상 팔레트
-export const palette = {
-    tossBlue: '#0064FF',
-    tossGray: '#202632',
-    black: '#000000',
-    white: '#FFFFFF',
-    gray100: '#F5F6FA',
-    gray200: '#EAEBF0',
-    gray300: '#DADCE3',
-    gray400: '#C8CAD2',
-    gray500: '#A7AAAF',
-    gray600: '#878B94',
-    gray700: '#64676E',
-    gray800: '#3F4249',
-    gray900: '#252730',
-  };
-  
-  // 라이트 모드 테마
-  export const lightColors = {
-    primary: palette.tossBlue,
-    secondary: palette.white,
-    background: palette.gray900,
-    card: palette.gray800,
-    text: palette.gray100,
-    border: palette.gray700,
-    notification: palette.tossBlue,
-    placeholder: palette.gray600,
-    highlight: palette.tossBlue,
-    error: '#FF3B30',
-    success: '#30D158',
-    warning: '#FF9F0A',
-  };
-  
-  // 다크 모드 테마
-  export const darkColors = {
-    primary: palette.tossBlue,
-    secondary: palette.tossGray,
-    background: palette.white,
-    card: palette.gray100,
-    text: palette.gray900,
-    border: palette.gray300,
-    notification: palette.tossBlue,
-    placeholder: palette.gray500,
-    highlight: palette.tossBlue,
-    error: '#FF2D55',
-    success: '#34C759',
-    warning: '#FF9500',
-  };
-  
+// src/styles/theme/colors.ts
+// 앱에서 사용되는 주요 색상 정의
+
+// 주요 색상 정의 인터페이스
+export interface Colors {
+  primary: string;
+  secondary: string;
+  background: string;
+  text: string;
+  placeholder: string;
+  error: string;
+  success: string;
+  warning: string;
+  card: string;
+  // 기타 필요한 색상 추가
+}
+
+// 라이트 테마(기본)
+export const lightColors: Colors = {
+  primary: '#365BC5', // 토스 메인 파란색
+  secondary: '#FF6B35', // 보조 색상
+  background: '#FFFFFF', // 배경색
+  text: '#1A1A1A', // 텍스트 색상
+  placeholder: '#AAAAAA', // 플레이스홀더 색상
+  error: '#E53935', // 오류 색상
+  success: '#4CAF50', // 성공 색상
+  warning: '#FF9800', // 경고 색상
+  card: '#F8F9FA', // 카드 배경색
+};
+
+// 다크 테마
+export const darkColors: Colors = {
+  primary: '#5A7DD6', // 토스 메인 파란색 (어두운 모드용)
+  secondary: '#FF8C5F', // 보조 색상 (어두운 모드용)
+  background: '#121212', // 배경색
+  text: '#FFFFFF', // 텍스트 색상
+  placeholder: '#777777', // 플레이스홀더 색상
+  error: '#EF5350', // 오류 색상
+  success: '#66BB6A', // 성공 색상
+  warning: '#FFB74D', // 경고 색상
+  card: '#1E1E1E', // 카드 배경색
+};
+
+export default { lightColors, darkColors };
