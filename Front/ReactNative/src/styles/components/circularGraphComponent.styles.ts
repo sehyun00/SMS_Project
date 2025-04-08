@@ -1,8 +1,33 @@
 // src/styles/components/circularGraphComponent.styles.js
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-export default function createStyles(theme) {
-  return StyleSheet.create({
+// 테마 타입 정의 (프로젝트의 실제 테마 타입에 맞게 조정해주세요)
+interface Theme {
+  colors: {
+    text: string;
+    placeholder: string;
+    background: string;
+    // 테마에 있는 다른 색상들
+  };
+}
+
+// 스타일 타입 정의
+interface CircularGraphStyles {
+  container: ViewStyle;
+  chartContainer: ViewStyle;
+  description: TextStyle;
+  legendContainer: ViewStyle;
+  legendItem: ViewStyle;
+  legendColor: ViewStyle;
+  legendText: TextStyle;
+  chartTitle: TextStyle;
+  centerContainer: ViewStyle;
+  centerLabel: TextStyle;
+  centerValue: TextStyle;
+}
+
+export default function createStyles(theme: Theme): CircularGraphStyles {
+  return StyleSheet.create<CircularGraphStyles>({
     container: {
       alignItems: 'center',
       padding: 16,

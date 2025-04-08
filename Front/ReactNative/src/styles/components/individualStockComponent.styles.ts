@@ -1,8 +1,22 @@
-// src/styles/components/individualStockComponent.styles.js
-import { StyleSheet } from 'react-native';
+// src/styles/components/individualStockComponent.styles.ts
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-export default function createStyles(theme) {
-  return StyleSheet.create({
+interface Theme {
+  colors: {
+    text: string;
+    placeholder: string;
+    background: string;
+  };
+}
+
+// 스타일 타입 정의
+interface individualStockComponent {
+  container: ViewStyle;
+  text: TextStyle;
+}
+
+export default function createStyles(theme: Theme): individualStockComponent {
+  return StyleSheet.create<individualStockComponent>({
     container: {
       flexDirection: 'row',
       alignItems: 'center',
