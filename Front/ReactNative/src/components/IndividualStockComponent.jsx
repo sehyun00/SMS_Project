@@ -1,8 +1,15 @@
+// 경로: src/components/IndividualStockComponent.jsx
+// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > IndividualStockComponent.jsx
 import React from 'react';
 import { View, Text } from 'react-native';
-import styles from '../styles/components/individualStockComponent.styles';
 
-const IndividualStockComponent = ({ stock }) => {
+// HOC 임포트
+import withTheme from '../hoc/withTheme';
+import createStyles from '../styles/components/individualStockComponent.styles';
+
+const IndividualStockComponent = ({ stock, theme }) => {
+  const styles = createStyles(theme);
+  
   return (
     <View style={styles.container}>
       <View style={[styles.colorIndicator, { backgroundColor: stock.color }]} />
@@ -15,4 +22,4 @@ const IndividualStockComponent = ({ stock }) => {
   );
 };
 
-export default IndividualStockComponent;
+export default withTheme(IndividualStockComponent);

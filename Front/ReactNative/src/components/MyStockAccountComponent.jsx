@@ -1,13 +1,20 @@
+// 경로: src/components/MyStockAccountComponent.jsx
+// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// 컴포넌트 임포트
 import CircularGraphComponent from './CircularGraphComponent';
 import IndividualStockComponent from './IndividualStockComponent';
-import styles from '../styles/components/myStockAccountComponent.styles';
 
-const MyStockAccountComponent = () => {
+// 스타일 임포트
+import withTheme from '../hoc/withTheme';
+import createStyles from '../styles/components/myStockAccountComponent.styles';
+
+const MyStockAccountComponent = ({ theme }) => {
   const insets = useSafeAreaInsets();
+  const styles = createStyles(theme);
   
   // 샘플 주식 데이터 (색상 없이 정의)
   const stockData = [
@@ -28,16 +35,16 @@ const MyStockAccountComponent = () => {
   
   // 색상 배열 정의
   const colors = [
-    '#FF9AA2', // 연한 빨강 (Apple)
-    '#FFD700', // 노랑 (Banana)
-    '#D3A4F7', // 연한 보라 (Grapes)
-    '#A8E6CF', // 연한 민트 (Melon)
-    '#FF6B35', // 주황
-    '#9BDC28', // 연한 녹색
-    '#FFB400', // 주황노랑
-    '#FF4D6D', // 핑크
-    '#4A6FA5', // 파랑
-    '#FFE135', // 연한 노랑
+    theme.colors.primary, // 토스 메인 파란색
+    '#FF6B35',  // 주황
+    '#4CAF50',  // 녹색
+    '#9C27B0',  // 보라
+    '#FF9800',  // 주황색
+    '#00BCD4',  // 청록색
+    '#E91E63',  // 분홍색
+    '#FFEB3B',  // 노란색
+    '#607D8B',  // 파란회색
+    '#8BC34A',  // 연두색
   ];
   
   // 총 자산 가치 계산
@@ -52,19 +59,30 @@ const MyStockAccountComponent = () => {
     .sort((a, b) => b.value - a.value)
     .map((stock, index) => ({
       ...stock,
-      color: index < 10 ? colors[index] : '#CCCCCC' // 상위 10개만 색상 적용, 나머지는 회색
+      color: index < 10 ? colors[index] : theme.colors.placeholder // 상위 10개만 색상 적용, 나머지는 테마에 맞는 색상
     }));
   
   return (
     <ScrollView 
-      style={[styles.container, { paddingTop: insets.top }]}
-      contentContainerStyle={{ paddingBottom: 60 }} 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer} 
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>자산 개수 {stocksWithRatioAndColor.length}</Text>
+      {/* 요약 정보 영역 */}
+      <View style={styles.summaryContainer}>
+        <Text style={styles.smallTitle}>총 보유자산</Text>
+        <Text style={styles.totalValue}>{totalValue.toLocaleString()}원</Text>
+      </View>
       
-      {/* 원형 차트 - 데이터에 이미 색상이 적용된 상태로 전달 */}
-      <CircularGraphComponent data={stocksWithRatioAndColor} />
+      {/* 원형 차트 영역 */}
+      <View style={styles.chartContainer}>
+        <CircularGraphComponent data={stocksWithRatioAndColor} />
+      </View>
+      
+      {/* 종목 리스트 헤더 */}
+      <View style={styles.stockListHeader}>
+        <Text style={styles.sectionTitle}>보유종목 {stocksWithRatioAndColor.length}</Text>
+      </View>
       
       {/* 모든 자산 표시 */}
       <View style={styles.stockList}>
@@ -79,4 +97,4 @@ const MyStockAccountComponent = () => {
   );
 };
 
-export default MyStockAccountComponent;
+export default withTheme(MyStockAccountComponent);
