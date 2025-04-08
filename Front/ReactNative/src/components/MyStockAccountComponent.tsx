@@ -1,5 +1,5 @@
-// 경로: src/components/MyStockAccountComponent.jsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx
+// 경로: src/components/MyStockAccountComponent.tsx
+// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.tsx
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,12 +12,40 @@ import IndividualStockComponent from './IndividualStockComponent';
 import withTheme from '../hoc/withTheme';
 import createStyles from '../styles/components/myStockAccountComponent.styles';
 
-const MyStockAccountComponent = ({ theme }) => {
+// 주식 데이터 인터페이스 정의
+interface StockData {
+  name: string;
+  value: number;
+}
+
+// 비율과 색상이 추가된 주식 데이터 인터페이스
+interface StockWithRatioAndColor extends StockData {
+  ratio: number;
+  color: string;
+}
+
+// 테마 인터페이스 정의
+interface Theme {
+  colors: {
+    primary: string;
+    placeholder: string;
+    text: string;
+    // 기타 테마 색상 속성들
+  };
+  // 기타 테마 속성들
+}
+
+// 컴포넌트 props 인터페이스 정의
+interface MyStockAccountComponentProps {
+  theme: Theme;
+}
+
+const MyStockAccountComponent: React.FC<MyStockAccountComponentProps> = ({ theme }) => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
   
   // 샘플 주식 데이터 (색상 없이 정의)
-  const stockData = [
+  const stockData: StockData[] = [
     { name: 'Apple', value: 340000 },
     { name: 'Banana', value: 320000 },
     { name: 'Grapes', value: 180000 },
@@ -34,7 +62,7 @@ const MyStockAccountComponent = ({ theme }) => {
   ];
   
   // 색상 배열 정의
-  const colors = [
+  const colors: string[] = [
     theme.colors.primary, // 토스 메인 파란색
     '#FF6B35',  // 주황
     '#4CAF50',  // 녹색
@@ -48,10 +76,10 @@ const MyStockAccountComponent = ({ theme }) => {
   ];
   
   // 총 자산 가치 계산
-  const totalValue = stockData.reduce((total, stock) => total + stock.value, 0);
+  const totalValue: number = stockData.reduce((total, stock) => total + stock.value, 0);
   
   // 비율 계산과 내림차순 정렬 및 색상 적용
-  const stocksWithRatioAndColor = stockData
+  const stocksWithRatioAndColor: StockWithRatioAndColor[] = stockData
     .map(stock => ({
       ...stock,
       ratio: parseFloat(((stock.value / totalValue) * 100).toFixed(1))
