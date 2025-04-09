@@ -5,6 +5,9 @@ export interface Theme {
     background: string;
     text: string;
     placeholder: string;
+    border: string;
+    card: string;
+    notification?: string; 
   };
   fonts?: {
     fontSize: {

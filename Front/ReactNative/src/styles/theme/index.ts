@@ -1,4 +1,4 @@
-// src/styles/theme/index.ts
+// 경로: src/styles/theme/index.ts
 // 테마 관련 파일 통합 인덱스
 import { lightColors, darkColors, Colors } from './colors';
 import spacing, { Spacing } from './spacing';

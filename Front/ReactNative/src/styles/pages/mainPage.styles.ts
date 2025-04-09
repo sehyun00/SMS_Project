@@ -1,9 +1,26 @@
-// 경로: src/styles/pages/mainPage.styles.js
-import { StyleSheet } from 'react-native';
+// 경로: src/styles/pages/mainPage.styles.ts
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-// 테마를 사용하는 스타일로 변경
-export default function createStyles(theme) {
-  return StyleSheet.create({
+import { Theme } from '../../types/theme';
+
+// 스타일 타입 정의
+interface MainPage {
+  container: ViewStyle;
+  header: ViewStyle;
+  headerText: TextStyle;
+  subHeader: ViewStyle;
+  button: ViewStyle;
+  pageName: TextStyle;
+  content: ViewStyle;
+  bottomNav: ViewStyle;
+  navItem: ViewStyle;
+  navText: TextStyle;
+  activeNavText: TextStyle;
+}
+
+
+export default function createStyles(theme: Theme): MainPage {
+  return StyleSheet.create<MainPage>({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,

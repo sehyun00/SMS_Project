@@ -1,4 +1,4 @@
-// src/styles/theme/colors.ts
+// 경로: src/styles/theme/colors.ts
 // 앱에서 사용되는 주요 색상 정의
 
 // 주요 색상 정의 인터페이스
@@ -12,7 +12,8 @@ export interface Colors {
   success: string;
   warning: string;
   card: string;
-  // 기타 필요한 색상 추가
+  border: string;
+  notification?: string; 
 }
 
 // 라이트 테마(기본)
@@ -26,6 +27,8 @@ export const lightColors: Colors = {
   success: '#4CAF50', // 성공 색상
   warning: '#FF9800', // 경고 색상
   card: '#F8F9FA', // 카드 배경색
+  border: '#E8E8E8', // 테두리 색상 추가
+  notification: '#FF3B30' // 알림 색상 (선택사항)
 };
 
 // 다크 테마
@@ -39,6 +42,8 @@ export const darkColors: Colors = {
   success: '#66BB6A', // 성공 색상
   warning: '#FFB74D', // 경고 색상
   card: '#1E1E1E', // 카드 배경색
+  border: '#2C2C2C', // 테두리 색상 추가
+  notification: '#FF453A' // 알림 색상 (선택사항)
 };
 
 export default { lightColors, darkColors };

@@ -1,15 +1,7 @@
-// src/styles/components/circularGraphComponent.styles.js
+// 경로: src/styles/components/circularGraphComponent.styles.js
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-// 테마 타입 정의 (프로젝트의 실제 테마 타입에 맞게 조정해주세요)
-interface Theme {
-  colors: {
-    text: string;
-    placeholder: string;
-    background: string;
-    // 테마에 있는 다른 색상들
-  };
-}
+import { Theme } from '../../types/theme';
 
 // 스타일 타입 정의
 interface CircularGraphStyles {

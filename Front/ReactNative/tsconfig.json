@@ -18,7 +18,7 @@
   "include": [
     "./**/*.ts",
     "./**/*.tsx",
-    "src/**/*.d.ts",
+    "src/**/*.d.ts", "src/styles/pages/setUpPage.styles.ts", "src/styles/hooks/useTheme.ts",
   ],
   "exclude": [
     "node_modules"

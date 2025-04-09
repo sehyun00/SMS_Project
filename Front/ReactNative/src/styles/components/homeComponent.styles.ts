@@ -1,13 +1,7 @@
-// styles/components/homeComponent.styles.ts
+// 경로: styles/components/homeComponent.styles.ts
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-interface Theme {
-  colors: {
-    text: string;
-    placeholder: string;
-    background: string;
-  };
-}
+import { Theme } from '../../types/theme';
 
 // 스타일 타입 정의
 interface HomeComponent {
