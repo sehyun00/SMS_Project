@@ -1,4 +1,4 @@
-// src/styles/theme/typography.ts
+// 경로: src/styles/theme/typography.ts
 // 앱에서 사용되는 텍스트 스타일 정의
 
 import { TextStyle } from 'react-native';

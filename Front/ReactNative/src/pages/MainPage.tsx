@@ -1,30 +1,42 @@
-// 경로: src/pages/MainPage.jsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx
+// 경로: src/pages/MainPage.tsx
+// 흐름도: App.js > AppNavigator.tsx > MainPage.tsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 // 컴포넌트 임포트
 import HomeComponent from '../components/HomeComponent';
 import MyStockAccountComponent from '../components/MyStockAccountComponent';
 import RebalancingComponent from '../components/RebalancingComponent';
 import RecordComponent from '../components/RecordComponent';
+import { MainPageNavigationProp } from '../types/navigation';
 
 // 스타일 임포트
 import createStyles from '../styles/pages/mainPage.styles';
 import withTheme from '../hoc/withTheme';
+import { Theme } from '../types/theme';
 
-const MainPage = ({ theme }) => {
-  const [activeTab, setActiveTab] = useState('자산');
+// 탭 타입 정의
+type TabType = '홈' | '자산' | '리밸런싱' | '기록';
+
+// 컴포넌트 props 인터페이스 정의
+interface MainPageProps {
+  theme: Theme;
+}
+
+const MainPage: React.FC<MainPageProps> = ({ theme }) => {
+  const [activeTab, setActiveTab] = useState<TabType>('자산');
   const insets = useSafeAreaInsets(); 
-  const styles = createStyles(theme); // props로 받은 theme 사용
+  const styles = createStyles(theme);
+  const navigation = useNavigation<MainPageNavigationProp>();
   
   // 현재 탭에 따른 컴포넌트 렌더링
-  const renderComponent = () => {
+  const renderComponent = (): React.ReactNode => {
     switch(activeTab) {
       case '홈':
-        return <HomeComponent />;
+        return <HomeComponent theme={undefined} />;
       case '자산':
         return <MyStockAccountComponent />;
       case '리밸런싱':
@@ -41,13 +53,19 @@ const MainPage = ({ theme }) => {
       
       {/* 서브 헤더 */}
       <View style={styles.subHeader}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity 
+          style={styles.button}
+          onPress={() => setActiveTab('홈')}
+        >
           <Text style={{ color: theme.colors.text }}>SMS</Text>
         </TouchableOpacity>
         
         <Text style={styles.pageName}>{activeTab}</Text>
         
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity 
+          style={styles.button}
+          onPress={() => navigation.navigate('Settings')}
+        >
           <Text style={{ color: theme.colors.text }}>설정</Text>
         </TouchableOpacity>
       </View>

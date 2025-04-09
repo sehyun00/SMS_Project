@@ -1,4 +1,4 @@
-// src/styles/theme/spacing.ts
+// 경로: src/styles/theme/spacing.ts
 // 앱에서 사용되는 여백 및 간격 정의
 
 // 간격 정의 인터페이스

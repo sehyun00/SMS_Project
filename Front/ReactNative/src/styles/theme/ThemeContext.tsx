@@ -1,4 +1,4 @@
-// src/styles/theme/ThemeContext.tsx
+// 경로: src/styles/theme/ThemeContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { lightTheme, darkTheme } from './index';
 import { Theme } from '../../types/theme';
