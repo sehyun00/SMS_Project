@@ -1,4 +1,4 @@
-package com.upwardright.reblancing1.reblancing.controller;
+package com.upwardright.reblancing.reblancing.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;

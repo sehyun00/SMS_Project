@@ -1,10 +1,10 @@
-package com.upwardright.reblancing1;
+package com.upwardright.reblancing;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Reblancing1ApplicationTests {
+class ReblancingApplicationTests {
 
 	@Test
 	void contextLoads() {

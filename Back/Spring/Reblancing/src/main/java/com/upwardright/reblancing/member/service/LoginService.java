@@ -1,4 +1,4 @@
-package com.upwardright.reblancing1.member.service;
+package com.upwardright.reblancing.member.service;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

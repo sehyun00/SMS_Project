@@ -1,4 +1,4 @@
-package com.upwardright.reblancing1.member.controller;
+package com.upwardright.reblancing.member.controller;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

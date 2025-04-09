@@ -1,4 +1,4 @@
-package com.upwardright.reblancing1.member.domain;
+package com.upwardright.reblancing.member.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
