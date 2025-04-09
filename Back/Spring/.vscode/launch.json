@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ReblancingApplication<Reblancing>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.upwardright.reblancing.ReblancingApplication",
+            "projectName": "Reblancing",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
