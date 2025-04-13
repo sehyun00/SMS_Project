@@ -1,9 +1,6 @@
 package com.upwardright.reblancing.member.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,16 +13,30 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Table(name = "user")
 public class User {
-    
+
     @Id
     private String userId; //유저아이디 = 이메일
-    private String password; //비밀번호
+
+    @Column(nullable = false)
+    private String password; //비밀번호(암호화되어 저장)
+
+    @Column(nullable = false)
     private String name; //이름
-    private String phonenumber; //전화번호
+
+    @Column(nullable = false)
+    private String phoneNumber; //전화번호
 
     @Enumerated(EnumType.STRING)
-    private MemberShipType membership; //멤버쉽
+    @Column(nullable = false)
+    private MemberShipType membership = MemberShipType.COMMON_USER; //멤버쉽 (기본값: 일반 사용자)
+
+    // 비즈니스 로직: 멤버십 업그레이드
+    public void upgradeMembership() {
+        this.membership = MemberShipType.MEMBERSHIP_USER;
+    }
+
 }
 
 enum MemberShipType {
