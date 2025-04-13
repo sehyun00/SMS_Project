@@ -9,13 +9,13 @@ import java.lang.reflect.Member;
 public class LoginService {
     // @Query("select m from Member m where m.userId = :userId")
 
-    public User create(String userId, String password, String name, String phonenumber){
+    public User create(String userId, String password, String name, String phoneNumber){
 
         User user = new User();
         user.setUserId(userId);
         user.setPassword(password);
         user.setName(name);
-        user.setPhonenumber(phonenumber);
+        user.setPhoneNumber(phoneNumber);
 
         return user;
     }
