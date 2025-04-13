@@ -26,7 +26,7 @@ public class User {
     private String name; //이름
 
     @Column(nullable = false)
-    private String phoneNumber; //전화번호
+    private String phone_number; //전화번호
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
