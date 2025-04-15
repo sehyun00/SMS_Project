@@ -7,6 +7,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainPage from '../pages/MainPage';
 import SetUpPage from '../pages/SetUpPage';
 import ThemeToggle from '../components/common/ThemeToggle';
+
+// 로그인 상태에 따른 네비게이트
 import { RootStackParamList } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

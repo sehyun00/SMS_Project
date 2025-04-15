@@ -9,9 +9,13 @@ export type RootStackParamList = {
 
 export type AuthStackParamList = {
   '로그인 페이지': undefined;
+  '회원가입 페이지': undefined;
 }
-
+// 로그인 x
 export type LoginPageNavigationProp = NativeStackNavigationProp<AuthStackParamList, '로그인 페이지'>;
+export type SignUpPageNavigationProp = NativeStackNavigationProp<AuthStackParamList, '회원가입입 페이지'>;
+
+// 로그인 o
 export type MainPageNavigationProp = NativeStackNavigationProp<RootStackParamList, '메인 페이지'>;
 export type SettingsPageNavigationProp = NativeStackNavigationProp<RootStackParamList, '설정 페이지'>;
 export type ThemePageNavigationProp = NativeStackNavigationProp<RootStackParamList, '테마설정 페이지'>;

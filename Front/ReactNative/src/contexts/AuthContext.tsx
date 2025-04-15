@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       // 실제로는 서버 API 호출하여 인증
-      // 예시 목적으로 간단한 유효성 검사만 수행
+      // 현재는 간단한 유효성 검사만 수행
       if (email && password) {
         // 로그인 성공 상태 저장
         await AsyncStorage.setItem('isLoggedIn', 'true');
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       // 실제로는 카카오 SDK를 통한 인증 처리
-      // 예시 목적으로 항상 성공 처리
+      // 현재는 항상 성공 처리
       await AsyncStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
       return true;

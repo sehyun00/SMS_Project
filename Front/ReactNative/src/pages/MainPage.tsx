@@ -11,6 +11,8 @@ import HomeComponent from '../components/HomeComponent';
 import MyStockAccountComponent from '../components/MyStockAccountComponent';
 import RebalancingComponent from '../components/RebalancingComponent';
 import RecordComponent from '../components/RecordComponent';
+
+// 네비게이트 타입 임포트
 import { MainPageNavigationProp } from '../types/navigation';
 
 // 스타일 임포트
