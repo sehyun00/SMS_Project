@@ -64,7 +64,7 @@ const MainPage: React.FC<MainPageProps> = ({ theme }) => {
         
         <TouchableOpacity 
           style={styles.button}
-          onPress={() => navigation.navigate('Settings')}
+          onPress={() => navigation.navigate('설정 페이지')}
         >
           <Text style={{ color: theme.colors.text }}>설정</Text>
         </TouchableOpacity>

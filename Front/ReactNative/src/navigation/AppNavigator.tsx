@@ -2,6 +2,8 @@
 // 흐름도: App.js > AppNavigator.tsx
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// 컴포넌트 임포트
 import MainPage from '../pages/MainPage';
 import SetUpPage from '../pages/SetUpPage';
 import ThemeToggle from '../components/common/ThemeToggle';
@@ -12,9 +14,12 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Main" component={MainPage} />
-      <Stack.Screen name="Settings" component={SetUpPage} />
-      <Stack.Screen name="Theme" component={ThemeToggle} />
+      {/* 메인 페이지 */}
+      <Stack.Screen name="메인 페이지" component={MainPage} />
+      
+      {/* 설정 페이지 */}
+      <Stack.Screen name="설정 페이지" component={SetUpPage} />
+      <Stack.Screen name="테마설정 페이지" component={ThemeToggle} />
     </Stack.Navigator>
   );
 };

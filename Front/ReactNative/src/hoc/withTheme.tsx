@@ -1,4 +1,4 @@
-// src/hoc/withTheme.tsx
+// 경로: src/hoc/withTheme.tsx
 import React from 'react';
 import { useTheme } from '../styles/theme/ThemeContext';
 import { Theme } from '../types/theme';

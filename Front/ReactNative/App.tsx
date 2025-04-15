@@ -1,21 +1,40 @@
-// App.tsx
+// 경로: App.tsx
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ActivityIndicator, View } from 'react-native';
 
-// 파일 확장자 확인 및 경로 검증
-import AppNavigator from './src/navigation/AppNavigator'; 
-
-// ThemeProvider 임포트 방식 확인
+// 네비게이터 및 컨텍스트 임포트
+import AppNavigator from './src/navigation/AppNavigator';
+import AuthNavigator from './src/navigation/AuthNavigator';
 import { ThemeProvider } from './src/styles/theme/ThemeContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+
+// 조건부 네비게이션을 처리하는 컴포넌트
+const RootNavigator: React.FC = () => {
+  const { isLoggedIn, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+  
+  // 로그인 상태에 따라 다른 네비게이터 렌더링
+  return isLoggedIn ? <AppNavigator /> : <AuthNavigator />;
+};
 
 const App: React.FC = () => {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
+        <AuthProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
