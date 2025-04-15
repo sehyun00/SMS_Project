@@ -30,6 +30,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private MemberShipType membership = MemberShipType.COMMON_USER; //멤버쉽 (기본값: 일반 사용자)
 
     // 비즈니스 로직: 멤버십 업그레이드

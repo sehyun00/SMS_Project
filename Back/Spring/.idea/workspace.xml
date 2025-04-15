@@ -5,40 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="119aa975-fa56-497e-a65c-2052ead34ef2" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/RebalancingApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/UserDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/LoginService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/SignUpService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/reblancing1.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/reblancing1.main.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/.gitattributes" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/gradlew" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/gradlew.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/ReblancingApplication.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/controller/FindMyAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/FindMyAccountController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/controller/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/LoginController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/controller/SignController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/SignController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/domain/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/dto/UserDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/service/LoginService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/member/service/SignUpService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/reblancing/controller/ReblancingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/reblancing/controller/ReblancingController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/reblancing/controller/ReblancingRecordConroller.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/reblancing/controller/ReblancingRecordConroller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/java/com/upwardright/reblancing/security/SecurityConfig.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/main/resources/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/resources/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Reblancing/src/test/java/com/upwardright/reblancing/ReblancingApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/test/java/com/upwardright/rebalancing/ReblancingApplicationTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/SignUpResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/SignController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/SignController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/domain/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/UserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/SignUpRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/SignUpService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/SignUpService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +34,13 @@
         </projects_view>
       </state>
     </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
@@ -86,6 +66,7 @@
     "git-widget-placeholder": "back)makeserver",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Coding/WorkSpace/RUD/rud_boot",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -121,11 +102,22 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1744554799675</updated>
-      <workItem from="1744554801114" duration="1487000" />
+      <workItem from="1744554801114" duration="6571000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
