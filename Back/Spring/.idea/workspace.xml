@@ -5,13 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="119aa975-fa56-497e-a65c-2052ead34ef2" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/SignUpResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/exception/DuplicateUserIdException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/LoginRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/LoginResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/JwtTokenProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Rebalancing/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/SignController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/SignController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/LoginController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/domain/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/UserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/dto/SignUpRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/LoginService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/LoginService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/SignUpService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/service/SignUpService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/SecurityConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,10 +50,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2vg7KEfBmPzMTdaz3OSTRaH95xW" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -66,7 +71,7 @@
     "git-widget-placeholder": "back)makeserver",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Coding/WorkSpace/RUD/rud_boot",
+    "last_opened_file_path": "C:/Coding/WorkSpace/SMS_Project/Back/Spring",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -76,6 +81,11 @@
     "애플리케이션.RebalancingApplication.executor": "Run"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.upwardright.rebalancing.exception" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="RebalancingApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -102,7 +112,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1744554799675</updated>
-      <workItem from="1744554801114" duration="6571000" />
+      <workItem from="1744554801114" duration="11123000" />
+      <workItem from="1744818232052" duration="3707000" />
     </task>
     <servers />
   </component>

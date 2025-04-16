@@ -17,6 +17,7 @@ import lombok.Setter;
 public class User {
 
     @Id
+    @Column(unique = true, nullable = false)
     private String user_id; //유저아이디 = 이메일
 
     @Column(nullable = false)
