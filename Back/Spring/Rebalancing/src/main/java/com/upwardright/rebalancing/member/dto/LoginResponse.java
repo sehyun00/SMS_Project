@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/*
+    클래스 설명 : 해당 클래스는 LoginRequest에 대한 LoginResponse 값
+ */
 @Getter
 @Builder
 @NoArgsConstructor

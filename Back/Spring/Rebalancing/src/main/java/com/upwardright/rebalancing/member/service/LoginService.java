@@ -9,6 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/*
+    클래스 설명 : 해당 클래스는 로그인 기능을 구현하기 위한 코드로 front의 request를 통해 DB의 user_id와 password와 유효성 검사를 통해
+    로그인 성공시 JWT토큰을 발행하고 아이디가 존재하지 않거나 비밀번호가 존재하지 않을 경우 오류 내용을 표현
+ */
 @Service
 @RequiredArgsConstructor
 public class LoginService {
@@ -31,7 +35,7 @@ public class LoginService {
                                 .success(true)
                                 .token(token)
                                 .user_id(user.getUser_id())
-                                .name(user.getName()) // User 클래스에 이름 필드가 있다고 가정
+                                .name(user.getName())
                                 .message("로그인 성공")
                                 .build();
                     } else {

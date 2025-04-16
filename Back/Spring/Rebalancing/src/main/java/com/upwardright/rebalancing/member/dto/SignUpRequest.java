@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/*
+    클래스 설명 : 해당 클래스는 SignUpRequest에 어떤 값을 받을지 설정
+ */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

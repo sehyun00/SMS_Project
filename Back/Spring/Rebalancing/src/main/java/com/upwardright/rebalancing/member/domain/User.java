@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*
+    클래스 설명 : 해당 클래스는 DB Table에 대한 설정
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
