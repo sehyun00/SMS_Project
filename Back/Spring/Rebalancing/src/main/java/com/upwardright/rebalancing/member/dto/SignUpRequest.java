@@ -25,14 +25,14 @@ public class SignUpRequest {
     private String name;
 
     @NotBlank(message = "전화번호는 필수 입력값입니다.")
-    private String phoneNumber;
+    private String phone_number;
 
     public User toEntity() {
         return User.builder()
                 .user_id(user_id)
                 .password(password) // 실제 구현시 암호화 필요
                 .name(name)
-                .phone_number(phoneNumber)
+                .phone_number(phone_number)
                 .build();
     }
 }

@@ -28,13 +28,13 @@ public class SignController {
 
     @PostMapping("/upwardright/signup")
     public ResponseEntity<SignUpResponse> signUp(
-            @Valid @RequestBody SignUpRequest request) {
+        @Valid @RequestBody SignUpRequest request) {
 
-        User newUser = request.toEntity();
-        User savedUser = signUpService.signUp(newUser);
+    User newUser = request.toEntity();
+    User savedUser = signUpService.signUp(newUser);
 
-        return ResponseEntity.ok(
-                new SignUpResponse("회원가입 성공", savedUser.getUser_id())
-        );
-    }
+    return ResponseEntity.ok(
+            new SignUpResponse("회원가입 성공", savedUser.getUser_id())
+    );
+}
 }
