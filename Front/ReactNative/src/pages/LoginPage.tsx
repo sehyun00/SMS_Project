@@ -12,19 +12,20 @@ import {
   Platform,
   UIManager,
   Keyboard,
+  Image,
   StyleSheet
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-// 네비게이트 타입 임포트
+// 컴포넌트트 임포트
 import { LoginPageNavigationProp } from '../types/navigation';
+import { useAuth } from '../contexts/AuthContext';
 
 // 스타일 임포트
 import createStyles from '../styles/pages/loginPage.styles';
 import withTheme from '../hoc/withTheme';
 import { Theme } from '../types/theme';
-import { useAuth } from '../contexts/AuthContext';
 
 // Android에서 LayoutAnimation 활성화
 if (Platform.OS === 'android') {
@@ -143,7 +144,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ theme }) => {
       <View style={styles.fixedContainer}>
         {/* 로고 */}
         <View style={styles.logoContainer}>
-          <Text style={styles.logo}>X</Text>
+        <Text style={styles.logo}>SMS</Text>
+          <Image source={require('../../assets/super_ant.png')} style={styles.logoImage} resizeMode="contain" />
         </View>
 
         {/* 이메일 입력 필드 - 항상 고정 위치 */}

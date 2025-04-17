@@ -1,5 +1,5 @@
 // 경로: src/styles/pages/loginPage.styles.ts
-import { Dimensions, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Dimensions, StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { Theme } from '../../types/theme';
 
 // 스타일 타입 정의
@@ -8,6 +8,7 @@ interface LoginPage {
   loadingContainer: ViewStyle;
   logoContainer: ViewStyle;
   logo: TextStyle;
+  logoImage: ImageStyle;
   formContainer: ViewStyle;
   inputLabel: TextStyle;
   input: TextStyle;
@@ -53,9 +54,14 @@ export default function createStyles(theme: Theme): LoginPage {
       marginBottom: 50,
     },
     logo: {
-      fontSize: 80,
+      fontSize: 20,
       fontWeight: 'bold',
       color: theme.colors.text,
+    },
+    logoImage: {
+      width: 150, // 적절한 크기로 조정
+      height: 150, // 적절한 크기로 조정
+      alignSelf: 'center',
     },
     formContainer: {
       width: '100%',

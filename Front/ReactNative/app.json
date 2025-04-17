@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "RUD_RN",
-    "slug": "RUD_RN",
+    "name": "SMS",
+    "slug": "SMS",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/super_ant.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,12 +17,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/super_ant.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/super_ant.png"
     }
   }
 }
