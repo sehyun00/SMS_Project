@@ -4,6 +4,7 @@ import com.upwardright.rebalancing.member.domain.User;
 import com.upwardright.rebalancing.member.dto.LoginRequest;
 import com.upwardright.rebalancing.member.dto.LoginResponse;
 import com.upwardright.rebalancing.member.repository.UserRepository;
+import com.upwardright.rebalancing.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class LoginService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     // JWT 토큰 생성을 위한 유틸리티를 사용할 경우
-    // private final JwtTokenProvider jwtTokenProvider;
+     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
@@ -54,10 +55,9 @@ public class LoginService {
 
     // JWT 토큰 생성 메서드 (실제 구현은 JWT 라이브러리 필요)
     private String generateToken(User user) {
-        // JWT 토큰 생성 로직
-        // 예: return jwtTokenProvider.createToken(user.getUser_id());
+        return jwtTokenProvider.createToken(user.getUser_id());
 
         // 임시 구현 (실제로는 JWT 라이브러리를 사용하여 구현)
-        return "sample-jwt-token-" + System.currentTimeMillis();
+//        return "sample-jwt-token-" + System.currentTimeMillis();
     }
 }
