@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (user_id: string, password: string) => Promise<boolean>;
+  signup: (user_id: string, password: string, name: string, phone_number: string) => Promise<boolean>; // 회원가입 함수 추가
   loginWithKakao: () => Promise<boolean>;
   logout: () => void;
   loading: boolean;
@@ -37,8 +38,54 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     checkLoginStatus();
   }, []);
 
+  // 회원가입 함수
+  const signup = async (
+    user_id: string,
+    password: string,
+    name: string,
+    phone_number: string
+  ): Promise<boolean> => {
+    setLoading(true);
+    try {
+      // 백엔드 서버에 회원가입 요청
+      const response = await fetch(`${API_URL}/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id,         // 이메일
+          password,        // 비밀번호
+          name,            // 이름
+          phone_number,    // 전화번호
+          // membership은 백엔드에서 기본값으로 설정
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('회원가입 실패:', data.message || '알 수 없는 오류');
+        return false;
+      }
+
+      console.log('회원가입 성공:', data);
+      // 회원가입 직후 자동 로그인을 원한다면 아래 주석을 해제
+      // await AsyncStorage.setItem('authToken', data.token);
+      // await AsyncStorage.setItem('isLoggedIn', 'true');
+      // setIsLoggedIn(true);
+      
+      return true;
+    } catch (error) {
+      console.error('회원가입 중 오류 발생:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 이메일/비밀번호 로그인
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (user_id: string, password: string): Promise<boolean> => {
     setLoading(true);
     try {
       // 백엔드 서버에 로그인 요청
@@ -47,7 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ user_id, password }),
       });
 
       const data = await response.json();
@@ -96,6 +143,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
     try {
       await AsyncStorage.removeItem('isLoggedIn');
+      await AsyncStorage.removeItem('authToken'); // 토큰도 제거
       setIsLoggedIn(false);
     } catch (error) {
       console.error('로그아웃 중 오류 발생:', error);
@@ -105,7 +153,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, loginWithKakao, logout, loading }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, signup, loginWithKakao, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
