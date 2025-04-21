@@ -11,5 +11,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SignUpResponse {
     private String message;
-    private String userId;
+    private String user_id;
 }
