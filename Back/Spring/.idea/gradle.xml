@@ -4,11 +4,19 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+<<<<<<< HEAD
         <option name="externalProjectPath" value="$PROJECT_DIR$/Reblancing" />
         <option name="gradleJvm" value="#JAVA_HOME" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/Reblancing" />
+=======
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Rebalancing" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Rebalancing" />
+>>>>>>> origin/back)makeserver
           </set>
         </option>
       </GradleProjectSettings>
