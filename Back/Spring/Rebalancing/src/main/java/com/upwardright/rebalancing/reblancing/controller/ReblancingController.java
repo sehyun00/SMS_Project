@@ -22,12 +22,12 @@ public class ReblancingController {
     }
     
     @GetMapping("/upwardright/addstockaccount")
-    public String addStockAccount(@RequestParam String param) {
+    public String addStockAccount(Authentication authentication) {
         return "add account";
     }
 
     @GetMapping("/upwardright/mystockaccount/reblancing")
-    public String reblancing(@RequestParam String param) {
+    public String reblancing(Authentication authentication) {
         return "reblancing";
     }
 

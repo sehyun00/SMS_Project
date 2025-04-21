@@ -12,4 +12,5 @@ import lombok.Getter;
 public class SignUpResponse {
     private String message;
     private String user_id;
+    private boolean success;
 }
