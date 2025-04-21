@@ -4,9 +4,6 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-<<<<<<< HEAD
-    <list default="true" id="677020fd-c99a-48d0-b57b-3a213d8ca213" name="변경" comment="" />
-=======
     <list default="true" id="119aa975-fa56-497e-a65c-2052ead34ef2" name="변경" comment="">
       <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/CustomUserDetailsService.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/JwtAuthenticationEntryPoint.java" afterDir="false" />
@@ -16,18 +13,13 @@
       <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/JwtTokenProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/JwtTokenProvider.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/security/SecurityConfig.java" afterDir="false" />
     </list>
->>>>>>> origin/back)makeserver
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExternalProjectsData">
-<<<<<<< HEAD
-    <projectState path="$PROJECT_DIR$/Reblancing">
-=======
     <projectState path="$PROJECT_DIR$/Rebalancing">
->>>>>>> origin/back)makeserver
       <ProjectState />
     </projectState>
   </component>
@@ -36,16 +28,7 @@
       <state>
         <projects_view>
           <tree_state>
-<<<<<<< HEAD
-            <expand>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="reblancing1" type="f1a62948:ProjectNode" />
-              </path>
-            </expand>
-=======
             <expand />
->>>>>>> origin/back)makeserver
             <select />
           </tree_state>
         </projects_view>
@@ -56,61 +39,21 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
-<<<<<<< HEAD
-        <option value="Interface" />
-=======
->>>>>>> origin/back)makeserver
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-<<<<<<< HEAD
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
-  <component name="ProjectId" id="2vfoBBHMOqX4fm06pZkWwFa5BBk" />
-  <component name="ProjectLevelVcsManager">
-    <ConfirmationsSetting value="2" id="Add" />
-  </component>
-=======
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2vg7KEfBmPzMTdaz3OSTRaH95xW" />
->>>>>>> origin/back)makeserver
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-<<<<<<< HEAD
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Downloaded.Files.Path.Enabled": "false",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "false",
-    "Repository.Attach.Sources": "false",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Coding/WorkSpace/RUD/rud_boot",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
-  }
-}]]></component>
-  <component name="RunManager">
-    <configuration name="ReblancingApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-      <module name="reblancing1.main" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.upwardright.reblancing.ReblancingApplication" />
-=======
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;Gradle.Rebalancing 빌드.executor&quot;: &quot;Run&quot;,
@@ -145,7 +88,6 @@
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="reblancing1.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.upwardright.rebalancing.RebalancingApplication" />
->>>>>>> origin/back)makeserver
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -162,14 +104,6 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="디폴트 작업">
-<<<<<<< HEAD
-      <changelist id="677020fd-c99a-48d0-b57b-3a213d8ca213" name="변경" comment="" />
-      <created>1744545352253</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1744545352253</updated>
-      <workItem from="1744545353376" duration="4341000" />
-=======
       <changelist id="119aa975-fa56-497e-a65c-2052ead34ef2" name="변경" comment="" />
       <created>1744554799675</created>
       <option name="number" value="Default" />
@@ -180,15 +114,12 @@
       <workItem from="1744825427486" duration="776000" />
       <workItem from="1744875987502" duration="625000" />
       <workItem from="1745148927907" duration="4290000" />
->>>>>>> origin/back)makeserver
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-<<<<<<< HEAD
-=======
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -200,5 +131,4 @@
       </map>
     </option>
   </component>
->>>>>>> origin/back)makeserver
 </project>
