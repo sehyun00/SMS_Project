@@ -35,13 +35,13 @@ export const lightColors: Colors = {
 export const darkColors: Colors = {
   primary: '#5A7DD6', // 토스 메인 파란색 (어두운 모드용)
   secondary: '#FF8C5F', // 보조 색상 (어두운 모드용)
-  background: '#121212', // 배경색
+  background: '#17171C', // 배경색
   text: '#FFFFFF', // 텍스트 색상
   placeholder: '#777777', // 플레이스홀더 색상
   error: '#EF5350', // 오류 색상
   success: '#66BB6A', // 성공 색상
   warning: '#FFB74D', // 경고 색상
-  card: '#1E1E1E', // 카드 배경색
+  card: '#101013', // 카드 배경색
   border: '#2C2C2C', // 테두리 색상 추가
   notification: '#FF453A' // 알림 색상 (선택사항)
 };

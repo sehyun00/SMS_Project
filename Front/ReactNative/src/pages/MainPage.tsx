@@ -1,7 +1,7 @@
 // 경로: src/pages/MainPage.tsx
 // 흐름도: App.js > AppNavigator.tsx > MainPage.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -29,7 +29,7 @@ interface MainPageProps {
 }
 
 const MainPage: React.FC<MainPageProps> = ({ theme }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('자산');
+  const [activeTab, setActiveTab] = useState<TabType>('홈');
   const insets = useSafeAreaInsets(); 
   const styles = createStyles(theme);
   const navigation = useNavigation<MainPageNavigationProp>();
@@ -38,7 +38,7 @@ const MainPage: React.FC<MainPageProps> = ({ theme }) => {
   const renderComponent = (): React.ReactNode => {
     switch(activeTab) {
       case '홈':
-        return <HomeComponent theme={undefined} />;
+        return <HomeComponent/>;
       case '자산':
         return <MyStockAccountComponent />;
       case '리밸런싱':
@@ -59,7 +59,7 @@ const MainPage: React.FC<MainPageProps> = ({ theme }) => {
           style={styles.button}
           onPress={() => setActiveTab('홈')}
         >
-          <Text style={{ color: theme.colors.text }}>SMS</Text>
+          <Image source={require('../../assets/ant_head.png')} style={styles.logoImage} resizeMode="contain" />
         </TouchableOpacity>
         
         <Text style={styles.pageName}>{activeTab}</Text>

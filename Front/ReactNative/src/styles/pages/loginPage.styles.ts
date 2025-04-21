@@ -59,8 +59,8 @@ export default function createStyles(theme: Theme): LoginPage {
       color: theme.colors.text,
     },
     logoImage: {
-      width: 150, // 적절한 크기로 조정
-      height: 150, // 적절한 크기로 조정
+      width: 150,
+      height: 150,
       alignSelf: 'center',
     },
     formContainer: {
