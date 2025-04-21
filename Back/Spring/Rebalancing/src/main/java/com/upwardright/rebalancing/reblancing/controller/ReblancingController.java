@@ -1,5 +1,6 @@
 package com.upwardright.rebalancing.reblancing.controller;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,15 +11,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 public class ReblancingController {
+
+    @GetMapping("/upwardright/mystockaccount")
+    public String myStockAccount(Authentication authentication) {
+        // 인증된 사용자의 ID 가져오기
+        String userId = authentication.getName();
+
+        // 사용자별 계좌 정보 조회 로직
+        return "계정 " + userId + "의 주식 계좌 정보";
+    }
     
     @GetMapping("/upwardright/addstockaccount")
     public String addStockAccount(@RequestParam String param) {
         return "add account";
-    }
-    
-    @GetMapping("/upwardright/mystockaccount")
-    public String myStockAccount(){
-        return "myStockAccount";
     }
 
     @GetMapping("/upwardright/mystockaccount/reblancing")
