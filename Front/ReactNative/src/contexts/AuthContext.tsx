@@ -12,6 +12,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// 백엔드 서버 URL
+const API_URL = 'http://localhost:8081/upwardright';
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -38,14 +41,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     try {
-      // 실제로는 서버 API 호출하여 인증
-      // 현재는 간단한 유효성 검사만 수행
-      if (email && password) {
-        // 로그인 성공 상태 저장
+      // 백엔드 서버에 로그인 요청
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('로그인 실패:', data.message || '알 수 없는 오류');
+        return false;
+      }
+
+      // 토큰 저장 (백엔드에서 JWT 등의 토큰을 반환한다고 가정)
+      if (data.token) {
+        await AsyncStorage.setItem('authToken', data.token);
         await AsyncStorage.setItem('isLoggedIn', 'true');
         setIsLoggedIn(true);
         return true;
       }
+
       return false;
     } catch (error) {
       console.error('로그인 중 오류 발생:', error);
