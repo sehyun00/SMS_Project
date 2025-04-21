@@ -1,4 +1,4 @@
-// src/components/setUoItemComponent.tsx
+// 경로: src/components/setUoItemComponent.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

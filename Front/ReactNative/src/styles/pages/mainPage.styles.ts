@@ -1,5 +1,5 @@
 // 경로: src/styles/pages/mainPage.styles.ts
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 
 import { Theme } from '../../types/theme';
 
@@ -7,6 +7,7 @@ import { Theme } from '../../types/theme';
 interface MainPage {
   container: ViewStyle;
   header: ViewStyle;
+  logoImage: ImageStyle;
   headerText: TextStyle;
   subHeader: ViewStyle;
   button: ViewStyle;
@@ -41,21 +42,31 @@ export default function createStyles(theme: Theme): MainPage {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingHorizontal: 16,
+      paddingHorizontal: 10,
       height: 56,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
+      position: 'relative',
+    },
+    logoImage: {
+      width: 36,
+      height: 36,
+      alignSelf: 'center',
     },
     button: {
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 8,
       borderColor: theme.colors.border,
+      width: 60, // 양쪽 버튼에 고정 너비 부여
+      alignItems: 'center', // 버튼 내용 중앙 정렬
     },
     pageName: {
       fontSize: 18,
       fontWeight: '600',
       color: theme.colors.text,
+      flex: 1, // 남은 공간 차지
+      textAlign: 'center', // 텍스트 중앙 정렬
     },
     content: {
       flex: 1,

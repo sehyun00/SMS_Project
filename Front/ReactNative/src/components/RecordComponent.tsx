@@ -1,3 +1,5 @@
+// 경로: src/components/RecordComponent.tsx
+// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RecordComponent.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 

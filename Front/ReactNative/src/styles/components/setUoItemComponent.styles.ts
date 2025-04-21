@@ -1,4 +1,4 @@
-// src/styles/components/setUoItemComponent.styles.ts
+// 경로: src/styles/components/setUoItemComponent.styles.ts
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Theme } from '../../types/theme';
 
