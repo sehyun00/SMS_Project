@@ -4,11 +4,11 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/Reblancing" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Rebalancing" />
         <option name="gradleJvm" value="#JAVA_HOME" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/Reblancing" />
+            <option value="$PROJECT_DIR$/Rebalancing" />
           </set>
         </option>
       </GradleProjectSettings>
