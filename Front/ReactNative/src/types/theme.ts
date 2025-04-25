@@ -1,5 +1,6 @@
 export interface Theme {
   colors: {
+    divider: any;
     primary: string;
     secondary: string;
     background: string;

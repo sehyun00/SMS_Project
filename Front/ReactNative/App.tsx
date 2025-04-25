@@ -8,7 +8,7 @@ import { ActivityIndicator, View } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import { ThemeProvider } from './src/styles/theme/ThemeContext';
-import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { AuthProvider, useAuth } from './src/constants/AuthContext';
 
 // 조건부 네비게이션을 처리하는 컴포넌트
 const RootNavigator: React.FC = () => {

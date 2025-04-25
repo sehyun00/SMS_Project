@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.tsx
+// 경로: src/contants/AuthContext.tsx
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
