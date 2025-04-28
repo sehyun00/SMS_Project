@@ -1,4 +1,4 @@
-package com.upwardright.rebalancing.reblancing.controller;
+package com.upwardright.rebalancing.rebalancing.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-public class ReblancingRecordConroller {
+public class RebalancingRecordConroller {
 
     @GetMapping("/upwardright/mystockaccount/record")
     public String reblancingRecord(@RequestParam String param) {

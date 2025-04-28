@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="119aa975-fa56-497e-a65c-2052ead34ef2" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="10129eeb-511c-47a9-81f9-5cd757db7328" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,7 +13,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExternalProjectsData">
-    <projectState path="$PROJECT_DIR$/Rebalancing">
+    <projectState path="$PROJECT_DIR$/Spring/Rebalancing">
       <ProjectState />
     </projectState>
   </component>
@@ -22,12 +22,7 @@
       <state>
         <projects_view>
           <tree_state>
-            <expand>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="reblancing1" type="f1a62948:ProjectNode" />
-              </path>
-            </expand>
+            <expand />
             <select />
           </tree_state>
         </projects_view>
@@ -37,21 +32,18 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 5
+  &quot;associatedIndex&quot;: 8
 }</component>
-  <component name="ProjectId" id="2vg7KEfBmPzMTdaz3OSTRaH95xW" />
-  <component name="ProjectLevelVcsManager">
-    <ConfirmationsSetting value="2" id="Add" />
-  </component>
+  <component name="ProjectId" id="2w2jrcmAYDTETvDrBQQtR6bSqdx" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -59,8 +51,6 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Gradle.Rebalancing 빌드.executor": "Run",
-    "Notification.DisplayName-DoNotAsk-Database detector": "데이터베이스 탐지기",
-    "Notification.DoNotAsk-Database detector": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
@@ -68,27 +58,25 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Spring Boot.RebalancingApplication.executor": "Run",
     "git-widget-placeholder": "codef",
-    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Coding/WorkSpace/SMS_Project/Back",
+    "last_opened_file_path": "C:/Coding/WorkSpace/SMS_Project/Back/Spring",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true",
-    "애플리케이션.RebalancingApplication.executor": "Run"
+    "project.structure.last.edited": "SDK",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RecentsManager">
-    <key name="CreateClassDialog.RecentsKey">
-      <recent name="com.upwardright.rebalancing.exception" />
-    </key>
-  </component>
   <component name="RunManager">
     <configuration name="RebalancingApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="17" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-      <module name="reblancing1.main" />
+      <module name="reblancing1" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.upwardright.rebalancing.RebalancingApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -106,32 +94,19 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="디폴트 작업">
-      <changelist id="119aa975-fa56-497e-a65c-2052ead34ef2" name="변경" comment="" />
-      <created>1744554799675</created>
+      <changelist id="10129eeb-511c-47a9-81f9-5cd757db7328" name="변경" comment="" />
+      <created>1745246762815</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1744554799675</updated>
-      <workItem from="1744554801114" duration="11123000" />
-      <workItem from="1744818232052" duration="5330000" />
-      <workItem from="1744825427486" duration="776000" />
-      <workItem from="1744875987502" duration="625000" />
-      <workItem from="1745148927907" duration="4290000" />
-      <workItem from="1745246241588" duration="517000" />
+      <updated>1745246762815</updated>
+      <workItem from="1745246763841" duration="2354000" />
+      <workItem from="1745586099725" duration="729000" />
+      <workItem from="1745587600540" duration="127000" />
+      <workItem from="1745587739799" duration="126000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
 </project>

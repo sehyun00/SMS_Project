@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface AuthContextType {
   isLoggedIn: boolean;
   login: (user_id: string, password: string) => Promise<boolean>;
-  signup: (user_id: string, password: string, name: string, phone_number: string) => Promise<boolean>; // 회원가입 함수 추가
+  signup: (user_id: string, password: string, name: string, phone_number: string) => Promise<{ success: boolean, errorMessage?: string }>;
   loginWithKakao: () => Promise<boolean>;
   logout: () => void;
   loading: boolean;
@@ -18,7 +18,7 @@ const API_URL = 'http://localhost:8081/upwardright';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // 앱 시작 시 저장된 로그인 상태 확인
   useEffect(() => {
@@ -44,43 +44,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     password: string,
     name: string,
     phone_number: string
-  ): Promise<boolean> => {
-    setLoading(true);
+  ): Promise<{ success: boolean, errorMessage?: string }> => {
     try {
-      // 백엔드 서버에 회원가입 요청
       const response = await fetch(`${API_URL}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id,         // 이메일
-          password,        // 비밀번호
-          name,            // 이름
-          phone_number,    // 전화번호
-          // membership은 백엔드에서 기본값으로 설정
+          user_id, password, name, phone_number,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('회원가입 실패:', data.message || '알 수 없는 오류');
-        return false;
+        const errorMessage = data.message || '회원가입 처리 중 오류가 발생했습니다';
+        return { success: false, errorMessage };
+      } else {
+        console.log('성공:', data);
+        return { success: true, errorMessage: undefined };
       }
-
-      console.log('회원가입 성공:', data);
-      // 회원가입 직후 자동 로그인을 원한다면 아래 주석을 해제
-      // await AsyncStorage.setItem('authToken', data.token);
-      // await AsyncStorage.setItem('isLoggedIn', 'true');
-      // setIsLoggedIn(true);
-      
-      return true;
     } catch (error) {
-      console.error('회원가입 중 오류 발생:', error);
-      return false;
+      console.error('네트워크 오류:', error);
+      return { success: false, errorMessage: '서버 연결에 실패했습니다. 다시 시도해주세요' };
     } finally {
-      setLoading(false);
     }
   };
 
