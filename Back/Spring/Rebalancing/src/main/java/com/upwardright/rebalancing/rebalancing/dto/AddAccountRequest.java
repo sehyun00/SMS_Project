@@ -2,32 +2,28 @@ package com.upwardright.rebalancing.rebalancing.dto;
 
 import com.upwardright.rebalancing.rebalancing.domain.Accounts;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
 public class AddAccountRequest {
-    @NotBlank(message = "계좌번호는 필수 입력값입니다.")
-    private String account;
-
-    @NotBlank(message = "증권사는 필수 입력값입니다.")
+    @NotBlank(message = "증권사 코드는 필수입니다")
     private String company;
 
-    // 로그인한 사용자 ID 설정 시 사용
-    private String user_id;
+    @NotBlank(message = "계좌번호는 필수입니다")
+    private String account;
 
-    public void setUserId(String user_id) {
-        this.user_id = user_id;
-    }
+    @NotBlank(message = "계좌 비밀번호는 필수입니다")
+    private String password; // 비밀번호 필드 추가
+
+    private String userId;
 
     public Accounts toEntity() {
         return Accounts.builder()
-                .user_id(user_id)
-                .account(account)
                 .company(company)
+                .account(account)
+                .user_id(userId)
                 .build();
     }
 }
