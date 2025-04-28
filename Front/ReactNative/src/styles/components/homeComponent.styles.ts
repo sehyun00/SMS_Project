@@ -6,135 +6,125 @@ import { Theme } from '../../types/theme';
 interface HomeComponentStyles {
   container: ViewStyle;
   contentContainer: ViewStyle;
+  sectionHeader: ViewStyle;
   sectionTitle: TextStyle;
+  section: ViewStyle;
+  linkText: TextStyle;
   dateText: TextStyle;
   card: ViewStyle;
-  noAccountContainer: ViewStyle;
-  noAccountText: TextStyle;
-  addButton: ViewStyle;
-  addButtonText: TextStyle;
+  emptyCard: ViewStyle;
+  emptyText: TextStyle;
   accountRow: ViewStyle;
-  accountInfo: ViewStyle;
-  accountCompany: TextStyle;
-  accountNumber: TextStyle;
+  accountLabel: TextStyle;
+  accountValue: TextStyle;
+  returnRow: ViewStyle;
+  accountShortName: TextStyle;
+  recordName: TextStyle;
   returnRatePositive: TextStyle;
   returnRateNegative: TextStyle;
   divider: ViewStyle;
-  iconContainer: ViewStyle;
-  accountItemRow: ViewStyle;
-  accountItem: ViewStyle;
-  accountItemText: TextStyle;
+  footerText: TextStyle;
 }
 
 export default function createStyles(theme: Theme): HomeComponentStyles {
   return StyleSheet.create<HomeComponentStyles>({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
+      backgroundColor: '#f5f5f7',
     },
     contentContainer: {
       padding: 16,
+      paddingBottom: 30,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    section: {
+      marginTop: 20,
     },
     sectionTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 12,
+      color: '#000',
+    },
+    linkText: {
+      fontSize: 12,
+      color: '#666',
     },
     dateText: {
       fontSize: 12,
-      color: theme.colors.placeholder,
-      marginBottom: 8,
+      color: '#666',
     },
     card: {
-      backgroundColor: theme.colors.card,
-      borderRadius: 12,
+      backgroundColor: '#ffffff',
+      borderRadius: 8,
       padding: 16,
-      marginBottom: 20,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
+      marginBottom: 4,
     },
-    noAccountContainer: {
-      padding: 16,
+    emptyCard: {
       alignItems: 'center',
       justifyContent: 'center',
+      paddingVertical: 24,
     },
-    noAccountText: {
+    emptyText: {
       fontSize: 14,
-      color: theme.colors.placeholder,
-      marginBottom: 16,
-    },
-    addButton: {
-      backgroundColor: theme.colors.primary,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      borderRadius: 8,
-    },
-    addButtonText: {
-      color: '#FFFFFF',
-      fontSize: 14,
-      fontWeight: '600',
+      color: '#666',
+      textAlign: 'center',
     },
     accountRow: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 16,
-    },
-    accountInfo: {
-      flex: 1,
-    },
-    accountCompany: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
       marginBottom: 4,
     },
-    accountNumber: {
+    accountLabel: {
       fontSize: 14,
-      color: theme.colors.placeholder,
+      color: '#666',
+      width: 45,
+    },
+    accountValue: {
+      fontSize: 14,
+      color: '#000',
+      fontWeight: '500',
+    },
+    returnRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 6,
+    },
+    accountShortName: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: '#000',
+    },
+    recordName: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: '#000',
     },
     returnRatePositive: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: '600',
-      color: '#FF3B30', // 양수 수익률은 빨간색
+      color: '#FF3B30', // 양수 수익률은 빨간색 (한국 주식 앱 스타일)
     },
     returnRateNegative: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: '600',
-      color: '#007AFF', // 음수 수익률은 파란색
+      color: '#007AFF', // 음수 수익률은 파란색 (한국 주식 앱 스타일)
     },
     divider: {
       height: 1,
-      backgroundColor: theme.colors.border,
-      marginVertical: 12,
+      backgroundColor: '#f0f0f0',
+      marginVertical: 6,
     },
-    iconContainer: {
-      width: 40,
-      height: 40,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 20,
-      marginRight: 12,
-      backgroundColor: '#F0F0F0',
-    },
-    accountItemRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    accountItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    accountItemText: {
-      fontSize: 14,
-      fontWeight: '500',
-      color: theme.colors.text,
-    },
+    footerText: {
+      fontSize: 12,
+      color: '#999',
+      textAlign: 'center',
+      marginTop: 20,
+    }
   });
 }
