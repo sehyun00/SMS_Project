@@ -1,6 +1,7 @@
 package com.upwardright.rebalancing.rebalancing.controller;
 
 import com.upwardright.rebalancing.rebalancing.domain.Accounts;
+import com.upwardright.rebalancing.rebalancing.dto.AccountResponse;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountRequest;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountResponse;
 import com.upwardright.rebalancing.rebalancing.service.AddAccountService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class RebalancingController {
@@ -23,20 +25,12 @@ public class RebalancingController {
         this.addAccountService = addAccountService;
     }
 
-    @GetMapping("/upwardright/mystockaccount")
-    public ResponseEntity<?> myStockAccount(Authentication authentication) {
-        // 인증된 사용자의 ID 가져오기
-        String userId = authentication.getName();
-        List<Accounts> accounts = addAccountService.getUserAccounts(userId);
-        return ResponseEntity.ok(accounts);
-    }
-
     @PostMapping("/upwardright/addstockaccount")
     public ResponseEntity<AddAccountResponse> addAccount(@Valid @RequestBody AddAccountRequest request, Authentication authentication) {
         try {
             // 인증된 사용자 ID 설정
-            String userId = authentication.getName();
-            request.setUserId(userId);
+            String user_id = authentication.getName();
+            request.setUser_id(user_id);
 
             // 계좌 추가 (RSA 암호화는 서비스에서 처리)
             Accounts savedAccount = addAccountService.addAccount(request);
