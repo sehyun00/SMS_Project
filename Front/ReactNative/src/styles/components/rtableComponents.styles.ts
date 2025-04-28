@@ -1,4 +1,4 @@
-// src/styles/rtableComponents.styles.ts
+// 경로: src/styles/rtableComponents.styles.ts
 import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { Theme } from '../../types/theme';
 import { COLUMN_WIDTHS } from '../../constants/tableConfig';

@@ -1,4 +1,5 @@
-// src/components/RDomesticComponent.tsx
+// 경로: src/components/RDomesticComponent.tsx
+// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RDomesticComponent.tsx
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import withTheme from '../hoc/withTheme';
@@ -6,6 +7,7 @@ import { Theme } from '../types/theme';
 import { COLUMN_WIDTHS } from '../constants/tableConfig';
 import { createTableStyles } from '../styles/components/rtableComponents.styles';
 
+// 주식 데이터 인터페이스
 interface StockItem {
   name: string;
   ticker: string;
@@ -52,7 +54,9 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
               ? `${KRW_SYMBOL}${Math.round(totalAmount * exchangeRate).toLocaleString()}`
               : `$${totalAmount.toFixed(2)}`}
           </Text>
-          <Text style={[styles.percentChange, styles.negativeChange]}>{percentChange}%</Text>
+          <Text style={[styles.percentChange, percentChange < 0 ? styles.negativeChange : styles.positiveChange]}>
+            {percentChange}%
+          </Text>
         </View>
       </View>
       
@@ -87,7 +91,10 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
             {stocks.map((stock, index) => (
               <View key={index} style={styles.scrollableRow}>
                 <View style={[styles.changeColumn, { width: COLUMN_WIDTHS.change }]}>
-                  <Text style={[styles.changeText, styles.negativeChange]}>
+                  <Text style={[
+                    styles.changeText, 
+                    stock.percentChange < 0 ? styles.negativeChange : styles.positiveChange
+                  ]}>
                     {stock.percentChange}%
                   </Text>
                 </View>

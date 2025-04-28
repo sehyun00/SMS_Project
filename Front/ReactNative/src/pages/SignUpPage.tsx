@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../contexts/AuthContext'; // AuthContext 불러오기
+import { useAuth } from '../constants/AuthContext'; // AuthContext 불러오기
 
 // 스타일 임포트
 import createStyles from '../styles/pages/signUpPage.styles';

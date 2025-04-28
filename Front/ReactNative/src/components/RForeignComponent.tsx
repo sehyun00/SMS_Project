@@ -1,4 +1,5 @@
-// src/components/RForeignComponent.tsx
+// 경로: src/components/RForeignComponent.tsx
+// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RForeignComponent.tsx
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import withTheme from '../hoc/withTheme';

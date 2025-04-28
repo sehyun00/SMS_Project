@@ -1,4 +1,4 @@
-// src/hooks/useExchangeRate.ts
+// 경로: src/hooks/useExchangeRate.ts
 import { useState, useEffect } from 'react';
 
 export const useExchangeRate = () => {

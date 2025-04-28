@@ -11,6 +11,33 @@ export default function createStyles(theme: Theme) {
     contentContainer: {
       padding: 16,
     },
+    // 계좌 선택 UI 스타일
+    accountSelectorContainer: {
+      flexDirection: 'row',
+      marginBottom: 15,
+      flexWrap: 'wrap',
+    },
+    accountButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 15,
+      marginRight: 10,
+      marginBottom: 8,
+      borderRadius: 20,
+      backgroundColor: '#f0f0f0',
+    },
+    selectedAccountButton: {
+      backgroundColor: theme.colors.primary,
+    },
+    accountText: {
+      fontSize: 14,
+      color: '#333',
+    },
+    selectedAccountText: {
+      fontSize: 14,
+      color: '#FFF',
+      fontWeight: 'bold',
+    },
+    // 기존 스타일들
     accountContainer: {
       backgroundColor: '#ffffff',
       borderRadius: 12,
