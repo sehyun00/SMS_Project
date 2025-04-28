@@ -120,6 +120,129 @@ def create_account():
         }), 500
 
 
+@app.route('/delete_account', methods=['DELETE'])
+def delete_account():
+    try:
+        print("요청 시작")
+
+        data = request.get_json()
+        print("받은 데이터:", data)
+
+        access_token = get_access_token()
+        print("액세스 토큰:", access_token)
+
+        # 필수 파라미터 검증
+        if 'connectedId' not in data:
+            return jsonify({
+                'error': 'connectedId가 필요합니다.'
+            }), 400
+
+        if 'organization' not in data:
+            return jsonify({
+                'error': '기관코드(organization)가 필요합니다.'
+            }), 400
+
+        # API 문서에 맞게 payload 형식 수정
+        payload = {
+            'accountList': [{
+                'countryCode': 'KR',
+                'businessType': 'ST',
+                'clientType': 'A',
+                'organization': data['organization'],  # 클라이언트에서 전달받은 기관코드 사용
+                'loginType': '1'
+            }],
+            'connectedId': data['connectedId']
+        }
+        print("페이로드:", payload)
+
+        url = "https://development.codef.io/v1/account/delete"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        print("응답 상태 코드:", response.status_code)
+        print("응답 헤더:", response.headers)
+        print("API 응답:", response.text)
+
+        if not response.text:
+            return jsonify({
+                'error': 'API 응답이 비어있습니다.',
+                'status_code': response.status_code
+            }), 500
+
+        decoded_response = urllib.parse.unquote(response.text)
+        print("디코딩된 응답:", decoded_response)
+
+        return jsonify(json.loads(decoded_response))
+
+    except Exception as e:
+        print("에러 발생:", str(e))
+        return jsonify({
+            'error': str(e)
+        }), 500
+
+
+@app.route('/stock/account-list', methods=['POST'])
+def get_stock_account_list():
+    try:
+        # 액세스 토큰 발급
+        access_token = get_access_token()
+        if not access_token:
+            return jsonify({
+                'error': '토큰 발급 실패'
+            }), 500
+
+        # JSON 데이터 받기
+        data = request.get_json()
+
+        # 필수 필드 확인
+        required_fields = ['organization', 'connectedId']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'error': f'필수 필드가 누락되었습니다: {field}'
+                }), 400
+
+        # API 요청 데이터
+        payload = {
+            'organization': data['organization'],
+            'connectedId': data['connectedId']
+        }
+
+        # API 요청
+        url = "https://development.codef.io/v1/kr/stock/a/account/account-list"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        decoded_response = urllib.parse.unquote(response.text)
+        response_data = json.loads(decoded_response)
+
+        if response_data.get('result', {}).get('code') == 'CF-00000':
+            account_list = []
+            if 'data' in response_data:
+                if isinstance(response_data['data'], list):
+                    # 여러 계좌인 경우
+                    for account in response_data['data']:
+                        if 'resAccount' in account:
+                            account_list.append(account['resAccount'])
+                else:
+                    # 단일 계좌인 경우
+                    if 'resAccount' in response_data['data']:
+                        account_list.append(response_data['data']['resAccount'])
+
+            return jsonify({'accountList': account_list})
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
 @app.route('/stock/balance', methods=['POST'])
 def stock_balance():
     try:
