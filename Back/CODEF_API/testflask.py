@@ -7,11 +7,13 @@ import json
 import urllib.parse
 from dotenv import load_dotenv
 import os
+from flask_cors import CORS
 
 # .env 파일 로드
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 # 환경변수에서 설정 로드
 CLIENT_ID = os.getenv('CODEF_CLIENT_ID')
@@ -298,6 +300,98 @@ def stock_balance():
             'error': str(e)
         }), 500
 
+@app.route('/stock/create-and-list', methods=['POST'])
+def create_account_and_list():
+    try:
+        # 액세스 토큰 발급
+        access_token = get_access_token()
+        if not access_token:
+            return jsonify({
+                'error': '토큰 발급 실패'
+            }), 500
+
+        # JSON 데이터 받기
+        data = request.get_json()
+
+        # 필수 필드 확인
+        required_fields = ['id', 'password', 'organization']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'error': f'필수 필드가 누락되었습니다: {field}'
+                }), 400
+
+        # 비밀번호 암호화
+        encrypted_password = publicEncRSA(PUBLIC_KEY, data['password'])
+
+        # 계정 생성 API 요청 데이터
+        create_payload = {
+            'accountList': [
+                {
+                    'countryCode': "KR",
+                    'businessType': 'ST',
+                    'organization': data['organization'],
+                    'loginType': '1',
+                    'clientType': 'A',
+                    'id': data['id'],
+                    'password': encrypted_password
+                }
+            ]
+        }
+
+        # 계정 생성 API 요청
+        create_url = "https://development.codef.io/v1/account/create"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        create_response = requests.post(create_url, headers=headers, json=create_payload)
+        create_result = json.loads(urllib.parse.unquote(create_response.text))
+
+        # 계정 생성 실패 시
+        if create_result.get('result', {}).get('code') != 'CF-00000':
+            return jsonify(create_result)
+
+        # connectedId 추출
+        connected_id = create_result.get('data', {}).get('connectedId')
+        if not connected_id:
+            return jsonify({
+                'error': 'connectedId를 찾을 수 없습니다.'
+            }), 500
+
+        # 계좌 목록 조회 API 요청 데이터
+        list_payload = {
+            'organization': data['organization'],
+            'connectedId': connected_id
+        }
+
+        # 계좌 목록 조회 API 요청
+        list_url = "https://development.codef.io/v1/kr/stock/a/account/account-list"
+        list_response = requests.post(list_url, headers=headers, json=list_payload)
+        list_result = json.loads(urllib.parse.unquote(list_response.text))
+
+        # 계좌 목록 추출
+        account_list = []
+        if list_result.get('result', {}).get('code') == 'CF-00000':
+            if 'data' in list_result:
+                if isinstance(list_result['data'], list):
+                    for account in list_result['data']:
+                        if 'resAccount' in account:
+                            account_list.append(account['resAccount'])
+                else:
+                    if 'resAccount' in list_result['data']:
+                        account_list.append(list_result['data']['resAccount'])
+
+        return jsonify({
+            'connectedId': connected_id,
+            'accountList': account_list
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
