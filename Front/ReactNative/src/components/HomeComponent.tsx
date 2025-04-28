@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// 컴포넌트 임포트
+import ConnectedAccountComponent from './ConnectedAccountComponent';
+
 // 스타일 임포트
 import withTheme from '../hoc/withTheme';
 import createStyles from '../styles/components/homeComponent.styles';
@@ -52,6 +55,19 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
   const toggleRecords = () => {
     setHasRecords(!hasRecords);
   };
+  
+  // 모달 상태 추가
+  const [isConnectModalVisible, setIsConnectModalVisible] = useState(false);
+  
+  // 모달 열기
+  const openConnectModal = () => {
+    setIsConnectModalVisible(true);
+  };
+  
+  // 모달 닫기
+  const closeConnectModal = () => {
+    setIsConnectModalVisible(false);
+  };
 
   const styles = createStyles(theme);
 
@@ -62,34 +78,34 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
       showsVerticalScrollIndicator={false}
     >
       {/* 계좌 섹션 */}
-      <View>
+      <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>계좌</Text>
-        {hasAccounts ? (
-          <View style={styles.card}>
-            {accounts.map((account, index) => (
-              <View key={index}>
-                <View style={styles.accountRow}>
-                  <View style={styles.accountInfo}>
-                    <Text style={styles.accountCompany}>{account.company} {account.accountNumber}</Text>
-                  </View>
-                </View>
-                {index < accounts.length - 1 && <View style={styles.divider} />}
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={[styles.card, styles.noAccountContainer]}>
-            <Text style={styles.noAccountText}>계좌가 아직 없어요</Text>
-            <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addButtonText}>계좌 추가하기</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        <TouchableOpacity onPress={openConnectModal}>
+          <Text style={styles.linkText}>계좌 연동하기 &gt;</Text>
+        </TouchableOpacity>
       </View>
+      
+      {hasAccounts ? (
+        <View style={styles.card}>
+          {accounts.map((account, index) => (
+            <View key={index}>
+              <View style={styles.accountRow}>
+                <Text style={styles.accountLabel}>계좌사</Text>
+                <Text style={styles.accountValue}>{account.company} {account.accountNumber}</Text>
+              </View>
+              {index < accounts.length - 1 && <View style={styles.divider} />}
+            </View>
+          ))}
+        </View>
+      ) : (
+        <View style={[styles.card, styles.emptyCard]}>
+          <Text style={styles.emptyText}>계좌가 아직 없어요</Text>
+        </View>
+      )}
 
       {/* 계좌 수익률 섹션 */}
-      <View>
-        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>계좌 수익률</Text>
           <Text style={styles.dateText}>1월 1일 기준</Text>
         </View>
@@ -98,13 +114,13 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           <View style={styles.card}>
             {accounts.map((account, index) => (
               <View key={index}>
-                <View style={styles.accountItemRow}>
-                  <View style={styles.accountItem}>
-                    <Text style={styles.accountItemText}>
-                      {account.company.split('증권')[0] || account.company.substring(0, 2)}
-                      {account.accountNumber.split('-')[0]}
-                    </Text>
-                  </View>
+                <View style={styles.returnRow}>
+                  <Text style={styles.accountShortName}>
+                    {account.company.includes('증권') 
+                      ? account.company.split('증권')[0] 
+                      : account.company.substring(0, 2)}
+                    {account.accountNumber.split('-')[0]}
+                  </Text>
                   <Text
                     style={account.returnRate > 0 ? styles.returnRatePositive : styles.returnRateNegative}
                   >
@@ -116,17 +132,15 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
             ))}
           </View>
         ) : (
-          <View style={styles.card}>
-            <Text style={{fontSize: 14, color: theme.colors.placeholder, textAlign: 'center'}}>
-              계좌가 아직 없어요
-            </Text>
+          <View style={[styles.card, styles.emptyCard]}>
+            <Text style={styles.emptyText}>계좌가 아직 없어요</Text>
           </View>
         )}
       </View>
 
       {/* 리밸런싱 기록 수익률 섹션 */}
-      <View>
-        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>리밸런싱 기록 수익률</Text>
           <Text style={styles.dateText}>1일 전 기준</Text>
         </View>
@@ -135,10 +149,8 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           <View style={styles.card}>
             {records.map((record, index) => (
               <View key={index}>
-                <View style={styles.accountItemRow}>
-                  <View style={styles.accountItem}>
-                    <Text style={styles.accountItemText}>{record.name}</Text>
-                  </View>
+                <View style={styles.returnRow}>
+                  <Text style={styles.recordName}>{record.name}</Text>
                   <Text
                     style={record.returnRate > 0 ? styles.returnRatePositive : styles.returnRateNegative}
                   >
@@ -150,13 +162,15 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
             ))}
           </View>
         ) : (
-          <View style={styles.card}>
-            <Text style={{fontSize: 14, color: theme.colors.placeholder, textAlign: 'center'}}>
-              기록이 아직 없어요
-            </Text>
+          <View style={[styles.card, styles.emptyCard]}>
+            <Text style={styles.emptyText}>기록이 아직 없어요</Text>
           </View>
         )}
       </View>
+      <ConnectedAccountComponent
+        isVisible={isConnectModalVisible}
+        onClose={closeConnectModal}
+      />
 
       {/* 테스트를 위한 토글 버튼 (실제 앱에서는 제거) */}
       {process.env.NODE_ENV === 'development' && (
