@@ -34,7 +34,7 @@ export interface Record {
 export interface Rud {
   stock_name: string;       // 종목 명 or 원화 or 달러
   record_id: number;        // 리밸런싱 기록 ID
-  expert_per: number;       // 희망 비중
+  expert_per: number;       // 희망 비중: 기본값 0
   market_order?: number;    // 구매 당시 시장가
   rate?: number;            // 수익률
   nos?: number;             // 수량
@@ -84,7 +84,7 @@ export const dummyRecords: Record[] = [
     account: '315411-34141-13',
     record_date: '2025-04-12T10:30:00',
     total_balance: 5323773,
-    record_name: '공격적 포지',
+    record_name: '공격적 포지션',
     profit_rate: -1.6
   },
   {
