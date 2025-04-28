@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3049c645-59a1-427f-bd31-a7e22433b746" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/dto/AddAccountRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/dto/AddAccountRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/dto/AddAccountResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/dto/AddAccountResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/service/AddAccountService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/service/AddAccountService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/service/CodefApiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/service/CodefApiService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/reblancing/domain/AccountId.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/reblancing/domain/Accounts.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/reblancing/repository/AccountRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/reblancing/service/AddAccountService.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0
+}]]></component>
+  <component name="ProjectId" id="2wLGexX6Nfq0FOjwftK1mcHPxoz" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Rebalancing 빌드.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.RebalancingApplication.executor": "Run",
+    "git-widget-placeholder": "codef",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23726.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23726.103" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="디폴트 작업">
+      <changelist id="3049c645-59a1-427f-bd31-a7e22433b746" name="변경" comment="" />
+      <created>1745813543302</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1745813543302</updated>
+      <workItem from="1745813545864" duration="1279000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/reblancing1$RebalancingApplication.ic" NAME="RebalancingApplication 커버리지 결과" MODIFIED="1745813040370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.upwardright.rebalancing.*</FILTER>
+    </SUITE>
+  </component>
+</project>

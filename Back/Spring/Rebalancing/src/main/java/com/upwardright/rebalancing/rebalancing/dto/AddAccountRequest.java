@@ -16,6 +16,9 @@ public class AddAccountRequest {
     @NotBlank(message = "증권사는 필수 입력값입니다.")
     private String company;
 
+    @NotBlank(message = "비밀번호는 필수 입력값입니다.")
+    private String password;
+
     // 로그인한 사용자 ID 설정 시 사용
     private String user_id;
 

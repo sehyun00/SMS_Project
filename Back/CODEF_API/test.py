@@ -1,3 +1,11 @@
+# 먼저 필요한 패키지 설치
+import sys
+import subprocess
+try:
+    from Crypto.PublicKey import RSA
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pycryptodome"])
+
 import requests
 import json
 import urllib.parse
@@ -55,7 +63,7 @@ headers = {
     'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlX3R5cGUiOiIxIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sInNlcnZpY2Vfbm8iOiIwMDAwMDU0NTQwMDIiLCJleHAiOjE3NDU1MDE4NDUsImF1dGhvcml0aWVzIjpbIklOU1VSQU5DRSIsIlBVQkxJQyIsIkJBTksiLCJFVEMiLCJTVE9DSyIsIkNBUkQiXSwianRpIjoiMjgwMjgwZjAtYTBlZS00NDE2LThiMmYtODY5YTYxNWEyZTlhIiwiY2xpZW50X2lkIjoiMTA3ZGUyM2EtOGQ2YS00YTllLTgyNmMtMTMxZDNlMTJkM2ZjIn0.TbNMX9KezFmz27ciUDbBUMYqIlhj52EE7kctz1LKqPSYQzkseYBhnQCYa9aBkHnH2W1o4TW1ig99xGodbg0yv-VzzB2viBL8WB-HO6KmaI1wwkzfw8B5Yl52gqiGdPetaJQOzFa8u0dmJm2kq_sg9dHwGXDld8JZIgvUaubKt6D2EkAiTI2WwLyHbGKE0DsGnJe5vIxNeqGT1dpXtAVTk9ty72FevFSUTDOAQpnAkQBetmtGP6xOG6a7nfe694kW2REijYeiqt8-NOHh1mbEJWlhYH3NywzMB15p2qVJa6BWMUS-MAGUrN9S5zYF0GCJuneLi-9iOHWt02FkQYpsKA'
 }
 
-response = requests.post(url, headers=headers, json=payload)  # data= 대신 json= 사용
+response = requests.post(url, headers=headers, json=payload)
 decoded_response = urllib.parse.unquote(response.text)
 json_response = json.loads(decoded_response)
 print(json.dumps(json_response, indent=2, ensure_ascii=False))
