@@ -31,11 +31,6 @@ public class RebalancingController {
         return ResponseEntity.ok(accounts);
     }
 
-    @GetMapping("/upwardright/mystockaccount/rebalancing")
-    public String rebalancing(Authentication authentication) {
-        return "rebalancing";
-    }
-
     @PostMapping("/upwardright/addstockaccount")
     public ResponseEntity<AddAccountResponse> addAccount(@Valid @RequestBody AddAccountRequest request, Authentication authentication) {
         try {
@@ -43,7 +38,7 @@ public class RebalancingController {
             String userId = authentication.getName();
             request.setUserId(userId);
 
-            // 계좌 추가
+            // 계좌 추가 (RSA 암호화는 서비스에서 처리)
             Accounts savedAccount = addAccountService.addAccount(request);
 
             return ResponseEntity.ok(
@@ -55,7 +50,7 @@ public class RebalancingController {
                     )
             );
         } catch (IllegalArgumentException e) {
-            // 중복 계좌 또는 유효하지 않은 계좌 정보
+            // 중복 계좌
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new AddAccountResponse(
@@ -79,7 +74,7 @@ public class RebalancingController {
 
     @PostMapping("/upwardright/mystockaccount/rebalancing")
     public String rebalancingProcess(@RequestBody String entity) {
-        // AI 모델을 통해 리밸런싱 처리 진행
+        // AI 모델을 통해 리밸런싱 처리 진행 - Flask API에서 처리될 예정
         return entity;
     }
 }

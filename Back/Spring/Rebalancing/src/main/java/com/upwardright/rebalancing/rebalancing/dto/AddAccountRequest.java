@@ -24,6 +24,9 @@ public class AddAccountRequest {
                 .company(company)
                 .account(account)
                 .user_id(userId)
+                .account_password(password)
+                .principal(0.0)
+                .pre_principal(0.0)
                 .build();
     }
 }

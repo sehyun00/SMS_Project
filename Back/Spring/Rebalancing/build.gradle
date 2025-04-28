@@ -46,6 +46,7 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	// Jackson 라이브러리 (JSON 처리용)
+	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
