@@ -32,14 +32,14 @@ interface HomeComponentProps {
 
 const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
   // 계좌 데이터 샘플 (실제로는 API에서 가져올 것)
-  const [hasAccounts, setHasAccounts] = useState<boolean>(true);
+  const [hasAccounts, setHasAccounts] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<AccountData[]>([
     { company: '토스증권', accountNumber: '0345-135611-3123', returnRate: 4.2 },
     { company: '한국투자', accountNumber: '315411-341411-13', returnRate: -3.3 }
   ]);
 
   // 리밸런싱 기록 샘플
-  const [hasRecords, setHasRecords] = useState<boolean>(true);
+  const [hasRecords, setHasRecords] = useState<boolean>(false);
   const [records, setRecords] = useState<RebalancingRecord[]>([
     { name: '토스 공격형 투자', returnRate: 1.3 },
     { name: '토스 안전형 투자', returnRate: 0.5 },

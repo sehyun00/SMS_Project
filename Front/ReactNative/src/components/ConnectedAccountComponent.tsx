@@ -41,21 +41,23 @@ interface ConnectedAccountComponentProps {
   theme: Theme;
 }
 
-const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({ 
-  isVisible, 
+const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
+  isVisible,
   onClose,
-  theme 
+  theme
 }) => {
   // 단계 상태 관리
   const [currentStep, setCurrentStep] = useState(1);
-  
+
   // 입력 필드 상태 관리
   const [securityCompany, setSecurityCompany] = useState('');
   const [socialId, setSocialId] = useState('');
   const [socialPassword, setSocialPassword] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountPassword, setAccountPassword] = useState('');
-  
+  const [accountList, setAccountList] = useState<string[]>([]);
+  const [connectedId, setConnectedId] = useState<string>('');
+
   // UI 상태 관리
   const [showSocialPassword, setShowSocialPassword] = useState(false);
   const [showAccountPassword, setShowAccountPassword] = useState(false);
@@ -67,7 +69,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const [isSocialPasswordEntered, setIsSocialPasswordEntered] = useState(false);
   const [isAccountNumberEntered, setIsAccountNumberEntered] = useState(false);
   const [isAccountPasswordEntered, setIsAccountPasswordEntered] = useState(false);
-  
+
   // 애니메이션 값
   const socialIdAnimation = useRef(new Animated.Value(0)).current;
   const socialPasswordAnimation = useRef(new Animated.Value(0)).current;
@@ -75,7 +77,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const accountNumberAnimation = useRef(new Animated.Value(0)).current;
   const accountPasswordAnimation = useRef(new Animated.Value(0)).current;
   const registerButtonAnimation = useRef(new Animated.Value(0)).current;
-  
+
   // 스크롤 관리
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -110,7 +112,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
     setIsSocialPasswordEntered(false);
     setIsAccountNumberEntered(false);
     setIsAccountPasswordEntered(false);
-    
+
     // 애니메이션 값 초기화
     socialIdAnimation.setValue(0);
     socialPasswordAnimation.setValue(0);
@@ -124,10 +126,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleSecurityCompanyChange = (value: string) => {
     setSecurityCompany(value);
     const isSelected = value !== '';
-    
+
     if (isSelected !== isSecurityCompanySelected) {
       setIsSecurityCompanySelected(isSelected);
-      
+
       if (isSelected) {
         // 소셜 아이디 필드 표시 애니메이션
         Animated.timing(socialIdAnimation, {
@@ -146,20 +148,20 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
           useNativeDriver: true,
           easing: Easing.in(Easing.ease)
         }).start();
-        
+
         // 다른 필드도 초기화
         setIsSocialIdEntered(false);
         setIsSocialPasswordEntered(false);
         setIsAccountNumberEntered(false);
         setIsAccountPasswordEntered(false);
-        
+
         // 다른 애니메이션도 초기화
         socialPasswordAnimation.setValue(0);
         nextButtonAnimation.setValue(0);
         accountNumberAnimation.setValue(0);
         accountPasswordAnimation.setValue(0);
         registerButtonAnimation.setValue(0);
-        
+
         setCurrentStep(1);
       }
     }
@@ -169,10 +171,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleSocialIdChange = (text: string) => {
     setSocialId(text);
     const isEntered = text.trim() !== '';
-    
+
     if (isEntered !== isSocialIdEntered) {
       setIsSocialIdEntered(isEntered);
-      
+
       if (isEntered) {
         // 소셜 비밀번호 필드 표시 애니메이션
         Animated.timing(socialPasswordAnimation, {
@@ -191,18 +193,18 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
           useNativeDriver: true,
           easing: Easing.in(Easing.ease)
         }).start();
-        
+
         // 다음 필드들도 초기화
         setIsSocialPasswordEntered(false);
         setIsAccountNumberEntered(false);
         setIsAccountPasswordEntered(false);
-        
+
         // 다음 애니메이션도 초기화
         nextButtonAnimation.setValue(0);
         accountNumberAnimation.setValue(0);
         accountPasswordAnimation.setValue(0);
         registerButtonAnimation.setValue(0);
-        
+
         setCurrentStep(2);
       }
     }
@@ -212,10 +214,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleSocialPasswordChange = (text: string) => {
     setSocialPassword(text);
     const isEntered = text.trim() !== '';
-    
+
     if (isEntered !== isSocialPasswordEntered) {
       setIsSocialPasswordEntered(isEntered);
-      
+
       if (isEntered) {
         // 다음 버튼 표시 애니메이션
         Animated.timing(nextButtonAnimation, {
@@ -233,11 +235,11 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
           useNativeDriver: true,
           easing: Easing.in(Easing.ease)
         }).start();
-        
+
         // 다음 필드들도 초기화
         setIsAccountNumberEntered(false);
         setIsAccountPasswordEntered(false);
-        
+
         // 다음 애니메이션도 초기화
         accountNumberAnimation.setValue(0);
         accountPasswordAnimation.setValue(0);
@@ -250,10 +252,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleAccountNumberChange = (text: string) => {
     setAccountNumber(text);
     const isEntered = text.trim() !== '';
-    
+
     if (isEntered !== isAccountNumberEntered) {
       setIsAccountNumberEntered(isEntered);
-      
+
       if (isEntered) {
         // 계좌 비밀번호 필드 표시 애니메이션
         Animated.timing(accountPasswordAnimation, {
@@ -272,13 +274,13 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
           useNativeDriver: true,
           easing: Easing.in(Easing.ease)
         }).start();
-        
+
         // 계좌 비밀번호 초기화
         setIsAccountPasswordEntered(false);
-        
+
         // 등록 버튼 애니메이션 초기화
         registerButtonAnimation.setValue(0);
-        
+
         setCurrentStep(4);
       }
     }
@@ -288,10 +290,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleAccountPasswordChange = (text: string) => {
     setAccountPassword(text);
     const isEntered = text.trim() !== '';
-    
+
     if (isEntered !== isAccountPasswordEntered) {
       setIsAccountPasswordEntered(isEntered);
-      
+
       if (isEntered) {
         // 계좌등록 버튼 표시 애니메이션
         Animated.timing(registerButtonAnimation, {
@@ -317,7 +319,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleNextButtonClick = async () => {
     Keyboard.dismiss();
     setLoading(true);
-    
+
     try {
       // 증권사 이름을 기관코드로 변환
       const firmInfo = findSecuritiesFirmByName(securityCompany);
@@ -326,28 +328,31 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
         setLoading(false);
         return;
       }
-      
+
       // 요청 페이로드 준비
       const payload = {
         id: socialId,
         password: socialPassword,
         organization: firmInfo.code
       };
-      
+
       console.log('전송 데이터:', payload);
-      
+
       // 플라스크 API 호출 - 소셜 정보 검증
-      const response = await axios.post('http://localhost:5000/create_account', payload);
-      
-      // 성공적으로 응답 받고 connectedId가 있는지 확인
-      if (response.data && 
-          response.data.data && 
-          response.data.data.connectedId) {
-        
-        // connectedId 저장 (필요한 경우 나중에 사용할 수 있음)
-        const connectedId = response.data.data.connectedId;
-        console.log('연결 ID:', connectedId);
-        
+      const response = await axios.post('http://localhost:5000/stock/create-and-list', payload);
+
+      // 성공적으로 응답 받고 accountList와 connectedId가 있는지 확인
+      if (response.data && response.data.connectedId && response.data.accountList) {
+        // connectedId와 accountList 저장
+        const receivedConnectedId = response.data.connectedId;
+        const receivedAccountList = response.data.accountList;
+
+        setConnectedId(receivedConnectedId);
+        setAccountList(receivedAccountList);
+
+        console.log('연결 ID:', receivedConnectedId);
+        console.log('계좌 목록:', receivedAccountList);
+
         // 다음 버튼 숨김
         Animated.timing(nextButtonAnimation, {
           toValue: 0,
@@ -355,7 +360,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
           useNativeDriver: true,
           easing: Easing.in(Easing.ease)
         }).start();
-        
+
         // 계좌번호 필드 표시 애니메이션
         Animated.timing(accountNumberAnimation, {
           toValue: 1,
@@ -364,11 +369,11 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
           useNativeDriver: true,
           easing: Easing.out(Easing.ease)
         }).start();
-        
+
         setCurrentStep(4);
       } else {
-        // 응답은 받았지만 connectedId가 없는 경우
-        const errorMessage = response.data.result?.message || '증권사 연동에 실패했습니다.';
+        // 응답은 받았지만 필요한 데이터가 없는 경우
+        const errorMessage = response.data?.message || '증권사 연동에 실패했습니다.';
         Alert.alert(
           '연동 실패',
           errorMessage,
@@ -389,6 +394,18 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
     }
   };
 
+  // 계좌번호 Picker 부분 수정
+  // renderAccountPickerItems 함수 추가
+  const renderAccountPickerItems = () => {
+    return [
+      <Picker.Item key="empty" label="계좌번호 선택" value="" />,
+      ...accountList.map(account => (
+        <Picker.Item key={account} label={account} value={account} />
+      ))
+    ];
+  };
+
+
   // Picker 항목 생성을 위한 함수 추가
   const renderSecuritiesPickerItems = () => {
     return [
@@ -403,7 +420,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   const handleRegisterAccount = async () => {
     Keyboard.dismiss();
     setLoading(true);
-    
+
     try {
       // 플라스크 API 호출 - 계좌 정보 등록
       const response = await axios.post('https://your-flask-api.com/register-account', {
@@ -413,13 +430,13 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
         accountNumber: accountNumber,
         accountPassword: accountPassword
       });
-      
+
       // 성공적으로 응답 받음
       if (response.data.success) {
         Alert.alert(
           '계좌 연동 성공',
           '계좌가 성공적으로 연동되었습니다.',
-          [{ 
+          [{
             text: '확인',
             onPress: () => {
               // 모달 닫기
@@ -463,10 +480,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Ionicons name="close" size={24} color="#000" />
             </TouchableOpacity>
-            
-            <ScrollView 
+
+            <ScrollView
               ref={scrollViewRef}
-              style={styles.scrollView} 
+              style={styles.scrollView}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollViewContent}
             >
@@ -484,10 +501,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                   </Picker>
                 </View>
               </View>
-              
+
               {/* 소셜 아이디 입력 - 애니메이션과 함께 표시 */}
               {currentStep >= 2 && (
-                <Animated.View 
+                <Animated.View
                   style={[
                     styles.stepContainer,
                     {
@@ -512,10 +529,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                   />
                 </Animated.View>
               )}
-              
+
               {/* 소셜 비밀번호 입력 - 애니메이션과 함께 표시 */}
               {currentStep >= 3 && (
-                <Animated.View 
+                <Animated.View
                   style={[
                     styles.stepContainer,
                     {
@@ -553,10 +570,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                   </View>
                 </Animated.View>
               )}
-              
+
               {/* 계좌번호 입력 - 애니메이션과 함께 표시 */}
               {currentStep >= 4 && (
-                <Animated.View 
+                <Animated.View
                   style={[
                     styles.stepContainer,
                     {
@@ -578,17 +595,15 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                       onValueChange={handleAccountNumberChange}
                       style={styles.picker}
                     >
-                      <Picker.Item label="계좌번호 선택" value="" />
-                      <Picker.Item label="123456-01-123456" value="123456-01-123456" />
-                      <Picker.Item label="654321-01-654321" value="654321-01-654321" />
+                      {renderAccountPickerItems()}
                     </Picker>
                   </View>
                 </Animated.View>
               )}
-              
+
               {/* 계좌 비밀번호 입력 - 애니메이션과 함께 표시 */}
               {currentStep >= 5 && (
-                <Animated.View 
+                <Animated.View
                   style={[
                     styles.stepContainer,
                     {
@@ -628,10 +643,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                 </Animated.View>
               )}
             </ScrollView>
-            
+
             {/* 다음 버튼 - 소셜 비밀번호 입력 후 */}
             {currentStep === 3 && isSocialPasswordEntered && (
-              <Animated.View 
+              <Animated.View
                 style={{
                   opacity: nextButtonAnimation,
                   transform: [{
@@ -642,8 +657,8 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                   }]
                 }}
               >
-                <TouchableOpacity 
-                  style={styles.buttonStyle} 
+                <TouchableOpacity
+                  style={styles.buttonStyle}
                   onPress={handleNextButtonClick}
                   disabled={loading}
                 >
@@ -655,10 +670,10 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                 </TouchableOpacity>
               </Animated.View>
             )}
-            
+
             {/* 계좌등록 버튼 - 계좌 비밀번호 입력 후 */}
             {currentStep === 5 && isAccountPasswordEntered && (
-              <Animated.View 
+              <Animated.View
                 style={{
                   opacity: registerButtonAnimation,
                   transform: [{
@@ -669,11 +684,11 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
                   }]
                 }}
               >
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[
-                    styles.buttonStyle, 
+                    styles.buttonStyle,
                     { backgroundColor: '#4A69FF' }
-                  ]} 
+                  ]}
                   onPress={handleRegisterAccount}
                   disabled={loading}
                 >
