@@ -1,4 +1,5 @@
 // 경로: src/pages/LoginPage.tsx
+// 흐름도: App.js > AuthNavigator.tsx > LoginPage.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
