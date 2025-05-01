@@ -245,6 +245,7 @@ def get_stock_account_list():
         return jsonify({
             'error': str(e)
         }), 500
+
 @app.route('/stock/balance', methods=['POST'])
 def stock_balance():
     try:
@@ -259,7 +260,7 @@ def stock_balance():
         data = request.get_json()
 
         # 필수 필드 확인
-        required_fields = ['organization', 'connectedId', 'account', 'accountPassword']
+        required_fields = ['organization', 'connectedId', 'account', 'account_password']
         for field in required_fields:
             if field not in data:
                 return jsonify({
@@ -267,18 +268,19 @@ def stock_balance():
                 }), 400
 
         # 계좌 비밀번호 암호화
-        encrypted_password = publicEncRSA(PUBLIC_KEY, data['accountPassword'])
+        encrypted_password = publicEncRSA(PUBLIC_KEY, data['account_password'])
         if not encrypted_password:
             return jsonify({
                 'error': '비밀번호 암호화 실패'
             }), 500
+        
 
         # API 요청 데이터
         payload = {
             'organization': data['organization'],
             'connectedId': data['connectedId'],
             'account': data['account'],
-            'accountPassword': encrypted_password,
+            'account_password': encrypted_password,
             'id': data.get('id', ''),  # 선택적 필드
             'add_password': data.get('add_password', '')  # 선택적 필드
         }
@@ -292,7 +294,7 @@ def stock_balance():
 
         response = requests.post(url, headers=headers, json=payload)
         decoded_response = urllib.parse.unquote(response.text)
-
+        print(jsonify(json.loads(decoded_response)))
         return jsonify(json.loads(decoded_response))
 
     except Exception as e:
@@ -347,17 +349,21 @@ def create_account_and_list():
         }
 
         create_response = requests.post(create_url, headers=headers, json=create_payload)
+        print("create_response.text:", create_response.text)  # 응답 확인
         create_result = json.loads(urllib.parse.unquote(create_response.text))
+        print("create_result:", create_result)
 
         # 계정 생성 실패 시
         if create_result.get('result', {}).get('code') != 'CF-00000':
-            return jsonify(create_result)
+            return jsonify(create_result), 400  # 400 등 클라이언트 에러로 반환
 
         # connectedId 추출
         connected_id = create_result.get('data', {}).get('connectedId')
         if not connected_id:
+            print("connectedId 없음:", create_result)
             return jsonify({
-                'error': 'connectedId를 찾을 수 없습니다.'
+                'error': 'connectedId를 찾을 수 없습니다.',
+                'detail': create_result
             }), 500
 
         # 계좌 목록 조회 API 요청 데이터
@@ -394,4 +400,4 @@ def create_account_and_list():
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

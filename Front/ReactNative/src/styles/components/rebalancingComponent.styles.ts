@@ -11,7 +11,6 @@ export default function createStyles(theme: Theme) {
     contentContainer: {
       padding: 16,
     },
-    // 계좌 선택 UI 스타일
     accountSelectorContainer: {
       flexDirection: 'row',
       marginBottom: 15,
@@ -37,69 +36,86 @@ export default function createStyles(theme: Theme) {
       color: '#FFF',
       fontWeight: 'bold',
     },
-    // 기존 스타일들
+    // 계좌 정보 스타일
     accountContainer: {
       backgroundColor: '#ffffff',
       borderRadius: 12,
       padding: 16,
       marginBottom: 12,
     },
-    accountTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: '#000',
+      // 리밸런싱 기록명 토글
+      recordToggleContainer: {
+        marginBottom: 10,
+      },
+      recordToggleButton: {
+        paddingBottom: 8,
+        borderRadius: 16,
+      },
+      recordToggleText: {
+        fontSize: 18,
+        color: '#343a40',
+      },
+      modalBackground: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 16,
+        maxHeight: 300,
+      },
+      recordOption: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+      },
+      recordOptionText: {
+        fontSize: 15,
+        color: '#222',
+      },
+      accountTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#000',
+        marginBottom: 12,
+      },
+    accountInfoRow: {
       marginBottom: 12,
+      flexWrap: 'wrap',
     },
-    principalContainer: {
+    accountInfoItem: {
       flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 4,
+      justifyContent: 'space-between',
+      flex: 1,
+      minWidth: 80,
+      marginHorizontal: 2,
     },
-    principalLabel: {
-      fontSize: 14,
+    infoLabel: {
+      fontSize: 13,
       color: '#666',
-      marginRight: 8,
+      marginBottom: 2,
     },
-    principalValue: {
+    infoValue: {
       fontSize: 14,
       fontWeight: '500',
       color: '#000',
     },
-    balanceContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    balanceLabel: {
+    // 수익 색상
+    profitPositive: {
       fontSize: 14,
-      color: '#666',
-      marginRight: 8,
+      fontWeight: 'bold',
+      color: theme.colors.positive,
     },
-    balanceValue: {
+    profitNegative: {
       fontSize: 14,
-      fontWeight: '500',
-      color: '#000',
+      fontWeight: 'bold',
+      color: theme.colors.negative,
     },
-    profitContainer: {
-      marginBottom: 6,
-    },
-    profitText: {
-      fontSize: 16,
-      fontWeight: '700',
-    },
-    dailyProfitContainer: {
-      marginBottom: 16,
-    },
-    dailyProfitText: {
-      fontSize: 14,
-      fontWeight: '500',
-    },
-    gainText: {
-      color: '#37b24d',
-    },
-    lossText: {
-      color: '#f03e3e',
-    },
+    // 통화 토글
     currencyToggleContainer: {
       position: 'absolute',
       top: 16,

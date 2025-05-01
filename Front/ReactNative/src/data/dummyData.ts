@@ -12,11 +12,10 @@ export interface User {
 export interface Account {
   user_id: string;          // 유저 아이디
   account: string;          // 계좌번호
-  account_password: string; // 계좌 비밀번호
   connected_id: string;     // 컨넥티드 아이디
   company: string;          // 증권사 명
-  principal: number;        // 원금
-  pre_principal: number;    // 전날 총잔고
+  principal?: number;        // 원금
+  pre_principal?: number;    // 전날 총잔고
 }
 
 // 새로운 Record 인터페이스 추가
@@ -60,7 +59,6 @@ export const dummyAccounts: Account[] = [
   {
     user_id: 'test@example.com',
     account: '315411-34141-13',
-    account_password: 'encrypted_pass_1',
     connected_id: 'conn_id_123456',
     company: '토스',
     principal: 5323773,
@@ -69,7 +67,6 @@ export const dummyAccounts: Account[] = [
   {
     user_id: 'test@example.com',
     account: '0345-135611-3123',
-    account_password: 'encrypted_pass_2',
     connected_id: 'conn_id_987654',
     company: '카카오',
     principal: 10000000,
