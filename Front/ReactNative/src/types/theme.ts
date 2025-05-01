@@ -1,6 +1,5 @@
 export interface Theme {
   colors: {
-    divider: any;
     primary: string;
     secondary: string;
     background: string;
@@ -9,6 +8,8 @@ export interface Theme {
     border: string;
     card: string;
     notification?: string; 
+    positive: string;
+    negative: string;
   };
   fonts?: {
     fontSize: {
