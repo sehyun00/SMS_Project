@@ -9,5 +9,6 @@ public class AddAccountResponse {
     private String message;
     private String account;
     private String company;
+    private String connected_id;
     private boolean success;
 }
