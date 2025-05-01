@@ -12,6 +12,8 @@ interface AuthContextType {
   logout: () => void;
   loading: boolean;
   lastError: string | null; // 마지막 에러 메시지 저장
+  loggedInId: string | null;
+  loggedToken: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +73,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true); // 초기 상태를 true로 설정
   const [lastError, setLastError] = useState<string | null>(null);
+  const [loggedInId, setLoggedInId] = useState(null);
+  const [loggedToken, setLoggedToken] = useState(null);
 
   // 앱 시작 시 저장된 로그인 상태 확인
   useEffect(() => {
@@ -89,7 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     checkLoginStatus();
   }, []);
-
+  
   // 회원가입 함수
   const signup = async (
     user_id: string,
@@ -141,6 +145,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         await AsyncStorage.setItem('authToken', response.data.token);
         await AsyncStorage.setItem('isLoggedIn', 'true');
         setIsLoggedIn(true);
+        setLoggedInId(user_id);
+        setLoggedToken(response.data.token);
         return true;
       } else {
         setLastError('서버 응답에 인증 토큰이 없습니다');
@@ -214,7 +220,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       loginWithKakao,
       logout,
       loading,
-      lastError
+      lastError,
+      loggedInId,
+      loggedToken
     }}>
       {children}
     </AuthContext.Provider>

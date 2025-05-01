@@ -27,6 +27,7 @@ import withTheme from '../hoc/withTheme';
 
 // data import
 import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../data/organizationData';
+import { useAuth } from '../constants/AuthContext';
 
 // Android에서 LayoutAnimation 활성화
 if (Platform.OS === 'android') {
@@ -46,6 +47,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   onClose,
   theme
 }) => {
+  const { loggedInId, loggedToken } = useAuth();
   // 단계 상태 관리
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -339,7 +341,16 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
       console.log('전송 데이터:', payload);
 
       // 플라스크 API 호출 - 소셜 정보 검증
-      const response = await axios.post('http://localhost:5000/stock/create-and-list', payload);
+      const response = await axios.post(Platform.OS === 'web'
+        ? 'http://localhost:5000/stock/create-and-list'
+        : 'http://192.168.0.9:5000/stock/create-and-list',
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       // 성공적으로 응답 받고 accountList와 connectedId가 있는지 확인
       if (response.data && response.data.connectedId && response.data.accountList) {
@@ -421,18 +432,52 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
     Keyboard.dismiss();
     setLoading(true);
 
+
     try {
+      const firmInfo = findSecuritiesFirmByName(securityCompany);
       // 플라스크 API 호출 - 계좌 정보 등록
-      const response = await axios.post('https://your-flask-api.com/register-account', {
-        company: securityCompany,
-        socialId: socialId,
-        socialPassword: socialPassword,
-        accountNumber: accountNumber,
-        accountPassword: accountPassword
-      });
+      const response = await axios.post(Platform.OS === 'web'
+        ? 'http://localhost:5000/stock/balance'
+        : 'http://192.168.0.9:5000/stock/balance',
+        {
+          organization: firmInfo?.code || '',      // 증권사 코드
+          connectedId: connectedId,                // '다음' 버튼에서 받아온 connectedId
+          account: accountNumber,                  // 사용자가 선택한 계좌번호
+          account_password: accountPassword,        // 사용자가 입력한 계좌 비밀번호
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const company = securityCompany                     //증권사명
+      const account = response.data.resAccount            //계좌번호
+      const connected_id = connectedId                    // 커넥티드 아이디
+      const principal = response.data.resDepositReceived  //시작 잔고
+      const user_id = loggedInId                          //유저 아이디
+      const token = `Bearer ${loggedToken}`
+      console.log(`Bearer ${loggedToken}`);
+
+      const addstockaccount = await axios.post(Platform.OS === 'web'
+        ? 'http://localhost:8081/upwardright/addstockaccount'
+        : 'http://192.168.0.9:8081/upwardright/addstockaccount',
+        { company, account, connected_id, principal },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Platform': Platform.OS,
+            'Authorization': token,
+          },
+        }
+      );
 
       // 성공적으로 응답 받음
-      if (response.data.success) {
+      console.log(addstockaccount.data);
+
+      if (response.data) {
         Alert.alert(
           '계좌 연동 성공',
           '계좌가 성공적으로 연동되었습니다.',

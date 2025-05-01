@@ -19,7 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-// 컴포넌트트 임포트
+// 컴포넌트 임포트
 import { LoginPageNavigationProp } from '../types/navigation';
 import { useAuth } from '../constants/AuthContext';
 
