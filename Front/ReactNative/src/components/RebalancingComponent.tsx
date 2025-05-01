@@ -85,6 +85,9 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
     const account = dummyAccounts[selectedAccountIndex];
     return getAccountRecords(account.account);
   }, [selectedAccountIndex]);
+
+  // 리밸런싱 기록 토글(드롭다운) 상태
+  const [recordDropdownVisible, setRecordDropdownVisible] = useState(false);
   
   // 선택된 리밸런싱 기록 ID (기본값: 가장 최근 기록)
   const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
@@ -100,6 +103,21 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
     );
     return sortedRecords[0].record_id;
   }, [selectedRecordId, accountRecords]);
+
+  // 현재 선택된 기록 정보
+  const currentRecord = useMemo(() => {
+    if (!currentRecordId) return null;
+    return accountRecords.find(r => r.record_id === currentRecordId) || null;
+  }, [currentRecordId, accountRecords]);
+
+  // 리밸런싱 기록명 리스트
+  const recordNames = useMemo(() => {
+    return accountRecords.map(r => ({
+      record_id: r.record_id,
+      record_name: r.record_name || `기록 ${r.record_id}`,
+      record_date: r.record_date,
+    }));
+  }, [accountRecords]);
   
   // 선택된 리밸런싱 기록 상세 데이터 가져오기
   const recordRuds = useMemo(() => {
@@ -214,6 +232,12 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
   const handleAccountChange = (index: number) => {
     setSelectedAccountIndex(index);
     setSelectedRecordId(null); // 계좌 변경 시 리밸런싱 기록 선택 초기화
+  };
+
+  // 기록명 선택 핸들러
+  const handleRecordSelect = (record_id: number) => {
+    setSelectedRecordId(record_id);
+    setRecordDropdownVisible(false);
   };
   
   // 종목 평균 변화율 계산
