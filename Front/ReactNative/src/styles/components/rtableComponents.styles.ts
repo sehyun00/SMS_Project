@@ -47,10 +47,24 @@ export interface TableComponentStyles {
 // 공통 스타일 생성 함수
 export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    // 그림자 효과 (iOS)
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    // 안드로이드용 그림자
+    elevation: 0.1,
+    // 테두리 효과
+    borderColor: 'rgba(0,0,0,0.05)',
+    borderWidth: 1,
+    borderBottomWidth: 2,
+    borderRightWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.2)',
+    borderRightColor: 'rgba(0,0,0,0.1)',
   },
   headerContainer: {
     marginBottom: 16,
