@@ -29,13 +29,6 @@ import withTheme from '../hoc/withTheme';
 import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../data/organizationData';
 import { useAuth } from '../constants/AuthContext';
 
-// Android에서 LayoutAnimation 활성화
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
-
 interface ConnectedAccountComponentProps {
   isVisible: boolean;
   onClose: () => void;

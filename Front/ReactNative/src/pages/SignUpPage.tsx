@@ -26,13 +26,6 @@ import withTheme from '../hoc/withTheme';
 import { Theme } from '../types/theme';
 import { LoginPageNavigationProp } from '../types/navigation';
 
-// Android에서 LayoutAnimation 활성화
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
-
 // 컴포넌트 props 인터페이스 정의
 interface SignUpPageProps {
   theme: Theme;
