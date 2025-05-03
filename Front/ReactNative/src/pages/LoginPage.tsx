@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 
 // 컴포넌트 임포트
 import { LoginPageNavigationProp } from '../types/navigation';
-import { useAuth } from '../constants/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 // 스타일 임포트
 import createStyles from '../styles/pages/loginPage.styles';

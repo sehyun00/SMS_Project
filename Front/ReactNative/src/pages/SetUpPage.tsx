@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 컴포넌트 임포트
 import SetUoItemComponent from '../components/setUoItemComponent';
-import { useAuth } from '../constants/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 // 스타일 임포트
 import createStyles from '../styles/pages/setUpPage.styles';

@@ -27,7 +27,7 @@ import withTheme from '../hoc/withTheme';
 
 // data import
 import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../data/organizationData';
-import { useAuth } from '../constants/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 interface ConnectedAccountComponentProps {
   isVisible: boolean;

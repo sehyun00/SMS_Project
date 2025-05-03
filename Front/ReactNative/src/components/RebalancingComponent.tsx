@@ -59,6 +59,7 @@ interface StockItem {
   percentChange: number;
   targetPortion: number;
   rebalanceAmount: number;
+  market_order?: number;
 }
 
 // 컴포넌트 props 인터페이스 정의
@@ -147,6 +148,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
         krwValue: (rud.dollar || 0) * currentExchangeRate,
         percentChange: rud.rate || 0,
         targetPortion: rud.expert_per,
+        market_order: rud.market_order
       }));
   }, [recordRuds, currentExchangeRate]);
 
@@ -160,6 +162,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
         krwValue: rud.won || 0,
         percentChange: rud.rate || 0,
         targetPortion: rud.expert_per,
+        market_order: rud.market_order
       }));
   }, [recordRuds, currentExchangeRate]);
 

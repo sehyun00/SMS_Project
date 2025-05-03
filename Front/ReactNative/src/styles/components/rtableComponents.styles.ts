@@ -26,6 +26,7 @@ export interface TableComponentStyles {
   targetText: TextStyle;
   rebalanceColumn: ViewStyle;
   rebalanceText: TextStyle;
+  rebalanceSubText: TextStyle;
   negativeText: TextStyle;
   positiveText: TextStyle;
   percentChange: TextStyle;
@@ -99,6 +100,7 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   fixedCell: {
     paddingVertical: 12,
@@ -107,6 +109,7 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
     paddingHorizontal: 8,
+    alignItems: 'flex-start',
   },
   scrollableHeader: {
     flexDirection: 'row',
@@ -126,12 +129,13 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     color: theme.colors.placeholder,
     fontWeight: '500',
     padding: 8,
-    textAlign: 'center',
+    textAlign: 'right',
   },
   nameText: {
     fontSize: 14,
     fontWeight: '600',
     color: theme.colors.text,
+    textAlign: 'left',
   },
   subText: {
     fontSize: 12,
@@ -144,12 +148,14 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     fontWeight: '600',
     color: theme.colors.text,
     paddingHorizontal: 8,
+    textAlign: 'left',
   },
   // 주식 항목용
   stockName: {
     fontSize: 14,
     fontWeight: '600',
     color: theme.colors.text,
+    textAlign: 'left',
   },
   stockTicker: {
     fontSize: 12,
@@ -157,40 +163,48 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     marginTop: 2,
   },
   amountColumn: {
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'flex-end',
   },
   mainAmount: {
     fontSize: 14,
     fontWeight: '500',
     color: theme.colors.text,
+    textAlign: 'right',
   },
   subAmount: {
     fontSize: 12,
     color: theme.colors.placeholder,
     marginTop: 2,
+    textAlign: 'right',
   },
   portionText: {
     fontSize: 14,
     fontWeight: '500',
     color: theme.colors.text,
-    textAlign: 'center',
+    textAlign: 'right',
   },
   targetText: {
     fontSize: 14,
     fontWeight: '500',
     color: theme.colors.text,
-    textAlign: 'center',
+    textAlign: 'right',
   },
   rebalanceColumn: {
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'flex-end',
   },
   rebalanceText: {
     fontSize: 14,
     fontWeight: '600',
     color: theme.colors.text,
-    textAlign: 'center',
+    textAlign: 'right',
+  },
+  rebalanceSubText: {
+    fontSize: 12,
+    color: theme.colors.placeholder,
+    marginTop: 2,
+    textAlign: 'right',
   },
   negativeText: {
     color: theme.colors.negative,
@@ -199,17 +213,18 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     color: theme.colors.positive,
   },
   changeColumn: {
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'flex-end',
   },
   changeText: {
     fontSize: 14,
     fontWeight: '600',
     color: theme.colors.text,
+    textAlign: 'right',
   },
   valueColumn: {
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'flex-end',
   },
   negativeChange: {
     color: theme.colors.negative,
