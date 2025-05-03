@@ -1,5 +1,6 @@
-// 경로: src/pages/SetUpPage.tsx
-// 흐름도: App.js > AppNavigator.tsx > MainPage.tsx > SetUpPage.tsx
+// 파일 경로: src/pages/SetUpPage.tsx
+// 컴포넌트 흐름: App.js > AuthNavigator.tsx > SetUpPage.tsx
+
 import React from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

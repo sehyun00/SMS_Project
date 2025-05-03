@@ -1,5 +1,6 @@
-// 경로: src/components/IndividualStockComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > IndividualStockComponent.tsx
+// 파일 경로: src/components/IndividualStockComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > IndividualStockComponent.tsx
+
 import React from 'react';
 import { View, Text } from 'react-native';
 

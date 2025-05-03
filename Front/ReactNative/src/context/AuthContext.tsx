@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { Platform } from 'react-native'; // 플랫폼 정보 가져오기
+import { login as loginApi, signup as signupApi } from '../api/authApi';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -81,8 +82,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const checkLoginStatus = async () => {
       try {
         const value = await AsyncStorage.getItem('isLoggedIn');
-        if (value === 'true') {
+        const token = await AsyncStorage.getItem('authToken'); // JWT 토큰 불러오기
+        if (value === 'true' && token) {
+          console.log('로그인 상태: 로그인됨');
+          console.log('JWT 토큰:', token);
           setIsLoggedIn(true);
+          setLoggedToken(token); // 토큰 상태에 저장
+        } else {
+          console.log('로그인 상태: 로그인되지 않음');
         }
       } catch (error) {
         setLastError('로그인 상태 확인 중 오류 발생');
@@ -93,7 +100,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     checkLoginStatus();
   }, []);
-  
+
   // 회원가입 함수
   const signup = async (
     user_id: string,
@@ -104,9 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
 
     try {
-      const response = await api.post(API_URL + '/signup', {
-        user_id, password, name, phone_number,
-      });
+      const response = await signupApi(user_id, password, name, phone_number);
 
       setLastError(null);
       return { success: true };
@@ -138,7 +143,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       // 백엔드 서버에 로그인 요청
-      const response = await api.post(API_URL + '/login', { user_id, password });
+      const response = await loginApi(user_id, password);
 
       // 토큰 저장
       if (response.data.token) {

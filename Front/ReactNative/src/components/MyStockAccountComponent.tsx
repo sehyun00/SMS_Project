@@ -1,5 +1,6 @@
-// 경로: src/components/MyStockAccountComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.tsx
+// 파일 경로: src/components/MyStockAccountComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.tsx
+
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

@@ -1,5 +1,6 @@
-// 경로: src/components/HomeComponent.tsx
-// 흐름도: App.tsx > AppNavigator.tsx > MainPage.tsx > HomeComponent.tsx
+// 파일 경로: src/components/HomeComponent.tsx
+// 컴포넌트 흐름: App.tsx > AppNavigator.tsx > MainPage.tsx > HomeComponent.tsx
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

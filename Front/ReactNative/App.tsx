@@ -3,6 +3,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View } from 'react-native';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 // 네비게이터 및 컨텍스트 임포트
 import AppNavigator from './src/navigation/AppNavigator';
@@ -31,9 +32,11 @@ const App: React.FC = () => {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <ErrorBoundary>
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </ErrorBoundary>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

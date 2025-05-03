@@ -1,5 +1,6 @@
-// 경로: src/pages/SignUpPage.tsx
-// 흐름도: App.js > AuthNavigator.tsx > SignUpPage.tsx
+// 파일 경로: src/pages/SignUpPage.tsx
+// 컴포넌트 흐름: App.js > AuthNavigator.tsx > SignUpPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import {
   View,

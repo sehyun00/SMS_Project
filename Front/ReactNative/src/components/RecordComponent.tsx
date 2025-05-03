@@ -1,5 +1,6 @@
-// 경로: src/components/RecordComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RecordComponent.tsx
+// 파일 경로: src/components/RecordComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RecordComponent.tsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 

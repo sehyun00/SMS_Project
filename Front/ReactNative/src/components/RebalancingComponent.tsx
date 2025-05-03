@@ -1,5 +1,6 @@
-// 경로: src/components/RebalancingComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx
+// 파일 경로: src/components/RebalancingComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

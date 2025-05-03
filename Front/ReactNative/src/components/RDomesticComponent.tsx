@@ -1,5 +1,6 @@
-// 경로: src/components/RDomesticComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RDomesticComponent.tsx
+// 파일 경로: src/components/RDomesticComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RDomesticComponent.tsx
+
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import withTheme from '../hoc/withTheme';
