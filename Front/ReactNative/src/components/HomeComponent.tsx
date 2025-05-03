@@ -90,7 +90,6 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           {accounts.map((account, index) => (
             <View key={index}>
               <View style={styles.accountRow}>
-                <Text style={styles.accountLabel}>계좌사</Text>
                 <Text style={styles.accountValue}>{account.company} {account.accountNumber}</Text>
               </View>
               {index < accounts.length - 1 && <View style={styles.divider} />}

@@ -445,13 +445,12 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
         }
       );
 
-      const company = securityCompany                     //증권사명
-      const account = response.data.resAccount            //계좌번호
-      const connected_id = connectedId                    // 커넥티드 아이디
-      const principal = response.data.resDepositReceived  //시작 잔고
-      const user_id = loggedInId                          //유저 아이디
-      const token = `Bearer ${loggedToken}`
-      console.log(`Bearer ${loggedToken}`);
+      const company = securityCompany;                     //증권사명
+      const account = accountNumber;                       // 사용자가 선택한 계좌번호
+      const connected_id = connectedId;                    // 커넥티드 아이디
+      const principal = response.data.resDepositReceived;  //시작 잔고
+      const token = `Bearer ${loggedToken}`;
+      console.log(account);
 
       const addstockaccount = await axios.post(Platform.OS === 'web'
         ? 'http://localhost:8081/upwardright/addstockaccount'
