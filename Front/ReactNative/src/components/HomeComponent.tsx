@@ -1,8 +1,10 @@
 // 경로: src/components/HomeComponent.tsx
 // 흐름도: App.tsx > AppNavigator.tsx > MainPage.tsx > HomeComponent.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import { useAuth } from '../constants/AuthContext';
 
 // 컴포넌트 임포트
 import ConnectedAccountComponent from './ConnectedAccountComponent';
@@ -31,12 +33,48 @@ interface HomeComponentProps {
 }
 
 const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
-  // 계좌 데이터 샘플 (실제로는 API에서 가져올 것)
+  const { loggedToken } = useAuth();
+  // DB에서 불러온 계좌 데이터
   const [hasAccounts, setHasAccounts] = useState<boolean>(false);
-  const [accounts, setAccounts] = useState<AccountData[]>([
-    { company: '토스증권', accountNumber: '0345-135611-3123', returnRate: 4.2 },
-    { company: '한국투자', accountNumber: '315411-341411-13', returnRate: -3.3 }
-  ]);
+  const [accounts, setAccounts] = useState<AccountData[]>([]);
+
+  useEffect(() => {
+    if (!loggedToken) {
+      console.log('토큰 없음, API 호출 안함');
+      return;
+    }
+    const fetchAccounts = async () => {
+      const token = `Bearer ${loggedToken}`;
+      try {
+        const response = await axios.get(
+          Platform.OS === 'web'
+            ? 'http://localhost:8081/upwardright/showstockaccounts'
+            : 'http://192.168.0.9:8081/upwardright/showstockaccounts',
+          {
+            headers: {
+              'Accept': 'application/json',
+              'Platform': Platform.OS,
+              'Authorization': token,
+            },
+          }
+        );
+        const mapped = response.data.map((acc: any) => ({
+          company: acc.company,
+          accountNumber: acc.account,
+          returnRate: 0,
+        }));
+        console.log('계좌 API 응답:', mapped);
+        setAccounts(mapped);
+        setHasAccounts(mapped.length > 0);
+      } catch (e) {
+        console.log(`Bearer ${loggedToken}`);
+        console.error('계좌 API 에러:', e);
+        setAccounts([]);
+        setHasAccounts(false);
+      }
+    };
+    fetchAccounts();
+  }, [loggedToken]);
 
   // 리밸런싱 기록 샘플
   const [hasRecords, setHasRecords] = useState<boolean>(false);
