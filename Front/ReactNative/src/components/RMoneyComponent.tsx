@@ -25,17 +25,17 @@ interface RMoneyComponentProps {
   theme?: Theme;
 }
 
-const RMoneyComponent: React.FC<RMoneyComponentProps> = ({ 
-  totalAmount, 
-  cashItems, 
+const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
+  totalAmount,
+  cashItems,
   currencyType,
   exchangeRate,
   totalBalance,
   calculateCurrentPortion,
-  theme 
+  theme
 }) => {
   const styles = createTableStyles(theme);
-  
+
   // 원화 기호 상수
   const KRW_SYMBOL = '\u20A9';
 
@@ -44,26 +44,26 @@ const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>현금</Text>
         <Text style={styles.headerAmount}>
-          {currencyType === 'won' 
+          {currencyType === 'won'
             ? `${KRW_SYMBOL}${Math.round(totalAmount * exchangeRate).toLocaleString()}`
             : `$${totalAmount.toFixed(2)}`}
         </Text>
       </View>
-      
+
       <View style={styles.tableContainer}>
         {/* 고정 열 (종목명) */}
         <View style={styles.fixedColumn}>
           <View style={styles.fixedHeader}>
             <Text style={styles.headerCell}>종목명</Text>
           </View>
-          
+
           {cashItems.map((item, index) => (
             <View key={index} style={styles.fixedCell}>
               <Text style={styles.cashName}>{item.name}</Text>
             </View>
           ))}
         </View>
-        
+
         {/* 스크롤 가능한 열 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View>
@@ -74,13 +74,14 @@ const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.targetPortion }]}>목표 비중</Text>
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.rebalance }]}>조정 금액</Text>
             </View>
-            
+
             {/* 스크롤 가능한 데이터 행 */}
             {cashItems.map((item, index) => (
               <View key={index} style={styles.scrollableRow}>
+                {/* 총금액 표시 */}
                 <View style={[styles.amountColumn, { width: COLUMN_WIDTHS.amount }]}>
                   <Text style={styles.mainAmount}>
-                    {currencyType === 'won' 
+                    {currencyType === 'won'
                       ? `${KRW_SYMBOL}${Math.round(item.value * exchangeRate).toLocaleString()}`
                       : `$${item.value.toFixed(2)}`}
                   </Text>
@@ -90,24 +91,34 @@ const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
                       : `${KRW_SYMBOL}${Math.round(item.value * exchangeRate).toLocaleString()}`}
                   </Text>
                 </View>
-                
+                {/* 현재 비중 표시 */}
                 <Text style={[styles.portionText, { width: COLUMN_WIDTHS.currentPortion }]}>
                   {calculateCurrentPortion(item.value)}%
                 </Text>
-                
+                {/* 목표 비중 표시 */}
                 <Text style={[styles.targetText, { width: COLUMN_WIDTHS.targetPortion }]}>
                   {item.targetPortion}%
                 </Text>
-                
-                <Text style={[
-                  styles.rebalanceText, 
-                  item.rebalanceAmount < 0 ? styles.negativeText : styles.positiveText, 
-                  { width: COLUMN_WIDTHS.rebalance }
-                ]}>
-                  {currencyType === 'won'
-                    ? `${KRW_SYMBOL}${Math.round(item.rebalanceAmount * exchangeRate).toLocaleString()}`
-                    : `$${item.rebalanceAmount.toFixed(2)}`}
-                </Text>
+                {/* 조정 금액 표시 */}
+                <View style={[styles.rebalanceColumn, { width: COLUMN_WIDTHS.rebalance }]}>
+                  <Text style={[
+                    styles.rebalanceText,
+                    item.rebalanceAmount < 0 ? styles.negativeText : styles.positiveText
+                  ]}>
+                    {currencyType === 'won'
+                      ? `${KRW_SYMBOL}${Math.round(item.rebalanceAmount * exchangeRate).toLocaleString()}`
+                      : `$${item.rebalanceAmount.toFixed(2)}`}
+                  </Text>
+                  {/* 조정 금액 부수 표시 */}
+                  <Text style={[
+                    styles.subAmount,
+                    item.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
+                  ]}>
+                    {currencyType === 'won'
+                      ? `$${item.rebalanceAmount.toFixed(2)}`
+                      : `${KRW_SYMBOL}${Math.round(item.rebalanceAmount * exchangeRate).toLocaleString()}`}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>

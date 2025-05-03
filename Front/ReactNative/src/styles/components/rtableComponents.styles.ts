@@ -24,6 +24,7 @@ export interface TableComponentStyles {
   subAmount: TextStyle;
   portionText: TextStyle;
   targetText: TextStyle;
+  rebalanceColumn: ViewStyle;
   rebalanceText: TextStyle;
   negativeText: TextStyle;
   positiveText: TextStyle;
@@ -37,13 +38,15 @@ export interface TableComponentStyles {
   stockName: TextStyle;
   stockTicker: TextStyle;
   negativeChange: TextStyle;
+  subNegativeChange: TextStyle;
   positiveChange: TextStyle;
+  subPositiveChange: TextStyle;
 }
 
 // 공통 스타일 생성 함수
 export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -54,19 +57,19 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
   headerTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
     marginBottom: 4,
   },
   categoryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
     marginBottom: 4,
   },
   headerAmount: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#000',
+    color: theme.colors.text,
   },
   totalContainer: {
     flexDirection: 'row',
@@ -75,12 +78,13 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
   totalAmount: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#000',
+    color: theme.colors.text,
     marginRight: 8,
   },
   percentChange: {
     fontSize: 14,
     fontWeight: '600',
+    color: theme.colors.text,
   },
   tableContainer: {
     flexDirection: 'row',
@@ -88,12 +92,12 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
   fixedColumn: {
     width: COLUMN_WIDTHS.name,
     borderRightWidth: 1,
-    borderRightColor: '#e0e0e0',
+    borderRightColor: theme.colors.border,
   },
   fixedHeader: {
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.colors.border,
     justifyContent: 'center',
   },
   fixedCell: {
@@ -101,25 +105,25 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
     justifyContent: 'center',
     height: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.colors.border,
     paddingHorizontal: 8,
   },
   scrollableHeader: {
     flexDirection: 'row',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.colors.border,
   },
   scrollableRow: {
     flexDirection: 'row',
     height: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.colors.border,
     alignItems: 'center',
   },
   headerCell: {
     fontSize: 12,
-    color: '#888',
+    color: theme.colors.placeholder,
     fontWeight: '500',
     padding: 8,
     textAlign: 'center',
@@ -127,29 +131,29 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
   nameText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
   },
   subText: {
     fontSize: 12,
-    color: '#888',
+    color: theme.colors.placeholder,
     marginTop: 2,
   },
   // 현금 항목용
   cashName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
     paddingHorizontal: 8,
   },
   // 주식 항목용
   stockName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: theme.colors.text,
   },
   stockTicker: {
     fontSize: 12,
-    color: '#888',
+    color: theme.colors.placeholder,
     marginTop: 2,
   },
   amountColumn: {
@@ -159,35 +163,40 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
   mainAmount: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: theme.colors.text,
   },
   subAmount: {
     fontSize: 12,
-    color: '#888',
+    color: theme.colors.placeholder,
     marginTop: 2,
   },
   portionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: theme.colors.text,
     textAlign: 'center',
   },
   targetText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: theme.colors.text,
     textAlign: 'center',
+  },
+  rebalanceColumn: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rebalanceText: {
     fontSize: 14,
     fontWeight: '600',
+    color: theme.colors.text,
     textAlign: 'center',
   },
   negativeText: {
-    color: '#f03e3e',
+    color: theme.colors.negative,
   },
   positiveText: {
-    color: '#37b24d',
+    color: theme.colors.positive,
   },
   changeColumn: {
     alignItems: 'center',
@@ -196,15 +205,22 @@ export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSh
   changeText: {
     fontSize: 14,
     fontWeight: '600',
+    color: theme.colors.text,
   },
   valueColumn: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   negativeChange: {
-    color: '#f03e3e',
+    color: theme.colors.negative,
+  },
+  subNegativeChange: {
+    color: theme.colors.negative+ '99',
   },
   positiveChange: {
-    color: '#37b24d',
+    color: theme.colors.positive,
+  },
+  subPositiveChange: {
+    color: theme.colors.positive + '99',
   },
 });

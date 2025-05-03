@@ -125,8 +125,8 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
     return getRecordRuds(currentRecordId);
   }, [currentRecordId]);
 
-  // Rud 데이터를 CashItem 형식으로 변환하는 함수
-  const getCashItems = useMemo((): CashItem[] => {
+  // 1. value만 먼저 계산 (rebalanceAmount 없이)
+  const cashItemsBase = useMemo(() => {
     return recordRuds
       .filter(rud => rud.stock_region === 0)
       .map(rud => ({
@@ -134,39 +134,65 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
         value: rud.dollar || (rud.won ? rud.won / currentExchangeRate : 0),
         krwValue: rud.won || (rud.dollar ? rud.dollar * currentExchangeRate : 0),
         targetPortion: rud.expert_per,
-        rebalanceAmount: rud.rebalance_dollar || 0
       }));
   }, [recordRuds, currentExchangeRate]);
 
-  // Rud 데이터를 StockItem 형식으로 변환하는 함수 (해외주식)
-  const getForeignStocks = useMemo((): StockItem[] => {
+  const foreignStocksBase = useMemo(() => {
     return recordRuds
       .filter(rud => rud.stock_region === 2)
       .map(rud => ({
         name: rud.stock_name,
-        ticker: rud.nos ? `${rud.nos}개` : '',
+        ticker: rud.nos ? `${rud.nos}주` : '',
         value: rud.dollar || 0,
         krwValue: (rud.dollar || 0) * currentExchangeRate,
         percentChange: rud.rate || 0,
         targetPortion: rud.expert_per,
-        rebalanceAmount: rud.rebalance_dollar || 0
       }));
   }, [recordRuds, currentExchangeRate]);
 
-  // Rud 데이터를 StockItem 형식으로 변환하는 함수 (국내주식)
-  const getDomesticStocks = useMemo((): StockItem[] => {
+  const domesticStocksBase = useMemo(() => {
     return recordRuds
       .filter(rud => rud.stock_region === 1)
       .map(rud => ({
         name: rud.stock_name,
-        ticker: rud.nos ? `${rud.nos}개` : '',
+        ticker: rud.nos ? `${rud.nos}주` : '',
         value: (rud.won || 0) / currentExchangeRate,
         krwValue: rud.won || 0,
         percentChange: rud.rate || 0,
         targetPortion: rud.expert_per,
-        rebalanceAmount: rud.rebalance_dollar || 0
       }));
   }, [recordRuds, currentExchangeRate]);
+
+  // 2. totalBalance 계산
+  const totalBalance = useMemo(() => {
+    return (
+      cashItemsBase.reduce((sum, item) => sum + item.value, 0) +
+      foreignStocksBase.reduce((sum, item) => sum + item.value, 0) +
+      domesticStocksBase.reduce((sum, item) => sum + item.value, 0)
+    );
+  }, [cashItemsBase, foreignStocksBase, domesticStocksBase]);
+
+  // 3. rebalanceAmount를 포함한 최종 리스트 생성
+  const getCashItems = useMemo((): CashItem[] => {
+    return cashItemsBase.map(item => ({
+      ...item,
+      rebalanceAmount: (totalBalance * (item.targetPortion / 100)) - item.value,
+    }));
+  }, [cashItemsBase, totalBalance]);
+
+  const getForeignStocks = useMemo((): StockItem[] => {
+    return foreignStocksBase.map(item => ({
+      ...item,
+      rebalanceAmount: (totalBalance * (item.targetPortion / 100)) - item.value,
+    }));
+  }, [foreignStocksBase, totalBalance]);
+
+  const getDomesticStocks = useMemo((): StockItem[] => {
+    return domesticStocksBase.map(item => ({
+      ...item,
+      rebalanceAmount: (totalBalance * (item.targetPortion / 100)) - item.value,
+    }));
+  }, [domesticStocksBase, totalBalance]);
 
   // 계좌 정보 (dummyAccounts에서 선택된 계좌 사용)
   const accountInfo: AccountInfo = useMemo(() => {
@@ -211,11 +237,6 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
   const totalDomestic = useMemo(() => {
     return getDomesticStocks.reduce((sum, item) => sum + item.value, 0);
   }, [getDomesticStocks]);
-
-  // 실시간 잔고 계산 (현금 + 모든 종목의 총금액)
-  const totalBalance = useMemo(() => {
-    return totalCash + totalForeign + totalDomestic;
-  }, [totalCash, totalForeign, totalDomestic]);
 
   // 현재 비중 동적 계산을 위한 함수
   const calculateCurrentPortion = (amount: number): number => {
