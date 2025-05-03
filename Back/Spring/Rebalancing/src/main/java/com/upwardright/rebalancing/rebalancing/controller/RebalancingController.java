@@ -4,6 +4,7 @@ import com.upwardright.rebalancing.rebalancing.domain.Accounts;
 import com.upwardright.rebalancing.rebalancing.dto.AccountResponse;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountRequest;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountResponse;
+import com.upwardright.rebalancing.rebalancing.repository.AccountRepository;
 import com.upwardright.rebalancing.rebalancing.service.AddAccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,25 @@ import java.util.stream.Collectors;
 @RestController
 public class RebalancingController {
     private final AddAccountService addAccountService;
+    private final AccountRepository accountRepository;
 
-    public RebalancingController(AddAccountService addAccountService) {
-
+    public RebalancingController(AddAccountService addAccountService, AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
         this.addAccountService = addAccountService;
     }
+
+    @GetMapping("/upwardright/showstockaccounts")
+    public ResponseEntity<List<AccountResponse>> getAccounts(Authentication authentication) {
+        String userId = authentication.getName();
+        List<Accounts> userAccounts = accountRepository.findByUserId(userId);
+
+        List<AccountResponse> response = userAccounts.stream()
+            .map(AccountResponse::fromEntity)
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/upwardright/addstockaccount")
     public ResponseEntity<AddAccountResponse> addAccount(@Valid Authentication authentication, @RequestBody AddAccountRequest request) {
