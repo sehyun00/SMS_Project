@@ -1,7 +1,7 @@
 // 경로: src/components/RebalancingComponent.tsx
 // 흐름도: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 컴포넌트 임포트
@@ -289,6 +289,11 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
 
   const { name, number, principal, valuation, dailyProfit, dailyProfitPercent, totalProfit, totalProfitPercent } = accountInfo;
 
+  // 리밸런싱 기록 수정 버튼 핸들러
+  const handleEditRecord = () => {
+    Alert.alert('알림', '리밸런싱 기록 수정 기능은 준비 중입니다.');
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -317,15 +322,22 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
       <View style={styles.accountContainer}>
         {/* 리밸런싱 기록 선택 */}
         <View style={styles.recordToggleContainer}>
-          <TouchableOpacity
-            style={styles.recordToggleButton}
-            onPress={() => setRecordDropdownVisible(true)}
-          >
-            <Text style={styles.recordToggleText}>
-              ▾ {currentRecord?.record_name || '리밸런싱 기록 선택'}
-            </Text>
-          </TouchableOpacity>
-          <Text>dsafasd</Text>
+          <View style={styles.recordToggleRow}>
+            <TouchableOpacity
+              style={styles.recordToggleButton}
+              onPress={() => setRecordDropdownVisible(true)}
+            >
+              <Text style={styles.recordToggleText}>
+                ▾ {currentRecord?.record_name || '리밸런싱 기록 선택'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.recordEditButton}
+              onPress={handleEditRecord}
+            >
+              <Text style={styles.recordEditText}>수정</Text>
+            </TouchableOpacity>
+          </View>
           <Modal
             visible={recordDropdownVisible}
             transparent

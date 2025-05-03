@@ -6,7 +6,7 @@ export default function createStyles(theme: Theme) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#f5f5f7',
+      backgroundColor: theme.colors.background,
     },
     contentContainer: {
       padding: 16,
@@ -22,14 +22,14 @@ export default function createStyles(theme: Theme) {
       marginRight: 10,
       marginBottom: 8,
       borderRadius: 20,
-      backgroundColor: '#f0f0f0',
+      backgroundColor: theme.colors.card,
     },
     selectedAccountButton: {
       backgroundColor: theme.colors.primary,
     },
     accountText: {
       fontSize: 14,
-      color: '#333',
+      color: theme.colors.text,
     },
     selectedAccountText: {
       fontSize: 14,
@@ -38,7 +38,7 @@ export default function createStyles(theme: Theme) {
     },
     // 계좌 정보 스타일
     accountContainer: {
-      backgroundColor: '#ffffff',
+      backgroundColor: theme.colors.card,
       borderRadius: 12,
       padding: 16,
       marginBottom: 12,
@@ -53,7 +53,25 @@ export default function createStyles(theme: Theme) {
       },
       recordToggleText: {
         fontSize: 18,
-        color: '#343a40',
+        color: theme.colors.text,
+      },
+      recordToggleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      },
+      recordEditButton: {
+        marginLeft: 8,
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        backgroundColor: theme.colors.background,
+        alignSelf: 'center',
+      },
+      recordEditText: {
+        fontSize: 14,
+        color: theme.colors.primary,
+        fontWeight: 'bold',
       },
       modalBackground: {
         flex: 1,
@@ -63,7 +81,7 @@ export default function createStyles(theme: Theme) {
       },
       modalContent: {
         width: '80%',
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.card,
         borderRadius: 10,
         padding: 16,
         maxHeight: 300,
@@ -71,16 +89,16 @@ export default function createStyles(theme: Theme) {
       recordOption: {
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: theme.colors.border,
       },
       recordOptionText: {
         fontSize: 15,
-        color: '#222',
+        color: theme.colors.text,
       },
       accountTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#000',
+        color: theme.colors.text,
         marginBottom: 12,
       },
     accountInfoRow: {
@@ -96,13 +114,13 @@ export default function createStyles(theme: Theme) {
     },
     infoLabel: {
       fontSize: 13,
-      color: '#666',
+      color: theme.colors.placeholder,
       marginBottom: 2,
     },
     infoValue: {
       fontSize: 14,
       fontWeight: '500',
-      color: '#000',
+      color: theme.colors.text,
     },
     // 수익 색상
     profitPositive: {
@@ -121,7 +139,7 @@ export default function createStyles(theme: Theme) {
       top: 16,
       right: 16,
       flexDirection: 'row',
-      backgroundColor: '#f0f0f0',
+      backgroundColor: theme.colors.card,
       borderRadius: 16,
       overflow: 'hidden',
     },
@@ -135,7 +153,7 @@ export default function createStyles(theme: Theme) {
     currencyText: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#666',
+      color: theme.colors.text,
     },
     activeCurrencyText: {
       color: '#fff',

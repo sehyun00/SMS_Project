@@ -39,6 +39,15 @@ const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
   // 원화 기호 상수
   const KRW_SYMBOL = '\u20A9';
 
+  // 조정 금액 포맷 함수 (RebalancingComponent와 동일)
+  const formatProfit = (value: number, type: 'won' | 'dollar') => {
+    const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+    if (type === 'won') {
+      return `${sign}${Math.abs(Math.round(value * exchangeRate)).toLocaleString()}원`;
+    }
+    return `${sign}$${Math.abs(value).toFixed(2)}`;
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -105,9 +114,7 @@ const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
                     styles.rebalanceText,
                     item.rebalanceAmount < 0 ? styles.negativeText : styles.positiveText
                   ]}>
-                    {currencyType === 'won'
-                      ? `${KRW_SYMBOL}${Math.round(item.rebalanceAmount * exchangeRate).toLocaleString()}`
-                      : `$${item.rebalanceAmount.toFixed(2)}`}
+                    {formatProfit(item.rebalanceAmount, currencyType)}
                   </Text>
                   {/* 조정 금액 부수 표시 */}
                   <Text style={[
