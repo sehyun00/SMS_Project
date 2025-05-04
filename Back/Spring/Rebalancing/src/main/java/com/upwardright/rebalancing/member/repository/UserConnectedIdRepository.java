@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserConnectedIdRepository extends JpaRepository<UserConnectedId, UserConnectedIdPK> {
-    @Query("SELECT COUNT(u) > 0 FROM UserConnectedId u WHERE u.connectedId = :connectedId")
-    boolean existsByConnectedId(@Param("connectedId") String connectedId);
+    @Query("SELECT COUNT(u) > 0 FROM UserConnectedId u WHERE u.connected_id = :connected_id")
+    boolean existsByConnected_id(@Param("connectedId") String connected_id);
 }

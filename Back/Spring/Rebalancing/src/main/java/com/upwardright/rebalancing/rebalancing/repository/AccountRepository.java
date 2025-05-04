@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Accounts, AccountId> {
-    // 명시적 JPQL 쿼리 사용
+
+    // 계좌 표현
     @Query("SELECT a FROM Accounts a WHERE a.user_id = :user_id")
     List<Accounts> findByUserId(@Param("user_id") String user_id);
 
