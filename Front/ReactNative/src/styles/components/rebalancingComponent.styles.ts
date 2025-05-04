@@ -6,7 +6,7 @@ export default function createStyles(theme: Theme) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#f5f5f7',
+      backgroundColor: theme.colors.background,
     },
     contentContainer: {
       padding: 16,
@@ -21,15 +21,34 @@ export default function createStyles(theme: Theme) {
       paddingHorizontal: 15,
       marginRight: 10,
       marginBottom: 8,
-      borderRadius: 20,
-      backgroundColor: '#f0f0f0',
+      borderRadius: 25,
+      backgroundColor: theme.colors.card,
     },
     selectedAccountButton: {
       backgroundColor: theme.colors.primary,
+      // 테두리 효과
+      borderColor: 'rgba(0,0,0,0.05)',
+      borderWidth: 1,
+      borderBottomWidth: 2,
+      borderRightWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.2)',
+      borderRightColor: 'rgba(0,0,0,0.1)',
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 2, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      // 안드로이드용 그림자
+      elevation: 4,
+      // 위치 및 크기 효과
+      marginBottom: 10,
+      marginTop: 0,
+      marginRight: 2,
+      transform: [{ scale: 1.02 }],
     },
     accountText: {
       fontSize: 14,
-      color: '#333',
+      color: theme.colors.text,
     },
     selectedAccountText: {
       fontSize: 14,
@@ -38,51 +57,197 @@ export default function createStyles(theme: Theme) {
     },
     // 계좌 정보 스타일
     accountContainer: {
-      backgroundColor: '#ffffff',
+      backgroundColor: theme.colors.background,
       borderRadius: 12,
       padding: 16,
       marginBottom: 12,
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 2, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      // 안드로이드용 그림자
+      elevation: 4,
+      // 테두리 효과
+      borderColor: 'rgba(0,0,0,0.05)',
+      borderWidth: 1,
+      borderBottomWidth: 2,
+      borderRightWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.2)',
+      borderRightColor: 'rgba(0,0,0,0.1)',
     },
-      // 리밸런싱 기록명 토글
-      recordToggleContainer: {
-        marginBottom: 10,
-      },
-      recordToggleButton: {
-        paddingBottom: 8,
-        borderRadius: 16,
-      },
-      recordToggleText: {
-        fontSize: 18,
-        color: '#343a40',
-      },
-      modalBackground: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      modalContent: {
-        width: '80%',
-        backgroundColor: '#fff',
-        borderRadius: 10,
-        padding: 16,
-        maxHeight: 300,
-      },
-      recordOption: {
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-      },
-      recordOptionText: {
-        fontSize: 15,
-        color: '#222',
-      },
-      accountTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#000',
-        marginBottom: 12,
-      },
+    // 리밸런싱 가로 스와이프 스타일
+    recordSwipeContainer: {
+      marginBottom: 20,
+      paddingVertical: 15,
+      alignItems: 'flex-start',
+      justifyContent: 'flex-start',
+      overflow: 'visible',
+    },
+    recordItemContainer: {
+      padding: 16,
+      width: '100%',
+      borderRadius: 12,
+      backgroundColor: theme.colors.background,
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      // 안드로이드용 그림자
+      elevation: 1,
+      // 테두리 효과
+      borderColor: 'rgba(0,0,0,0.05)',
+      borderWidth: 1,
+      borderBottomWidth: 1,
+      borderRightWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.1)',
+      borderRightColor: 'rgba(0,0,0,0.05)',
+      // 내부 패딩 설정
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      marginVertical: 5,
+      overflow: 'visible',
+    },
+    addRecordContainer: {
+      padding: 16,
+      width: '100%',
+      borderRadius: 12,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 150,
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.15,
+      shadowRadius: 5,
+      // 안드로이드용 그림자
+      elevation: 4,
+      overflow: 'visible',
+      marginVertical: 5,
+    },
+    loadPortfolioContainer: {
+      padding: 16,
+      width: '100%',
+      borderRadius: 12,
+      backgroundColor: theme.colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 150,
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.15,
+      shadowRadius: 5,
+      // 안드로이드용 그림자
+      elevation: 4,
+      overflow: 'visible',
+      marginVertical: 5,
+    },
+    loadPortfolioIcon: {
+      fontSize: 48,
+      color: '#FFF',
+      marginBottom: 12,
+    },
+    addRecordIcon: {
+      fontSize: 48,
+      color: '#FFF',
+      marginBottom: 12,
+    },
+    addRecordText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#FFF',
+    },
+    recordPaginationContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 8,
+    },
+    paginationDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      marginHorizontal: 3,
+      backgroundColor: '#DDDDDD',
+    },
+    activePaginationDot: {
+      backgroundColor: '#2F80ED',
+      width: 12,
+    },
+    // 리밸런싱 기록명 토글
+    recordToggleContainer: {
+      marginBottom: 10,
+    },
+    recordToggleButton: {
+      paddingBottom: 8,
+      borderRadius: 16,
+    },
+    recordToggleText: {
+      fontSize: 18,
+      color: theme.colors.text,
+    },
+    recordToggleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    recordEditButton: {
+      marginLeft: 8,
+      paddingVertical: 4,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      backgroundColor: theme.colors.background,
+      alignSelf: 'center',
+    },
+    recordEditText: {
+      fontSize: 14,
+      color: theme.colors.primary,
+      fontWeight: 'bold',
+    },
+    modalBackground: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      width: '80%',
+      backgroundColor: theme.colors.background,
+      borderRadius: 10,
+      padding: 16,
+      maxHeight: 300,
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 2, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      // 안드로이드용 그림자
+      elevation: 4,
+      // 테두리 효과
+      borderColor: 'rgba(0,0,0,0.05)',
+      borderWidth: 1,
+      borderBottomWidth: 2,
+      borderRightWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.2)',
+      borderRightColor: 'rgba(0,0,0,0.1)',
+    },
+    recordOption: {
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    recordOptionText: {
+      fontSize: 15,
+      color: theme.colors.text,
+    },
+    accountTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 12,
+    },
     accountInfoRow: {
       marginBottom: 12,
       flexWrap: 'wrap',
@@ -95,35 +260,78 @@ export default function createStyles(theme: Theme) {
       marginHorizontal: 2,
     },
     infoLabel: {
-      fontSize: 13,
-      color: '#666',
-      marginBottom: 2,
+      fontSize: 15,
+      color: theme.colors.placeholder,
+      marginBottom: 0,
     },
     infoValue: {
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: '500',
-      color: '#000',
+      color: theme.colors.text,
+      textAlign: 'right',
     },
     // 수익 색상
     profitPositive: {
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: 'bold',
-      color: theme.colors.positive,
+      color: '#FF3B30',
+      textAlign: 'right',
     },
     profitNegative: {
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: 'bold',
       color: theme.colors.negative,
+      textAlign: 'right',
     },
     // 통화 토글
     currencyToggleContainer: {
-      position: 'absolute',
-      top: 16,
-      right: 16,
       flexDirection: 'row',
-      backgroundColor: '#f0f0f0',
+      backgroundColor: theme.colors.card,
       borderRadius: 16,
       overflow: 'hidden',
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 2, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      // 안드로이드용 그림자
+      elevation: 4,
+      // 테두리 효과
+      borderColor: 'rgba(0,0,0,0.05)',
+      borderWidth: 1,
+      borderBottomWidth: 2,
+      borderRightWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.2)',
+      borderRightColor: 'rgba(0,0,0,0.1)',
+    },
+    rotateButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 16,
+      backgroundColor: theme.colors.card,
+      marginRight: 8,
+      // 그림자 효과 (iOS)
+      shadowColor: '#000',
+      shadowOffset: { width: 2, height: 3 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      // 안드로이드용 그림자
+      elevation: 4,
+      // 테두리 효과
+      borderColor: 'rgba(0,0,0,0.05)',
+      borderWidth: 1,
+      borderBottomWidth: 2,
+      borderRightWidth: 1,
+      borderBottomColor: 'rgba(0,0,0,0.2)',
+      borderRightColor: 'rgba(0,0,0,0.1)',
+    },
+    rotateButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text,
     },
     currencyButton: {
       paddingVertical: 6,
@@ -135,7 +343,7 @@ export default function createStyles(theme: Theme) {
     currencyText: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#666',
+      color: theme.colors.text,
     },
     activeCurrencyText: {
       color: '#fff',

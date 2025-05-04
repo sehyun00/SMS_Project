@@ -1,5 +1,6 @@
-// 경로: src/pages/MainPage.tsx
-// 흐름도: App.js > AppNavigator.tsx > MainPage.tsx
+// 파일 경로: src/pages/MainPage.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.tsx > MainPage.tsx
+
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';

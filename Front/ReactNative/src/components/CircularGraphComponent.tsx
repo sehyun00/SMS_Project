@@ -1,5 +1,6 @@
-// 경로: src/components/CircularGraphComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > CircularGraphComponent.tsx
+// 파일 경로: src/components/CircularGraphComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.jsx > CircularGraphComponent.tsx
+
 import React from 'react';
 import { View, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';

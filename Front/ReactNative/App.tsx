@@ -3,12 +3,13 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ActivityIndicator, View } from 'react-native';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 // 네비게이터 및 컨텍스트 임포트
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import { ThemeProvider } from './src/styles/theme/ThemeContext';
-import { AuthProvider, useAuth } from './src/constants/AuthContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 // 조건부 네비게이션을 처리하는 컴포넌트
 const RootNavigator: React.FC = () => {
@@ -31,9 +32,11 @@ const App: React.FC = () => {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <ErrorBoundary>
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </ErrorBoundary>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

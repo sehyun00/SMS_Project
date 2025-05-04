@@ -1,5 +1,6 @@
-// 경로: src/pages/SignUpPage.tsx
-// 흐름도: App.js > AuthNavigator.tsx > SignUpPage.tsx
+// 파일 경로: src/pages/SignUpPage.tsx
+// 컴포넌트 흐름: App.js > AuthNavigator.tsx > SignUpPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -18,7 +19,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../constants/AuthContext'; // AuthContext 불러오기
+import { useAuth } from '../context/AuthContext'; // AuthContext 불러오기
 
 // 스타일 임포트
 import createStyles from '../styles/pages/signUpPage.styles';

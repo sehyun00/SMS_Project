@@ -1,4 +1,6 @@
-// 경로: src/components/ConnectedAccountComponent.tsx
+// 파일 경로: src/components/ConnectedAccountComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > ConnectedAccountComponent.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -27,7 +29,16 @@ import withTheme from '../hoc/withTheme';
 
 // data import
 import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../data/organizationData';
-import { useAuth } from '../constants/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { verifySocialInfo, registerAccount, getAccountBalance } from '../api/connectedAccountApi';
+
+/**
+ * ConnectedAccountComponent Props
+ * @typedef {Object} ConnectedAccountComponentProps
+ * @property {boolean} isVisible - 모달의 가시성 여부
+ * @property {function} onClose - 모달을 닫는 함수
+ * @property {Theme} theme - 테마 객체
+ */
 
 interface ConnectedAccountComponentProps {
   isVisible: boolean;
@@ -310,7 +321,12 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
     }
   };
 
-  // 다음 버튼 클릭 처리 (소셜 정보 검증)
+  /**
+   * 소셜 정보 검증을 위한 다음 버튼 클릭 핸들러
+   * @async
+   * @function handleNextButtonClick
+   * @returns {Promise<void>}
+   */
   const handleNextButtonClick = async () => {
     Keyboard.dismiss();
     setLoading(true);
@@ -334,16 +350,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
       console.log('전송 데이터:', payload);
 
       // 플라스크 API 호출 - 소셜 정보 검증
-      const response = await axios.post(Platform.OS === 'web'
-        ? 'http://localhost:5000/stock/create-and-list'
-        : 'http://192.168.0.9:5000/stock/create-and-list',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await verifySocialInfo(payload);
 
       // 성공적으로 응답 받고 accountList와 connectedId가 있는지 확인
       if (response.data && response.data.connectedId && response.data.accountList) {
@@ -425,25 +432,15 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
     Keyboard.dismiss();
     setLoading(true);
 
-
     try {
       const firmInfo = findSecuritiesFirmByName(securityCompany);
       // 플라스크 API 호출 - 계좌 정보 등록
-      const response = await axios.post(Platform.OS === 'web'
-        ? 'http://localhost:5000/stock/balance'
-        : 'http://192.168.0.9:5000/stock/balance',
-        {
-          organization: firmInfo?.code || '',      // 증권사 코드
-          connectedId: connectedId,                // '다음' 버튼에서 받아온 connectedId
-          account: accountNumber,                  // 사용자가 선택한 계좌번호
-          account_password: accountPassword,        // 사용자가 입력한 계좌 비밀번호
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await getAccountBalance({
+        organization: firmInfo?.code || '',      // 증권사 코드
+        connectedId: connectedId,                // '다음' 버튼에서 받아온 connectedId
+        account: accountNumber,                  // 사용자가 선택한 계좌번호
+        account_password: accountPassword,        // 사용자가 입력한 계좌 비밀번호
+      });
 
       const company = securityCompany;                     //증권사명
       const account = accountNumber;                       // 사용자가 선택한 계좌번호
@@ -452,19 +449,7 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
       const token = `Bearer ${loggedToken}`;
       console.log(account);
 
-      const addstockaccount = await axios.post(Platform.OS === 'web'
-        ? 'http://localhost:8081/upwardright/addstockaccount'
-        : 'http://192.168.0.9:8081/upwardright/addstockaccount',
-        { company, account, connected_id, principal },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Platform': Platform.OS,
-            'Authorization': token,
-          },
-        }
-      );
+      const addstockaccount = await registerAccount({ company, account, connected_id, principal }, token);
 
       // 성공적으로 응답 받음
       console.log(addstockaccount.data);

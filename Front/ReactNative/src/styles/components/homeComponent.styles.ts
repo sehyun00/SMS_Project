@@ -30,7 +30,7 @@ export default function createStyles(theme: Theme): HomeComponentStyles {
   return StyleSheet.create<HomeComponentStyles>({
     container: {
       flex: 1,
-      backgroundColor: '#f5f5f7',
+      backgroundColor: theme.colors.background,
     },
     contentContainer: {
       padding: 16,
@@ -48,18 +48,18 @@ export default function createStyles(theme: Theme): HomeComponentStyles {
     sectionTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: '#000',
+      color: theme.colors.text,
     },
     linkText: {
       fontSize: 12,
-      color: '#666',
+      color: theme.colors.placeholder,
     },
     dateText: {
       fontSize: 12,
-      color: '#666',
+      color: theme.colors.placeholder,
     },
     card: {
-      backgroundColor: '#ffffff',
+      backgroundColor: theme.colors.card,
       borderRadius: 8,
       padding: 16,
       marginBottom: 4,
@@ -71,7 +71,7 @@ export default function createStyles(theme: Theme): HomeComponentStyles {
     },
     emptyText: {
       fontSize: 14,
-      color: '#666',
+      color: theme.colors.placeholder,
       textAlign: 'center',
     },
     accountRow: {
@@ -81,12 +81,12 @@ export default function createStyles(theme: Theme): HomeComponentStyles {
     },
     accountLabel: {
       fontSize: 14,
-      color: '#666',
+      color: theme.colors.placeholder,
       width: 45,
     },
     accountValue: {
       fontSize: 14,
-      color: '#000',
+      color: theme.colors.text,
       fontWeight: '500',
     },
     returnRow: {
@@ -98,31 +98,31 @@ export default function createStyles(theme: Theme): HomeComponentStyles {
     accountShortName: {
       fontSize: 14,
       fontWeight: '500',
-      color: '#000',
+      color: theme.colors.text,
     },
     recordName: {
       fontSize: 14,
       fontWeight: '500',
-      color: '#000',
+      color: theme.colors.text,
     },
     returnRatePositive: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#FF3B30', // 양수 수익률은 빨간색 (한국 주식 앱 스타일)
+      color: theme.colors.positive,
     },
     returnRateNegative: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#007AFF', // 음수 수익률은 파란색 (한국 주식 앱 스타일)
+      color: theme.colors.negative,
     },
     divider: {
       height: 1,
-      backgroundColor: '#f0f0f0',
+      backgroundColor: theme.colors.border,
       marginVertical: 6,
     },
     footerText: {
       fontSize: 12,
-      color: '#999',
+      color: theme.colors.placeholder,
       textAlign: 'center',
       marginTop: 20,
     }

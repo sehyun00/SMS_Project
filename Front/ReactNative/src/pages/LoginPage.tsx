@@ -1,5 +1,6 @@
-// 경로: src/pages/LoginPage.tsx
-// 흐름도: App.js > AuthNavigator.tsx > LoginPage.tsx
+// 파일 경로: src/pages/LoginPage.tsx
+// 컴포넌트 흐름: App.js > AuthNavigator.tsx > LoginPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -21,7 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 
 // 컴포넌트 임포트
 import { LoginPageNavigationProp } from '../types/navigation';
-import { useAuth } from '../constants/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 // 스타일 임포트
 import createStyles from '../styles/pages/loginPage.styles';

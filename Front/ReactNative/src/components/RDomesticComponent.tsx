@@ -1,5 +1,6 @@
-// 경로: src/components/RDomesticComponent.tsx
-// 흐름도: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RDomesticComponent.tsx
+// 파일 경로: src/components/RDomesticComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RDomesticComponent.tsx
+
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import withTheme from '../hoc/withTheme';
@@ -16,6 +17,7 @@ interface StockItem {
   percentChange: number;
   targetPortion: number;
   rebalanceAmount: number;
+  market_order?: number;
 }
 
 interface RDomesticComponentProps {
@@ -29,20 +31,29 @@ interface RDomesticComponentProps {
   theme?: Theme;
 }
 
-const RDomesticComponent: React.FC<RDomesticComponentProps> = ({ 
-  totalAmount, 
-  percentChange, 
-  stocks, 
+const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
+  totalAmount,
+  percentChange,
+  stocks,
   currencyType,
   exchangeRate,
   totalBalance,
   calculateCurrentPortion,
-  theme 
+  theme
 }) => {
   const styles = createTableStyles(theme);
-  
+
   // 원화 기호 상수
   const KRW_SYMBOL = '\u20A9';
+
+  // 조정 금액 포맷 함수 (RebalancingComponent와 동일)
+  const formatProfit = (value: number, type: 'won' | 'dollar') => {
+    const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+    if (type === 'won') {
+      return `${sign}${Math.abs(Math.round(value * exchangeRate)).toLocaleString()}원`;
+    }
+    return `${sign}$${Math.abs(value).toFixed(2)}`;
+  };
 
   return (
     <View style={styles.container}>
@@ -50,7 +61,7 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
         <Text style={styles.categoryTitle}>국내주식</Text>
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>
-            {currencyType === 'won' 
+            {currencyType === 'won'
               ? `${KRW_SYMBOL}${Math.round(totalAmount * exchangeRate).toLocaleString()}`
               : `$${totalAmount.toFixed(2)}`}
           </Text>
@@ -59,14 +70,14 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
           </Text>
         </View>
       </View>
-      
+
       <View style={styles.tableContainer}>
         {/* 고정 열 (종목명) */}
         <View style={styles.fixedColumn}>
           <View style={styles.fixedHeader}>
             <Text style={styles.headerCell}>종목명</Text>
           </View>
-          
+
           {stocks.map((stock, index) => (
             <View key={index} style={styles.fixedCell}>
               <Text style={styles.stockName}>{stock.name}</Text>
@@ -74,7 +85,7 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
             </View>
           ))}
         </View>
-        
+
         {/* 스크롤 가능한 열 */}
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View>
@@ -86,49 +97,60 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.targetPortion }]}>목표 비중</Text>
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.rebalance }]}>조정 금액</Text>
             </View>
-            
+
             {/* 스크롤 가능한 데이터 행 */}
             {stocks.map((stock, index) => (
               <View key={index} style={styles.scrollableRow}>
                 <View style={[styles.changeColumn, { width: COLUMN_WIDTHS.change }]}>
                   <Text style={[
-                    styles.changeText, 
+                    styles.changeText,
                     stock.percentChange < 0 ? styles.negativeChange : styles.positiveChange
                   ]}>
                     {stock.percentChange}%
                   </Text>
                 </View>
-                
+
                 <View style={[styles.valueColumn, { width: COLUMN_WIDTHS.amount }]}>
+                  {/* 총금액 표시 */}
                   <Text style={styles.mainAmount}>
-                    {currencyType === 'won' 
+                    {currencyType === 'won'
                       ? `${KRW_SYMBOL}${Math.round(stock.value * exchangeRate).toLocaleString()}`
                       : `$${stock.value.toFixed(2)}`}
                   </Text>
+                  {/* 총금액 부수 표시 */}
                   <Text style={styles.subAmount}>
                     {currencyType === 'won'
                       ? `$${stock.value.toFixed(2)}`
                       : `${KRW_SYMBOL}${Math.round(stock.value * exchangeRate).toLocaleString()}`}
                   </Text>
                 </View>
-                
+                {/* 현재 비중 표시 */}
                 <Text style={[styles.portionText, { width: COLUMN_WIDTHS.currentPortion }]}>
                   {calculateCurrentPortion(stock.value)}%
                 </Text>
-                
+                {/* 목표 비중 표시 */}
                 <Text style={[styles.targetText, { width: COLUMN_WIDTHS.targetPortion }]}>
                   {stock.targetPortion}%
                 </Text>
-                
-                <Text style={[
-                  styles.rebalanceText, 
-                  stock.rebalanceAmount < 0 ? styles.negativeChange : styles.positiveChange,
-                  { width: COLUMN_WIDTHS.rebalance }
-                ]}>
-                  {currencyType === 'won'
-                    ? `${KRW_SYMBOL}${Math.round(stock.rebalanceAmount * exchangeRate).toLocaleString()}`
-                    : `$${stock.rebalanceAmount.toFixed(2)}`}
-                </Text>
+                {/* 조정 금액 부수 표시 */}
+                <View style={[styles.rebalanceColumn, { width: COLUMN_WIDTHS.rebalance }]}>
+                  <Text style={[
+                    styles.rebalanceText,
+                    stock.rebalanceAmount < 0 ? styles.negativeChange : styles.positiveChange,
+                    { width: COLUMN_WIDTHS.rebalance }
+                  ]}>
+                    {formatProfit(stock.rebalanceAmount, currencyType)}
+
+                  </Text>
+                  {stock.market_order ? (
+                    <Text style={[
+                      styles.subAmount,
+                      stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
+                    ]}>
+                      {(stock.rebalanceAmount / stock.market_order).toFixed(2)}주
+                    </Text>
+                  ) : null}
+                </View>
               </View>
             ))}
           </View>
