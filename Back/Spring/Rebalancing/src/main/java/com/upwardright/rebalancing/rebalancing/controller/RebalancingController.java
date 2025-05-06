@@ -7,6 +7,7 @@ import com.upwardright.rebalancing.rebalancing.dto.AddAccountResponse;
 import com.upwardright.rebalancing.rebalancing.repository.AccountRepository;
 import com.upwardright.rebalancing.rebalancing.service.AddAccountService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,12 +18,24 @@ import java.util.stream.Collectors;
 
 @RestController
 public class RebalancingController {
+
     private final AddAccountService addAccountService;
     private final AccountRepository accountRepository;
 
     public RebalancingController(AddAccountService addAccountService, AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
         this.addAccountService = addAccountService;
+    }
+
+    @GetMapping("/upwardright/showstockaccountDetail/{}")
+    public ResponseEntity<List<AccountResponse>> getAccountStock(Authentication authentication){
+        String userId = authentication.getName();
+        List<Accounts> userAccounts = accountRepository.findByUserId(userId);
+
+        List<AccountResponse> response = userAccounts.stream()
+                .map(AccountResponse::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/upwardright/showstockaccounts")
@@ -80,10 +93,4 @@ public class RebalancingController {
                     ));
         }
     }
-
-//    @PostMapping("/upwardright/mystockaccount/rebalancing")
-//    public String rebalancingProcess(@RequestBody String entity) {
-//        // AI 모델을 통해 리밸런싱 처리 진행 - Flask API에서 처리될 예정
-//        return entity;
-//    }
 }
