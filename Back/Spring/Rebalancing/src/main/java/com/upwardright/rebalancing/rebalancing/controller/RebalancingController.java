@@ -1,5 +1,7 @@
 package com.upwardright.rebalancing.rebalancing.controller;
 
+import com.upwardright.rebalancing.member.domain.UserConnectedId;
+import com.upwardright.rebalancing.member.repository.UserConnectedIdRepository;
 import com.upwardright.rebalancing.rebalancing.domain.Accounts;
 import com.upwardright.rebalancing.rebalancing.dto.GetAccountResponse;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountRequest;
@@ -20,28 +22,32 @@ public class RebalancingController {
 
     private final AddAccountService addAccountService;
     private final AccountRepository accountRepository;
+    private final UserConnectedIdRepository userConnectedIdRepository;
 
-    public RebalancingController(AddAccountService addAccountService, AccountRepository accountRepository) {
+    public RebalancingController(AddAccountService addAccountService, AccountRepository accountRepository,
+                                 UserConnectedIdRepository userConnectedIdRepository) {
         this.accountRepository = accountRepository;
         this.addAccountService = addAccountService;
+        this.userConnectedIdRepository = userConnectedIdRepository;
     }
 
     @PostMapping("/upwardright/getAccountStock")
-    public ResponseEntity<?> getConnectedId(Authentication authentication ) {
-        String userId = authentication.getName();
-        List<Accounts> userAccounts = accountRepository.findByUserId(userId);
+    public ResponseEntity<?> getConnectedId(Authentication authentication) {
+        String user_id = authentication.getName();
+        List<UserConnectedId> userConnections = userConnectedIdRepository.findByUserId(user_id);
 
-        if (userAccounts.isEmpty()) {
+        if (userConnections.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         // connected_id만 추출하여 리스트로 반환
-        List<String> connectedIds = userAccounts.stream()
-                .map(Accounts::getConnected_id)
+        List<String> connectedIds = userConnections.stream()
+                .map(UserConnectedId::getConnected_id)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(connectedIds);
     }
+
 
     @GetMapping("/upwardright/showstockaccounts")
     public ResponseEntity<List<GetAccountResponse>> getAccounts(Authentication authentication) {
