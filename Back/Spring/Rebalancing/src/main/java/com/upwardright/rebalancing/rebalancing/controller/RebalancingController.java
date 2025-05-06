@@ -1,13 +1,12 @@
 package com.upwardright.rebalancing.rebalancing.controller;
 
 import com.upwardright.rebalancing.rebalancing.domain.Accounts;
-import com.upwardright.rebalancing.rebalancing.dto.AccountResponse;
+import com.upwardright.rebalancing.rebalancing.dto.GetAccountResponse;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountRequest;
 import com.upwardright.rebalancing.rebalancing.dto.AddAccountResponse;
 import com.upwardright.rebalancing.rebalancing.repository.AccountRepository;
 import com.upwardright.rebalancing.rebalancing.service.AddAccountService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,24 +26,30 @@ public class RebalancingController {
         this.addAccountService = addAccountService;
     }
 
-    @GetMapping("/upwardright/showstockaccountDetail/{}")
-    public ResponseEntity<List<AccountResponse>> getAccountStock(Authentication authentication){
+    @PostMapping("/upwardright/getAccountStock")
+    public ResponseEntity<?> getConnectedId(Authentication authentication ) {
         String userId = authentication.getName();
         List<Accounts> userAccounts = accountRepository.findByUserId(userId);
 
-        List<AccountResponse> response = userAccounts.stream()
-                .map(AccountResponse::fromEntity)
+        if (userAccounts.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // connected_id만 추출하여 리스트로 반환
+        List<String> connectedIds = userAccounts.stream()
+                .map(Accounts::getConnected_id)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+
+        return ResponseEntity.ok(connectedIds);
     }
 
     @GetMapping("/upwardright/showstockaccounts")
-    public ResponseEntity<List<AccountResponse>> getAccounts(Authentication authentication) {
+    public ResponseEntity<List<GetAccountResponse>> getAccounts(Authentication authentication) {
         String userId = authentication.getName();
         List<Accounts> userAccounts = accountRepository.findByUserId(userId);
 
-        List<AccountResponse> response = userAccounts.stream()
-            .map(AccountResponse::fromEntity)
+        List<GetAccountResponse> response = userAccounts.stream()
+            .map(GetAccountResponse::fromEntity)
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
