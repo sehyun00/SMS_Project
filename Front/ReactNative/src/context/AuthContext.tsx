@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { Platform } from 'react-native'; // 플랫폼 정보 가져오기
 import { login as loginApi, signup as signupApi } from '../api/authApi';
+import { SPRING_SERVER_URL } from '../constants/config';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -20,9 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // 백엔드 서버 URL
-const API_URL = Platform.OS === 'web'
-  ? 'http://localhost:8081/upwardright'
-  : 'http://192.168.0.9:8081/upwardright';
+const API_URL = SPRING_SERVER_URL;
 
 // 디버깅 로그 함수 - 빈 함수로 변경
 const logDebug = (message: string, data?: any) => {
@@ -135,15 +134,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLastError(null);
 
     try {
+      console.log('로그인 시도:', user_id);
+      console.log('API URL:', API_URL);
+      
       // Network 연결 테스트
       try {
         await axios.get('https://www.google.com', { timeout: 5000 });
+        console.log('네트워크 연결 성공');
       } catch (netError) {
-        // 에러 처리 로직
+        console.error('네트워크 연결 테스트 실패:', netError);
+        setLastError('네트워크 연결에 문제가 있습니다. 인터넷 연결을 확인해주세요.');
+        return false;
       }
 
       // 백엔드 서버에 로그인 요청
+      console.log('서버에 로그인 요청 전송 중...');
       const response = await loginApi(user_id, password);
+      console.log('로그인 응답:', response.data);
 
       // 토큰 저장
       if (response.data.token) {
@@ -152,8 +159,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoggedIn(true);
         setLoggedInId(user_id);
         setLoggedToken(response.data.token);
+        console.log('로그인 성공: 토큰 저장됨');
         return true;
       } else {
+        console.error('토큰 없음:', response.data);
         setLastError('서버 응답에 인증 토큰이 없습니다');
         return false;
       }
@@ -161,6 +170,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let errorMessage = '알 수 없는 오류';
 
       if (axios.isAxiosError(error)) {
+        console.error('로그인 에러:', error.response?.data);
         errorMessage = error.response?.data?.message || errorMessage;
 
         // 자세한 에러 타입 분석
@@ -175,6 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
+      console.error('로그인 실패:', errorMessage);
       setLastError(errorMessage);
       return false;
     } finally {

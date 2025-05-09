@@ -101,8 +101,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ theme }) => {
       return;
     }
 
+    console.log('로그인 시도 (LoginPage):', email);
     // 로그인 처리 로직
     const success = await login(email, password);
+    console.log('로그인 결과 (LoginPage):', success);
     if (!success) {
       Alert.alert('로그인 실패', '이메일 또는 비밀번호가 올바르지 않습니다.');
     }

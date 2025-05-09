@@ -5,7 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import { useAuth } from '../constants/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import { SPRING_SERVER_URL } from '../constants/config';
 
 // 컴포넌트 임포트
 import ConnectedAccountComponent from './ConnectedAccountComponent';
@@ -48,9 +49,7 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
       const token = `Bearer ${loggedToken}`;
       try {
         const response = await axios.get(
-          Platform.OS === 'web'
-            ? 'http://localhost:8081/upwardright/showstockaccounts'
-            : 'http://192.168.0.9:8081/upwardright/showstockaccounts',
+          `${SPRING_SERVER_URL}/showstockaccounts`,
           {
             headers: {
               'Accept': 'application/json',
@@ -70,6 +69,7 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
       } catch (e) {
         console.log(`Bearer ${loggedToken}`);
         console.error('계좌 API 에러:', e);
+        console.error('API URL:', `${SPRING_SERVER_URL}/showstockaccounts`);
         setAccounts([]);
         setHasAccounts(false);
       }

@@ -31,6 +31,7 @@ import withTheme from '../hoc/withTheme';
 import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../data/organizationData';
 import { useAuth } from '../context/AuthContext';
 import { verifySocialInfo, registerAccount, getAccountBalance } from '../api/connectedAccountApi';
+import { useExchangeRate } from '../hooks/useExchangeRate';
 
 /**
  * ConnectedAccountComponent Props
@@ -52,6 +53,8 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
   theme
 }) => {
   const { loggedInId, loggedToken } = useAuth();
+  // 환율 정보 가져오기
+  const { exchangeRate } = useExchangeRate();
   // 단계 상태 관리
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -442,10 +445,37 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
         account_password: accountPassword,        // 사용자가 입력한 계좌 비밀번호
       });
 
-      const company = securityCompany;                     //증권사명
+      const company = securityCompany;                     // 증권사명
       const account = accountNumber;                       // 사용자가 선택한 계좌번호
       const connected_id = connectedId;                    // 커넥티드 아이디
-      const principal = response.data.resDepositReceived;  //시작 잔고
+      
+      // 시작 잔고 계산: 예수금 + (외화예수금*환율) + 보유종목 평가금액(환율 적용)
+      let principal = parseFloat(response.data.resDepositReceived || 0);
+      
+      // 외화예수금 계산
+      if (response.data.resDepositReceivedFList && response.data.resDepositReceivedFList.length > 0) {
+        response.data.resDepositReceivedFList.forEach(item => {
+          if (item.resAccountCurrency === 'USD') {
+            principal += parseFloat(item.resAmount || 0) * exchangeRate;
+          } else {
+            // 다른 통화가 있는 경우 처리 (향후 확장성 고려)
+            principal += parseFloat(item.resAmount || 0);
+          }
+        });
+      }
+      
+      // 보유종목 평가금액 계산
+      if (response.data.resItemList && response.data.resItemList.length > 0) {
+        response.data.resItemList.forEach(item => {
+          if (item.resAccountCurrency === 'USD') {
+            principal += parseFloat(item.resValuationAmt || 0) * exchangeRate;
+          } else {
+            // 다른 통화가 있는 경우 처리
+            principal += parseFloat(item.resValuationAmt || 0);
+          }
+        });
+      }
+      
       const token = `Bearer ${loggedToken}`;
       console.log(account);
 

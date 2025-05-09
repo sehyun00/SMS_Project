@@ -2,6 +2,7 @@
 // 컴포넌트 흐름: 
 
 import React, { Component, ReactNode } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -30,11 +31,29 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   render() {
     if (this.state.hasError) {
       // 폴백 UI를 렌더링합니다.
-      return <h1>Something went wrong.</h1>;
+      return (
+        <View style={styles.container}>
+          <Text style={styles.errorText}>Something went wrong.</Text>
+        </View>
+      );
     }
 
     return this.props.children; 
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'red',
+  },
+});
 
 export default ErrorBoundary; 

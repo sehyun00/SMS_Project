@@ -3,9 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { SPRING_SERVER_URL } from '../constants/config';
 
-const API_URL = Platform.OS === 'web'
-  ? SPRING_SERVER_URL
-  : 'http://192.168.0.9:8081/upwardright';
+const API_URL = SPRING_SERVER_URL;
 
 const authApi: AxiosInstance = axios.create({
   baseURL: API_URL,
