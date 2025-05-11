@@ -4,9 +4,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { SPRING_SERVER_URL } from '../constants/config';
+import { fetchStockAccounts } from '../api/homeApi';
 
 // 컴포넌트 임포트
 import ConnectedAccountComponent from './ConnectedAccountComponent';
@@ -45,36 +44,24 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
       console.log('토큰 없음, API 호출 안함');
       return;
     }
-    const fetchAccounts = async () => {
-      const token = `Bearer ${loggedToken}`;
-      try {
-        const response = await axios.get(
-          `${SPRING_SERVER_URL}/showstockaccounts`,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'Platform': Platform.OS,
-              'Authorization': token,
-            },
-          }
-        );
-        const mapped = response.data.map((acc: any) => ({
-          company: acc.company,
-          accountNumber: acc.account,
-          returnRate: 0,
-        }));
-        console.log('계좌 API 응답:', mapped);
-        setAccounts(mapped);
-        setHasAccounts(mapped.length > 0);
-      } catch (e) {
-        console.log(`Bearer ${loggedToken}`);
-        console.error('계좌 API 에러:', e);
-        console.error('API URL:', `${SPRING_SERVER_URL}/showstockaccounts`);
+    
+    // 계좌 정보 가져오기
+    const getAccounts = async () => {
+      console.log('계좌 정보 가져오기 시도...');
+      const result = await fetchStockAccounts(loggedToken);
+      
+      if (result.success && result.data) {
+        console.log('계좌 API 응답:', result.data);
+        setAccounts(result.data);
+        setHasAccounts(result.data.length > 0);
+      } else {
+        console.log('계좌 정보 가져오기 실패');
         setAccounts([]);
         setHasAccounts(false);
       }
     };
-    fetchAccounts();
+    
+    getAccounts();
   }, [loggedToken]);
 
   // 리밸런싱 기록 샘플
