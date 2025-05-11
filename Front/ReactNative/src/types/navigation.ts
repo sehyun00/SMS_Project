@@ -5,6 +5,7 @@ export type RootStackParamList = {
   '메인 페이지': undefined;
   '설정 페이지': undefined;
   '테마설정 페이지': undefined;
+  'PortfolioEditor': { portfolioId?: number } | undefined;
 };
 
 export type AuthStackParamList = {
@@ -19,3 +20,4 @@ export type SignUpPageNavigationProp = NativeStackNavigationProp<AuthStackParamL
 export type MainPageNavigationProp = NativeStackNavigationProp<RootStackParamList, '메인 페이지'>;
 export type SettingsPageNavigationProp = NativeStackNavigationProp<RootStackParamList, '설정 페이지'>;
 export type ThemePageNavigationProp = NativeStackNavigationProp<RootStackParamList, '테마설정 페이지'>;
+export type PortfolioEditorNavigationProp = NativeStackNavigationProp<RootStackParamList, 'PortfolioEditor'>;

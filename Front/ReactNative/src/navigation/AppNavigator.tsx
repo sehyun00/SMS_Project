@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainPage from '../pages/MainPage';
 import SetUpPage from '../pages/SetUpPage';
 import ThemeToggle from '../components/common/ThemeToggle';
+import PortfolioEditor from '../components/PortfolioEditor';
 
 // 로그인 상태에 따른 네비게이트
 import { RootStackParamList } from '../types/navigation';
@@ -22,6 +23,9 @@ const AppNavigator = () => {
       {/* 설정 페이지 */}
       <Stack.Screen name="설정 페이지" component={SetUpPage} />
       <Stack.Screen name="테마설정 페이지" component={ThemeToggle} />
+      
+      {/* 포트폴리오 에디터 페이지 */}
+      <Stack.Screen name="PortfolioEditor" component={PortfolioEditor} />
     </Stack.Navigator>
   );
 };

@@ -4,6 +4,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, Alert, Dimensions, InteractionManager } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { MainPageNavigationProp } from '../types/navigation';
 
 // 컴포넌트 임포트
 import RForeignComponent from './RForeignComponent';
@@ -66,11 +68,16 @@ interface StockItem {
 // 컴포넌트 props 인터페이스 정의
 interface RebalancingComponentProps {
   theme: Theme;
+  navigation?: MainPageNavigationProp;
 }
 
-const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) => {
+const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navigation }) => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
+  const defaultNavigation = useNavigation<MainPageNavigationProp>();
+  
+  // navigation prop이 제공되지 않은 경우 useNavigation 훅 사용
+  const nav = navigation || defaultNavigation;
 
   // 화면 너비 구하기
   const screenWidth = Dimensions.get('window').width;
@@ -410,17 +417,24 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
     }
   };
 
+  // 리밸런싱 기록 수정 버튼 핸들러
+  const handleEditRecord = () => {
+    if (currentRecord) {
+      nav.navigate('PortfolioEditor', { portfolioId: currentRecord.record_id });
+    } else {
+      Alert.alert('알림', '수정할 리밸런싱 기록이 없습니다.');
+    }
+  };
+
   // 새 기록 추가 핸들러
   const handleAddRecord = () => {
-    // 여기에 실제 기록 추가 로직 구현
-    Alert.alert('알림', '새 리밸런싱 기록 추가 기능은 준비 중입니다.');
+    nav.navigate('PortfolioEditor');
     setShowNewRecordModal(false);
   };
 
   // 포트폴리오 불러오기 핸들러
   const handleLoadPortfolio = () => {
-    // 여기에 실제 포트폴리오 불러오기 로직 구현
-    Alert.alert('알림', '새 포트폴리오 추가 기능은 준비 중입니다.');
+    nav.navigate('PortfolioEditor');
     setShowLoadPortfolioModal(false);
   };
 
@@ -438,11 +452,6 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme }) =>
   }, [getDomesticStocks]);
 
   const { name, number, principal, valuation, dailyProfit, dailyProfitPercent, totalProfit, totalProfitPercent } = accountInfo;
-
-  // 리밸런싱 기록 수정 버튼 핸들러
-  const handleEditRecord = () => {
-    Alert.alert('알림', '리밸런싱 기록 수정 기능은 준비 중입니다.');
-  };
 
   // 화면 회전 핸들러
   const handleRotateScreen = () => {
