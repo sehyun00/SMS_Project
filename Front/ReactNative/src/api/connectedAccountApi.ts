@@ -2,12 +2,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import { SPRING_SERVER_URL, FLASK_SERVER_URL } from '../constants/config';
 
-const BASE_URL = Platform.OS === 'web'
-  ? 'http://localhost:5000'
-  : 'http://192.168.0.9:5000';
-
 const apiUrl = SPRING_SERVER_URL;
-const flaskApiUrl = FLASK_SERVER_URL;
 
 export const verifySocialInfo = async (payload: any) => {
   return axios.post(`${FLASK_SERVER_URL}/stock/create-and-list`, payload, {

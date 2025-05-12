@@ -8,8 +8,7 @@ import {
   Modal,
   FlatList,
   Alert,
-  ActivityIndicator,
-  StyleSheet
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
@@ -25,9 +24,19 @@ import {
   searchStocks
 } from '../api/rebalancingApi';
 
+// 더미 데이터 임포트
+import {
+  getRecordRuds,
+  dummyRecords,
+  getCurrentExchangeRate,
+  updateRecordName,
+  updateRecordRuds
+} from '../data/dummyData';
+
 // 스타일 임포트
 import withTheme from '../hoc/withTheme';
 import { Theme } from '../types/theme';
+import createStyles from '../styles/components/portfolioEditor.styles';
 
 // 검색 결과 항목 인터페이스
 interface SearchResultItem {
@@ -55,6 +64,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
 }) => {
   const { loggedToken } = useAuth();
   const [loading, setLoading] = useState(false);
+  const styles = createStyles(theme);
   
   // 네비게이션과 라우트
   const navigation = useNavigation<PortfolioEditorNavigationProp>();
@@ -102,24 +112,42 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       // route.params에서 ID만 전달된 경우
       if (portfolioId) {
         try {
-          // 실제 구현에서는 API 호출로 데이터 가져오기
-          // 예시 코드 (나중에 실제 API로 교체)
-          const dummyPortfolio: Portfolio = {
+          // dummyData에서 해당 portfolioId(recordId)의 상세 데이터 가져오기
+          const recordRuds = getRecordRuds(portfolioId);
+          
+          // 레코드 이름 찾기
+          const recordInfo = dummyRecords.find(r => r.record_id === portfolioId);
+          const recordName = recordInfo?.record_name || `포트폴리오 ${portfolioId}`;
+          
+          // 포트폴리오 객체 구성
+          const portfolioAssets: PortfolioItem[] = recordRuds.map(rud => ({
+            name: rud.stock_name,
+            ticker: rud.market_order ? `${rud.stock_name}` : undefined,
+            region: rud.stock_region as 0 | 1 | 2,
+            target_percent: rud.expert_per
+          }));
+          
+          const portfolioData: Portfolio = {
             portfolio_id: portfolioId,
-            portfolio_name: `포트폴리오 ${portfolioId}`,
-            assets: [
-              { name: '원화', region: 0, target_percent: 30 },
-              { name: '달러', region: 0, target_percent: 20 },
-              { name: '삼성전자', ticker: '005930.KS', region: 1, target_percent: 25 },
-              { name: 'Apple Inc.', ticker: 'AAPL', region: 2, target_percent: 25 }
-            ],
-            description: '샘플 포트폴리오 설명입니다.'
+            portfolio_name: recordName,
+            assets: portfolioAssets,
+            description: `리밸런싱 기록 ID ${portfolioId}에서 가져온 데이터입니다.`
           };
           
-          setPortfolio(dummyPortfolio);
+          setPortfolio(portfolioData);
         } catch (error) {
           console.error('포트폴리오 정보 로딩 에러:', error);
           Alert.alert('오류', '포트폴리오 정보를 불러올 수 없습니다.');
+          
+          // 에러 발생 시 기본 포트폴리오 생성
+          setPortfolio({
+            portfolio_name: `포트폴리오 ${portfolioId}`,
+            assets: [
+              { name: '원화', region: 0, target_percent: 50 },
+              { name: '달러', region: 0, target_percent: 50 }
+            ],
+            description: '기본 포트폴리오 구성'
+          });
         }
         return;
       }
@@ -208,7 +236,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     const newItem: PortfolioItem = {
       name: item.name,
       ticker: item.ticker,
-      region: item.region,
+      region: item.region as 0 | 1 | 2,
       target_percent: 0
     };
     
@@ -248,7 +276,25 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     
     setLoading(true);
     try {
-      // API 호출 로직
+      // 실제 API 연결 전 더미 데이터 업데이트 (개발 중 테스트용)
+      if (portfolio.portfolio_id || portfolioId) {
+        const recordId = portfolio.portfolio_id || portfolioId!;
+        
+        // 1. 레코드 이름 업데이트
+        updateRecordName(recordId, portfolio.portfolio_name);
+        
+        // 2. 레코드 상세 항목(RUDs) 업데이트
+        const success = updateRecordRuds(recordId, portfolio.assets);
+        
+        if (!success) {
+          throw new Error('포트폴리오 상세 정보 업데이트 실패');
+        }
+        
+        console.log('포트폴리오 업데이트 성공:', recordId);
+      }
+      
+      // 실제 API 호출 (서버 연결 후 활성화)
+      /*
       if (portfolio.portfolio_id || portfolioId) {
         // 수정
         await updatePortfolio(loggedToken!, portfolio.portfolio_id || portfolioId!, portfolio);
@@ -256,6 +302,10 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
         // 새로 생성
         await createPortfolio(loggedToken!, portfolio);
       }
+      */
+      
+      // 성공 알림
+      Alert.alert('완료', '포트폴리오가 성공적으로 저장되었습니다.');
       
       // props.onSave가 있으면 호출, 없으면 네비게이션으로 돌아가기
       if (propOnSave) {
@@ -291,21 +341,18 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       transparent={false}
       onRequestClose={handleClose}
     >
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.container}>
         {/* 헤더 */}
         <View style={styles.header}>
           <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+          <Text style={styles.headerTitle}>
             {(propPortfolioToEdit || portfolioId) ? '포트폴리오 수정' : '새 포트폴리오 생성'}
           </Text>
           <TouchableOpacity
             onPress={handleSave}
-            style={[
-              styles.saveButton,
-              { backgroundColor: theme.colors.primary }
-            ]}
+            style={styles.saveButton}
             disabled={loading || !isValidPercentage}
           >
             {loading ? (
@@ -319,16 +366,9 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
         <ScrollView style={styles.scrollContainer}>
           {/* 포트폴리오 이름 입력 */}
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.colors.text }]}>포트폴리오 이름 *</Text>
+            <Text style={styles.label}>포트폴리오 이름 *</Text>
             <TextInput
-              style={[
-                styles.input,
-                { 
-                  borderColor: theme.colors.border,
-                  backgroundColor: theme.colors.card,
-                  color: theme.colors.text
-                }
-              ]}
+              style={styles.input}
               value={portfolio.portfolio_name}
               onChangeText={text => setPortfolio({ ...portfolio, portfolio_name: text })}
               placeholder="포트폴리오 이름을 입력하세요"
@@ -338,17 +378,9 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
 
           {/* 설명 입력 */}
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.colors.text }]}>설명 (선택)</Text>
+            <Text style={styles.label}>설명 (선택)</Text>
             <TextInput
-              style={[
-                styles.input,
-                styles.textArea,
-                { 
-                  borderColor: theme.colors.border,
-                  backgroundColor: theme.colors.card,
-                  color: theme.colors.text
-                }
-              ]}
+              style={[styles.input, styles.textArea]}
               value={portfolio.description || ''}
               onChangeText={text => setPortfolio({ ...portfolio, description: text })}
               placeholder="포트폴리오에 대한 설명을 입력하세요"
@@ -361,7 +393,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           {/* 구성 항목 리스트 */}
           <View style={styles.assetsContainer}>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.label, { color: theme.colors.text }]}>포트폴리오 구성 *</Text>
+              <Text style={styles.label}>포트폴리오 구성 *</Text>
               <Text style={[
                 styles.percentageTotal,
                 { color: isValidPercentage ? theme.colors.primary : theme.colors.negative }
@@ -373,30 +405,23 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             {portfolio.assets.map((item, index) => (
               <View key={index} style={styles.itemRow}>
                 <View style={styles.itemInfo}>
-                  <Text style={[styles.itemName, { color: theme.colors.text }]}>
+                  <Text style={styles.itemName}>
                     {item.name}
                   </Text>
-                  <Text style={[styles.itemRegion, { color: theme.colors.text + '80' }]}>
+                  <Text style={styles.itemRegion}>
                     {item.region === 0 ? '현금' : item.region === 1 ? '국내주식' : '해외주식'}
                   </Text>
                 </View>
                 <View style={styles.itemActions}>
                   <TextInput
-                    style={[
-                      styles.percentInput,
-                      { 
-                        borderColor: theme.colors.border,
-                        backgroundColor: theme.colors.card,
-                        color: theme.colors.text
-                      }
-                    ]}
+                    style={styles.percentInput}
                     value={item.target_percent.toString()}
                     onChangeText={value => handlePercentChange(index, value)}
                     keyboardType="numeric"
                     placeholder="0"
                     placeholderTextColor={theme.colors.text + '80'}
                   />
-                  <Text style={[styles.percentSymbol, { color: theme.colors.text }]}>%</Text>
+                  <Text style={styles.percentSymbol}>%</Text>
                   <TouchableOpacity
                     style={styles.removeButton}
                     onPress={() => handleRemoveItem(index)}
@@ -409,10 +434,10 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
 
             {/* 항목 추가 버튼 */}
             <TouchableOpacity
-              style={[styles.addButton, { borderColor: theme.colors.primary }]}
+              style={styles.addButton}
               onPress={handleAddItem}
             >
-              <Text style={[styles.addButtonText, { color: theme.colors.primary }]}>
+              <Text style={styles.addButtonText}>
                 + 항목 추가
               </Text>
             </TouchableOpacity>
@@ -427,7 +452,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           onRequestClose={() => setSearchModalVisible(false)}
         >
           <View style={styles.searchModalContainer}>
-            <View style={[styles.searchModal, { backgroundColor: theme.colors.background }]}>
+            <View style={styles.searchModal}>
               <View style={styles.searchHeader}>
                 <TouchableOpacity
                   onPress={() => setSearchModalVisible(false)}
@@ -435,7 +460,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                 >
                   <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
-                <Text style={[styles.searchTitle, { color: theme.colors.text }]}>
+                <Text style={styles.searchTitle}>
                   항목 검색
                 </Text>
               </View>
@@ -495,14 +520,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
               {/* 검색 입력 필드 */}
               <View style={styles.searchInputContainer}>
                 <TextInput
-                  style={[
-                    styles.searchInput,
-                    { 
-                      borderColor: theme.colors.border,
-                      backgroundColor: theme.colors.card,
-                      color: theme.colors.text
-                    }
-                  ]}
+                  style={styles.searchInput}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholder={
@@ -516,7 +534,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                   onSubmitEditing={handleSearch}
                 />
                 <TouchableOpacity
-                  style={[styles.searchButton, { backgroundColor: theme.colors.primary }]}
+                  style={styles.searchButton}
                   onPress={handleSearch}
                 >
                   <Ionicons name="search" size={20} color="white" />
@@ -534,21 +552,21 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                   keyExtractor={(item, index) => `${item.name}-${index}`}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                      style={[styles.searchResultItem, { borderBottomColor: theme.colors.border }]}
+                      style={styles.searchResultItem}
                       onPress={() => handleSelectSearchItem(item)}
                     >
                       <View>
-                        <Text style={[styles.resultItemName, { color: theme.colors.text }]}>
+                        <Text style={styles.resultItemName}>
                           {item.name}
                         </Text>
                         {item.ticker && (
-                          <Text style={[styles.resultItemTicker, { color: theme.colors.text + '80' }]}>
+                          <Text style={styles.resultItemTicker}>
                             {item.ticker}
                           </Text>
                         )}
                       </View>
                       {item.price && (
-                        <Text style={[styles.resultItemPrice, { color: theme.colors.text }]}>
+                        <Text style={styles.resultItemPrice}>
                           {item.region === 1 
                             ? `${item.price.toLocaleString()}원` 
                             : `$${item.price.toLocaleString()}`}
@@ -558,7 +576,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
                   )}
                   ListEmptyComponent={
                     <View style={styles.emptyResultContainer}>
-                      <Text style={[styles.emptyResultText, { color: theme.colors.text + '80' }]}>
+                      <Text style={styles.emptyResultText}>
                         검색 결과가 없습니다
                       </Text>
                     </View>
@@ -572,210 +590,5 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flex: 1,
-    padding: 16
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    padding: 8,
-  },
-  saveButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-  },
-  saveButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  assetsContainer: {
-    marginBottom: 32,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  percentageTotal: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  itemRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  itemInfo: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  itemRegion: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  itemActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  percentInput: {
-    width: 60,
-    textAlign: 'right',
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 8,
-    marginRight: 4,
-  },
-  percentSymbol: {
-    marginRight: 12,
-    fontSize: 16,
-  },
-  removeButton: {
-    padding: 8,
-  },
-  addButton: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  addButtonText: {
-    fontSize: 16,
-  },
-  searchModalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  searchModal: {
-    flex: 1,
-    marginTop: 60,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  searchHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  searchTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 16,
-  },
-  closeSearchButton: {
-    padding: 8,
-  },
-  regionTabs: {
-    flexDirection: 'row',
-    padding: 16,
-  },
-  regionTab: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  regionTabText: {
-    fontWeight: '500',
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  searchButton: {
-    marginLeft: 8,
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchResultItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  resultItemName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  resultItemTicker: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  resultItemPrice: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyResultContainer: {
-    padding: 32,
-    alignItems: 'center',
-  },
-  emptyResultText: {
-    fontSize: 16,
-  },
-});
 
 export default withTheme(PortfolioEditor); 

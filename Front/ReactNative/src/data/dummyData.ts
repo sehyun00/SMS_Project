@@ -41,6 +41,7 @@ export interface Rud {
   dollar?: number;          // 달러
   rebalance_dollar?: number; // 희망 금액
   stock_region: 0 | 1 | 2;  // 0: 현금, 1: 주식, 2: 해외주식
+  to_remove?: boolean;      // 삭제 대상 여부 (내부용)
 }
 
 // 더미 사용자 데이터
@@ -222,8 +223,96 @@ export function getRecordRuds(recordId: number): Rud[] {
   return dummyRuds.filter(rud => rud.record_id === recordId);
 }
 
-// 환율 가져오는 함수
-export function getCurrentExchangeRate() {
+// 헬퍼 함수: 리밸런싱 기록 이름 업데이트
+export function updateRecordName(recordId: number, newName: string): boolean {
+  const recordIndex = dummyRecords.findIndex(record => record.record_id === recordId);
+  if (recordIndex === -1) return false;
+
+  dummyRecords[recordIndex].record_name = newName;
+  return true;
+}
+
+// 헬퍼 함수: 리밸런싱 기록의 상세 항목 업데이트
+export function updateRecordRuds(recordId: number, assets: any[]): boolean {
+  // 1. 기존 RUD 항목 찾기
+  const existingRudIndices = dummyRuds
+    .map((rud, index) => rud.record_id === recordId ? index : -1)
+    .filter(index => index !== -1);
+  
+  if (existingRudIndices.length === 0) return false;
+  
+  // 2. 기존 항목 삭제 또는 업데이트
+  const currentRuds = [...dummyRuds]; // 복사본 생성
+  
+  // 2-1. 기존 항목을 업데이트해야 할 항목과 삭제해야 할 항목으로 분류
+  for (const index of existingRudIndices) {
+    const rudToUpdate = currentRuds[index];
+    const matchingAsset = assets.find(asset => 
+      asset.name === rudToUpdate.stock_name && 
+      asset.region === rudToUpdate.stock_region
+    );
+    
+    if (matchingAsset) {
+      // 항목 업데이트
+      currentRuds[index] = {
+        ...rudToUpdate,
+        expert_per: matchingAsset.target_percent
+      };
+      
+      // 이미 처리한 항목은 assets에서 제거
+      assets = assets.filter(asset => 
+        !(asset.name === rudToUpdate.stock_name && 
+          asset.region === rudToUpdate.stock_region)
+      );
+    } else {
+      // 이 Rud는 삭제 대상 (나중에 한번에 처리)
+      currentRuds[index] = { ...currentRuds[index], to_remove: true };
+    }
+  }
+  
+  // 2-2. 삭제 대상 항목을 배열에서 제거
+  let newRuds = currentRuds.filter(rud => !rud.to_remove);
+  
+  // 3. 새로운 항목 추가
+  for (const asset of assets) {
+    // 기본 Rud 객체 생성
+    const newRud: Rud = {
+      stock_name: asset.name,
+      record_id: recordId,
+      expert_per: asset.target_percent,
+      stock_region: asset.region
+    };
+    
+    // 스톡 타입에 따라 추가 정보 설정
+    if (asset.region === 0) { // 현금
+      if (asset.name === '원화') {
+        newRud.won = 10000; // 예시 값
+      } else if (asset.name === '달러') {
+        newRud.dollar = 10; // 예시 값
+      }
+    } else if (asset.region === 1) { // 국내주식
+      newRud.market_order = 50000; // 예시 값
+      newRud.nos = 1;
+      newRud.won = 50000;
+      newRud.rate = 0;
+    } else if (asset.region === 2) { // 해외주식
+      newRud.market_order = 100;
+      newRud.nos = 1;
+      newRud.dollar = 100;
+      newRud.rate = 0;
+    }
+    
+    newRuds.push(newRud);
+  }
+  
+  // 4. 업데이트된 배열을 dummyRuds에 할당
+  Object.assign(dummyRuds, newRuds);
+  
+  return true;
+}
+
+// 현재 환율 정보 가져오기
+export function getCurrentExchangeRate(): number {
   return exchangeRates.USD_KRW;
 }
 
