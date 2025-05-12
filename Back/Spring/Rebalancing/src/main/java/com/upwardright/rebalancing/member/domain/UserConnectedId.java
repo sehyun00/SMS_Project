@@ -22,4 +22,7 @@ public class UserConnectedId {
     @Id
     @Column(nullable = false)
     private String connected_id;
+
+    @Column(nullable = false)
+    private  String account;
 }

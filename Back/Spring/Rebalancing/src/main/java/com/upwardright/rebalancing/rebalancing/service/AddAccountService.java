@@ -30,6 +30,7 @@ public class AddAccountService {
                 UserConnectedId connectedId = UserConnectedId.builder()
                         .connected_id(request.getConnected_id())
                         .user_id(request.getUser_id())
+                        .account(request.getAccount())
                         .build();
                 userConnectedIdRepository.save(connectedId);
             }
