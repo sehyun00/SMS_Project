@@ -1,13 +1,16 @@
 // 파일 경로: src/components/MyStockAccountComponent.tsx
 // 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.tsx
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 컴포넌트 임포트
 import CircularGraphComponent from './CircularGraphComponent';
 import IndividualStockComponent from './IndividualStockComponent';
+
+// API 임포트
+import { fetchConnectedAccounts, ConnectedAccount } from '../api/connectedAccountApi';
 
 // 스타일 임포트
 import withTheme from '../hoc/withTheme';
@@ -36,6 +39,30 @@ interface MyStockAccountComponentProps {
 const MyStockAccountComponent: React.FC<MyStockAccountComponentProps> = React.memo(({ theme }) => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
+  
+  // API에서 커넥티드 계좌 정보 가져오기
+  useEffect(() => {
+    const getConnectedAccounts = async () => {
+      try {
+        // API에서 자체적으로 토큰을 가져오기 때문에 토큰을 전달할 필요가 없음
+        const accounts = await fetchConnectedAccounts();
+        
+        console.log('Connected Accounts:', accounts);
+        setConnectedAccounts(accounts);
+        
+        // connectedId만 콘솔에 출력
+        accounts.forEach((account: ConnectedAccount) => {
+          console.log('Connected ID:', account.connectedId);
+          console.log('Account Number:', account.accountNumber);
+        });
+      } catch (error) {
+        console.error('계좌 연결 ID 조회 실패:', error);
+      }
+    };
+
+    getConnectedAccounts();
+  }, []); // 의존성 배열에서 loggedToken 제거
   
   // 샘플 주식 데이터 (색상 없이 정의)
   const stockData: StockData[] = [
