@@ -9,6 +9,7 @@ import com.upwardright.rebalancing.rebalancing.dto.AddAccountResponse;
 import com.upwardright.rebalancing.rebalancing.repository.AccountRepository;
 import com.upwardright.rebalancing.rebalancing.service.AddAccountService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,19 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @RestController
-public class RebalancingController {
+public class AccoountController {
 
     private final AddAccountService addAccountService;
     private final AccountRepository accountRepository;
     private final UserConnectedIdRepository userConnectedIdRepository;
-
-    public RebalancingController(AddAccountService addAccountService, AccountRepository accountRepository,
-                                 UserConnectedIdRepository userConnectedIdRepository) {
-        this.accountRepository = accountRepository;
-        this.addAccountService = addAccountService;
-        this.userConnectedIdRepository = userConnectedIdRepository;
-    }
 
     @PostMapping("/upwardright/getAccountStock")
     public ResponseEntity<?> getConnectedId(Authentication authentication) {

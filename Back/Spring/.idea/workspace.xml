@@ -6,8 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="ef41613e-a89e-47c8-9bb6-770188012d41" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/repository/UserConnectedIdRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/repository/UserConnectedIdRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/FindMyAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/member/controller/FindMyAccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/AccoountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingRecordConroller.java" beforeDir="false" afterPath="$PROJECT_DIR$/Rebalancing/src/main/java/com/upwardright/rebalancing/rebalancing/controller/RebalancingRecordConroller.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +72,7 @@
       <updated>1746535237907</updated>
       <workItem from="1746535239663" duration="3446000" />
       <workItem from="1746540734855" duration="1110000" />
+      <workItem from="1747017195034" duration="418000" />
     </task>
     <servers />
   </component>
