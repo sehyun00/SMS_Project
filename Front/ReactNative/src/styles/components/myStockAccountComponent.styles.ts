@@ -1,29 +1,38 @@
-// 경로: src/styles/components/myStockAccountComponent.styles.js
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-
 import { Theme } from '../../types/theme';
 
-// 스타일 타입 정의
-interface MyStockAccountComponent {
+// MyStockAccountComponent 스타일 타입 정의
+export interface MyStockAccountComponentStylesType {
+  // 컨테이너 스타일
   container: ViewStyle;
   contentContainer: ViewStyle;
-  summaryContainer: ViewStyle;
-  smallTitle: TextStyle;
-  totalValue: TextStyle;
-  chartContainer: ViewStyle;
-  stockListHeader: ViewStyle;
-  sectionTitle: TextStyle;
-  stockList: ViewStyle;
+  
+  // 계좌 선택 영역 스타일
   accountSelectorContainer: ViewStyle;
   accountButton: ViewStyle;
   selectedAccountButton: ViewStyle;
   accountText: TextStyle;
   selectedAccountText: TextStyle;
+  
+  // 통화 선택 영역 스타일
   currencySelectorContainer: ViewStyle;
   currencyButton: ViewStyle;
   selectedCurrencyButton: ViewStyle;
   currencyText: TextStyle;
   selectedCurrencyText: TextStyle;
+  
+  // 요약 정보 영역 스타일
+  summaryContainer: ViewStyle;
+  smallTitle: TextStyle;
+  totalValue: TextStyle;
+  
+  // 차트 영역 스타일
+  chartContainer: ViewStyle;
+  
+  // 종목 리스트 영역 스타일
+  stockListHeader: ViewStyle;
+  sectionTitle: TextStyle;
+  stockList: ViewStyle;
   stockItemContainer: ViewStyle;
   colorIndicator: ViewStyle;
   stockInfo: ViewStyle;
@@ -32,139 +41,143 @@ interface MyStockAccountComponent {
   stockRatio: TextStyle;
 }
 
-export default function createStyles(theme: Theme): MyStockAccountComponent {
-  return StyleSheet.create<MyStockAccountComponent>({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    contentContainer: {
-      paddingBottom: 30,
-    },
-    summaryContainer: {
-      marginTop: 10,
-      marginBottom: 20,
-      paddingHorizontal: 16,
-    },
-    smallTitle: {
-      color: theme.colors.placeholder,
-      fontSize: 14,
-      marginBottom: 4,
-    },
-    totalValue: {
-      fontSize: 26,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-    },
-    chartContainer: {
-      alignItems: 'center',
-      marginVertical: 20,
-    },
-    stockListHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      marginBottom: 15,
-      marginTop: 10,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-    },
-    stockList: {
-      paddingHorizontal: 16,
-    },
-    accountSelectorContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: 16,
-      paddingHorizontal: 16,
-      marginTop: 10,
-    },
-    accountButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      marginRight: 8,
-      marginBottom: 8,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    selectedAccountButton: {
-      backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.primary,
-    },
-    accountText: {
-      color: theme.colors.text,
-      fontSize: 13,
-    },
-    selectedAccountText: {
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: 13,
-    },
-    // 통화 선택 버튼 스타일
-    currencySelectorContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      marginBottom: 8,
-      marginTop: 4,
-    },
-    currencyButton: {
-      paddingVertical: 6,
-      paddingHorizontal: 16,
-      borderRadius: 16,
-      borderWidth: 1,
-      marginHorizontal: 8,
-      borderColor: theme.colors.border,
-    },
-    selectedCurrencyButton: {
-      backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.primary,
-    },
-    currencyText: {
-      color: theme.colors.text,
-      fontSize: 14,
-    },
-    selectedCurrencyText: {
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: 14,
-    },
-    // 종목 아이템 스타일
-    stockItemContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 16,
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    colorIndicator: {
-      width: 12,
-      height: 24,
-      borderRadius: 4,
-      marginRight: 12,
-    },
-    stockInfo: {
-      flex: 1,
-    },
-    stockName: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-      marginBottom: 4,
-    },
-    stockValue: {
-      fontSize: 14,
-      color: theme.colors.text,
-    },
-    stockRatio: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-    },
-  });
-}
+// 스타일 생성 함수
+const createStyles = (theme: Theme): MyStockAccountComponentStylesType => StyleSheet.create({
+  // 컨테이너 관련 스타일
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 30, // 하단 여백 추가
+  },
+  
+  // 계좌 선택 영역 스타일
+  accountSelectorContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  accountButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  selectedAccountButton: {
+    backgroundColor: theme.colors.primary,
+  },
+  accountText: {
+    color: theme.colors.text,
+    fontSize: 14,
+  },
+  selectedAccountText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  
+  // 통화 선택 영역 스타일
+  currencySelectorContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  currencyButton: {
+    padding: 8,
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    marginRight: 8,
+    width: 80,
+    alignItems: 'center',
+  },
+  selectedCurrencyButton: {
+    backgroundColor: theme.colors.primary,
+  },
+  currencyText: {
+    color: theme.colors.text,
+  },
+  selectedCurrencyText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  
+  // 요약 정보 영역 스타일
+  summaryContainer: {
+    backgroundColor: theme.colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  smallTitle: {
+    fontSize: 14,
+    color: theme.colors.text,
+    marginBottom: 8,
+  },
+  totalValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+  },
+  
+  // 차트 영역 스타일
+  chartContainer: {
+    marginBottom: 20,
+    height: 240,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  // 종목 리스트 영역 스타일
+  stockListHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+  },
+  stockList: {
+    backgroundColor: theme.colors.card,
+    borderRadius: 12,
+    padding: 8,
+  },
+  stockItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+  },
+  colorIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  stockInfo: {
+    flex: 1,
+  },
+  stockName: {
+    fontSize: 14,
+    color: theme.colors.text,
+    marginBottom: 4,
+  },
+  stockValue: {
+    fontSize: 14,
+    color: theme.colors.text,
+    fontWeight: 'bold',
+  },
+  stockRatio: {
+    fontSize: 14,
+    color: theme.colors.text,
+    fontWeight: 'bold',
+  },
+});
+
+export default createStyles;

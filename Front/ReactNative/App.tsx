@@ -10,6 +10,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import { ThemeProvider } from './src/styles/theme/ThemeContext';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { AccountsProvider } from './src/context/AccountsContext';
 
 // 조건부 네비게이션을 처리하는 컴포넌트
 const RootNavigator: React.FC = () => {
@@ -31,13 +32,15 @@ const App: React.FC = () => {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <AuthProvider>
-          <ErrorBoundary>
-            <NavigationContainer>
-              <RootNavigator />
-            </NavigationContainer>
-          </ErrorBoundary>
-        </AuthProvider>
+        <AccountsProvider>
+          <AuthProvider>
+            <ErrorBoundary>
+              <NavigationContainer>
+                <RootNavigator />
+              </NavigationContainer>
+            </ErrorBoundary>
+          </AuthProvider>
+        </AccountsProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );
