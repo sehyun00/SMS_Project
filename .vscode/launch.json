@@ -6,6 +6,13 @@
       "name": "RebalancingApplication",
       "request": "launch",
       "mainClass": "com.upwardright.rebalancing.RebalancingApplication",
+      "projectName": "reblancing1-Rebalancing"
+    },
+    {
+      "type": "java",
+      "name": "RebalancingApplication",
+      "request": "launch",
+      "mainClass": "com.upwardright.rebalancing.RebalancingApplication",
       "projectName": "Rebalancing"
     },
     {
