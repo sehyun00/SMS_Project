@@ -48,6 +48,11 @@ dependencies {
 	// Jackson 라이브러리 (JSON 처리용)
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// 이메일 인증 라이브러리
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {
