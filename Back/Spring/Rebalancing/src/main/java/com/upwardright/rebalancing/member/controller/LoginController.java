@@ -11,16 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000") // React 앱의 URL을 명시 (개발 환경용)
 public class LoginController {
 
     private final LoginService loginService;
-
-    @GetMapping("/upwardright/login")
-    public String signup(Model model) {
-        model.addAttribute("login_test", "로그인 페이지입니다.");
-        return "login";
-    }
 
     @PostMapping("/upwardright/login")
     public ResponseEntity<LoginResponse> loginProcess(@RequestBody LoginRequest loginRequest) {

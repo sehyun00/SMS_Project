@@ -2,11 +2,17 @@ package com.upwardright.rebalancing.member.service;
 
 import com.upwardright.rebalancing.exception.DuplicateUserIdException;
 import com.upwardright.rebalancing.member.domain.User;
+import com.upwardright.rebalancing.member.dto.EmailVerificationResponse;
+import com.upwardright.rebalancing.member.dto.SendCodeRequest;
+import com.upwardright.rebalancing.member.dto.VerifyCodeRequest;
 import com.upwardright.rebalancing.member.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Random;
 
 
 /*
@@ -21,6 +27,13 @@ public class SignUpService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final RedisService redisService;
+
+    private static final String EMAIL_AUTH_CODE_PREFIX = "EMAIL_AUTH_CODE:";
+
+    @Value("${auth.code.expiration-millis:300000}")
+    private long authCodeExpirationMillis;
 
     //DB의 user_id colunm 호출
     @Transactional(readOnly = true)
@@ -39,5 +52,22 @@ public class SignUpService {
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         return userRepository.save(user);
+    }
+
+    public void sendCode(SendCodeRequest requestParam) {
+        String code = createCode();
+        emailService.sendEmail(requestParam.email(), code);
+        redisService.saveWithExpiration(EMAIL_AUTH_CODE_PREFIX + requestParam.email(), code, authCodeExpirationMillis);
+    }
+
+    private String createCode() {
+        Random random = new Random();
+        return String.format("%06d", random.nextInt(1000000));
+    }
+
+    public EmailVerificationResponse verifyCode(VerifyCodeRequest requestParam) {
+        String findCode = (String) redisService.get(EMAIL_AUTH_CODE_PREFIX + requestParam.email());
+        boolean isVerified = requestParam.code().equals(findCode);
+        return new EmailVerificationResponse(isVerified);
     }
 }

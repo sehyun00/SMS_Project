@@ -1,10 +1,9 @@
 package com.upwardright.rebalancing.member.controller;
 
 import com.upwardright.rebalancing.member.domain.User;
-import com.upwardright.rebalancing.member.dto.SignUpRequest;
-import com.upwardright.rebalancing.member.dto.SignUpResponse;
-import com.upwardright.rebalancing.member.repository.UserRepository;
+import com.upwardright.rebalancing.member.dto.*;
 import com.upwardright.rebalancing.member.service.SignUpService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,10 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public class SignController {
 
-    private final UserRepository userRepository;
     private final SignUpService signUpService;
 
     @PostMapping("/upwardright/signup")
@@ -42,5 +39,19 @@ public class SignController {
                     .body(new SignUpResponse("회원가입 중 오류가 발생했습니다: " + e.getMessage(),
                             request.getUser_id(), false));
         }
+    }
+
+    @Operation(summary = "이메일 인증 코드 전송")
+    @PostMapping("/emails/verify")
+    public ResponseEntity<Void> sendCode(@Valid @RequestBody SendCodeRequest requestParam) {
+        signUpService.sendCode(requestParam);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "이메일 인증 코드 검증")
+    @GetMapping("/emails/verify")
+    public ResponseEntity<EmailVerificationResponse> verifyCode(@Valid @RequestBody VerifyCodeRequest requestParam) {
+        EmailVerificationResponse response = signUpService.verifyCode(requestParam);
+        return ResponseEntity.ok(response);
     }
 }
