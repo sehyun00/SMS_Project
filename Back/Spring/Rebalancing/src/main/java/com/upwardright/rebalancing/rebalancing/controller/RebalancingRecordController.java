@@ -19,27 +19,30 @@ public class RebalancingRecordController {
      * 리벨런싱 기록 저장
      */
     @PostMapping("/upwardright/mystockaccount/record/save")
-    public ResponseEntity<SaveRebalancingResponse> saveRebalancing(@RequestBody SaveRebalancingRequest request) {
+    public ResponseEntity<?> saveRebalancing(@RequestBody SaveRebalancingRequest request) {
         try {
+            System.out.println("받은 요청: " + request); // 디버깅용
             SaveRebalancingResponse response = saveRebalancingService.saveRebalancing(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("에러 발생: " + e.getMessage()); // 디버깅용
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("오류: " + e.getMessage());
         }
     }
 
     /**
      * 기록 전체 보기 - 사용자의 모든 리벨런싱 기록 조회
      */
-    @GetMapping("/upwardright/mystockaccount/record")
-    public ResponseEntity<List<SaveRebalancingResponse>> rebalancingRecord(@RequestParam String userId) {
-        try {
-            List<SaveRebalancingResponse> records = saveRebalancingService.getUserRebalancingRecords(userId);
-            return ResponseEntity.ok(records);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
+//    @GetMapping("/upwardright/mystockaccount/record")
+//    public ResponseEntity<List<SaveRebalancingResponse>> rebalancingRecord(@RequestParam String userId) {
+//        try {
+//            List<SaveRebalancingResponse> records = saveRebalancingService.getUserRebalancingRecords(userId);
+//            return ResponseEntity.ok(records);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
 
     /**
      * 특정 기록 ID로 상세 조회

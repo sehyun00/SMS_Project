@@ -26,25 +26,26 @@ public class SaveRebalancingService {
     public SaveRebalancingResponse saveRebalancing(SaveRebalancingRequest request) {
         try {
             // 1. 계좌 존재 여부 확인
-            boolean accountExists = accountRepository.existsByAccountAndUser_id(
-                    request.getAccountNumber(),
-                    request.getUserId()
-            );
+            List<Accounts> userAccounts = accountRepository.findByUserId(request.getUser_id());
 
-            if (!accountExists) {
-                throw new RuntimeException("계좌를 찾을 수 없습니다: " + request.getAccountNumber());
+            if (userAccounts.isEmpty()) {
+                throw new RuntimeException("사용자의 계좌가 존재하지 않습니다: " + request.getUser_id());
             }
 
-            // 2. 사용자의 계좌 목록에서 해당 계좌 찾기
-            List<Accounts> userAccounts = accountRepository.findByUserId(request.getUserId());
-            Accounts account = userAccounts.stream()
-                    .filter(acc -> acc.getAccount().equals(request.getAccountNumber()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("계좌를 찾을 수 없습니다: " + request.getAccountNumber()));
+            boolean accountExists = userAccounts.stream()
+                    .anyMatch(acc -> acc.getAccount().equals(request.getAccount()));
 
-            // 3. 리벨런싱 기록 생성
+            if (!accountExists) {
+                String accountList = userAccounts.stream()
+                        .map(Accounts::getAccount)
+                        .collect(Collectors.joining(", "));
+                throw new RuntimeException("선택한 계좌가 존재하지 않습니다. 보유 계좌: " + accountList);
+            }
+
+            // 2. 리벨런싱 기록 생성 (user_id와 account 모두 저장)
             SaveRebalancing saveRebalancing = SaveRebalancing.builder()
-                    .account(account)
+                    .user_id(request.getUser_id())
+                    .account(request.getAccount())
                     .record_date(LocalDateTime.now())
                     .total_balance(request.getTotalBalance())
                     .record_name(request.getRecordName())
@@ -62,24 +63,11 @@ public class SaveRebalancingService {
     }
 
     @Transactional(readOnly = true)
-    public List<SaveRebalancingResponse> getRebalancingRecords(String accountNumber, String userId) {
+    public List<SaveRebalancingResponse> getRebalancingRecords(String account, String user_id) {
         try {
-            // 1. 계좌 존재 여부 확인
-            boolean accountExists = accountRepository.existsByAccountAndUser_id(accountNumber, userId);
-
-            if (!accountExists) {
-                throw new RuntimeException("계좌를 찾을 수 없습니다: " + accountNumber);
-            }
-
-            // 2. 사용자의 계좌 목록에서 해당 계좌 찾기
-            List<Accounts> userAccounts = accountRepository.findByUserId(userId);
-            Accounts account = userAccounts.stream()
-                    .filter(acc -> acc.getAccount().equals(accountNumber))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("계좌를 찾을 수 없습니다: " + accountNumber));
-
-            // 3. 리벨런싱 기록 조회
-            List<SaveRebalancing> records = saveRebalancingRepository.findByAccountOrderByRecord_dateDesc(account);
+            // 직접 user_id와 account로 조회
+            List<SaveRebalancing> records = saveRebalancingRepository
+                    .findByUserIdAndAccountOrderByRecordDateDesc(user_id, account);
 
             return records.stream()
                     .map(SaveRebalancingResponse::new)
@@ -91,10 +79,10 @@ public class SaveRebalancingService {
     }
 
     @Transactional(readOnly = true)
-    public SaveRebalancingResponse getRebalancingRecord(int recordId) {
+    public SaveRebalancingResponse getRebalancingRecord(int record_id) {
         try {
-            SaveRebalancing record = saveRebalancingRepository.findById(recordId)
-                    .orElseThrow(() -> new RuntimeException("기록을 찾을 수 없습니다: " + recordId));
+            SaveRebalancing record = saveRebalancingRepository.findById(record_id)
+                    .orElseThrow(() -> new RuntimeException("기록을 찾을 수 없습니다: " + record_id));
 
             return new SaveRebalancingResponse(record);
 
@@ -103,55 +91,46 @@ public class SaveRebalancingService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public List<SaveRebalancingResponse> getUserRebalancingRecords(String userId) {
-        try {
-            // 사용자의 모든 계좌 조회
-            List<Accounts> userAccounts = accountRepository.findByUserId(userId);
-
-            if (userAccounts.isEmpty()) {
-                throw new RuntimeException("사용자의 계좌를 찾을 수 없습니다: " + userId);
-            }
-
-            // 모든 계좌의 리벨런싱 기록 조회
-            List<SaveRebalancing> allRecords = userAccounts.stream()
-                    .flatMap(account -> saveRebalancingRepository.findByAccountOrderByRecord_dateDesc(account).stream())
-                    .toList();
-
-            return allRecords.stream()
-                    .map(SaveRebalancingResponse::new)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            throw new RuntimeException("사용자 리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<SaveRebalancingResponse> getRebalancingRecordsByDate(String userId, LocalDate date) {
-        try {
-            // 사용자의 모든 계좌 조회
-            List<Accounts> userAccounts = accountRepository.findByUserId(userId);
-
-            if (userAccounts.isEmpty()) {
-                throw new RuntimeException("사용자의 계좌를 찾을 수 없습니다: " + userId);
-            }
-
-            // 특정 날짜의 리벨런싱 기록 조회
-            LocalDateTime startOfDay = date.atStartOfDay();
-            LocalDateTime endOfDay = date.atTime(23, 59, 59);
-
-            List<SaveRebalancing> dateRecords = userAccounts.stream()
-                    .flatMap(account -> saveRebalancingRepository
-                            .findByAccountAndRecord_dateBetween(account, startOfDay, endOfDay).stream())
-                    .toList();
-
-            return dateRecords.stream()
-                    .map(SaveRebalancingResponse::new)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            throw new RuntimeException("날짜별 리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
-        }
-    }
+//    @Transactional(readOnly = true)
+//    public List<SaveRebalancingResponse> getRebalancingRecordsByDate(String user_id, String account, LocalDate date) {
+//        try {
+//            // 1. 계좌 존재 여부 확인
+//            List<Accounts> userAccounts = accountRepository.findByUserId(user_id);
+//            boolean accountExists = userAccounts.stream()
+//                    .anyMatch(acc -> acc.getAccount().equals(account));
+//
+//            if (!accountExists) {
+//                throw new RuntimeException("계좌를 찾을 수 없습니다: " + account);
+//            }
+//
+//            // 2. 특정 계좌의 특정 날짜 리벨런싱 기록 조회
+//            LocalDateTime startOfDay = date.atStartOfDay();
+//            LocalDateTime endOfDay = date.atTime(23, 59, 59);
+//
+//            List<SaveRebalancing> dateRecords = saveRebalancingRepository
+//                    .findByUser_idAndAccountAndRecord_dateBetween(user_id, account, startOfDay, endOfDay);
+//
+//            return dateRecords.stream()
+//                    .map(SaveRebalancingResponse::new)
+//                    .collect(Collectors.toList());
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("날짜별 리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
+//        }
+//    }
+//
+//    // 사용자의 계좌 목록 조회 메서드
+//    @Transactional(readOnly = true)
+//    public List<String> getUserAccounts(String user_id) {
+//        try {
+//            List<Accounts> userAccounts = accountRepository.findByUserId(user_id);
+//
+//            return userAccounts.stream()
+//                    .map(Accounts::getAccount)
+//                    .collect(Collectors.toList());
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("사용자 계좌 목록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
+//        }
+//    }
 }
