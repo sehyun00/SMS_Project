@@ -1,0 +1,47 @@
+package com.upwardright.rebalancing.rebalancing.domain;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
+
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+@Table(name = "record")
+public class SaveRebalancing {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private int record; //레코드 번호 자동으로 저장
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account", nullable = false)
+    private Accounts account;  //계좌번호
+
+    @Column(nullable = false)
+    @CreatedDate
+    private LocalDateTime record_date; //record date ex)2025:05:24:09:00:00
+
+    @Column(nullable = false)
+    private double total_balance; //리벨런싱 시점 총잔고
+
+    @Column(nullable = false)
+    private String record_name;
+
+    @Lob
+    @Column(nullable = false)
+    private String memo;
+
+    @Column(nullable = false)
+    private double profit_rate; //수익률
+}
