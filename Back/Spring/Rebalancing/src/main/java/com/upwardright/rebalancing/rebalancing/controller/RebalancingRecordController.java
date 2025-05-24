@@ -5,6 +5,7 @@ import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingResponse;
 import com.upwardright.rebalancing.rebalancing.service.SaveRebalancingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,15 +20,17 @@ public class RebalancingRecordController {
      * 리벨런싱 기록 저장
      */
     @PostMapping("/upwardright/mystockaccount/record/save")
-    public ResponseEntity<?> saveRebalancing(@RequestBody SaveRebalancingRequest request) {
+    public ResponseEntity<SaveRebalancingResponse> saveRebalancing(
+            @RequestBody SaveRebalancingRequest request,
+            Authentication authentication) {
         try {
-            System.out.println("받은 요청: " + request); // 디버깅용
-            SaveRebalancingResponse response = saveRebalancingService.saveRebalancing(request);
+            String user_id = authentication.getName();
+            request.setUser_id(user_id); // JWT에서 추출한 user_id를 request에 세팅
+
+            SaveRebalancingResponse response = saveRebalancingService.saveRebalancing(request); // 파라미터 1개만 전달
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.err.println("에러 발생: " + e.getMessage()); // 디버깅용
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("오류: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -62,10 +65,11 @@ public class RebalancingRecordController {
      */
     @GetMapping("/upwardright/mystockaccount/record/account")
     public ResponseEntity<List<SaveRebalancingResponse>> getAccountRebalancingRecords(
-            @RequestParam String accountNumber,
-            @RequestParam String userId) {
+            @RequestParam String account,
+            Authentication authentication) {
         try {
-            List<SaveRebalancingResponse> records = saveRebalancingService.getRebalancingRecords(accountNumber, userId);
+            String user_id = authentication.getName();
+            List<SaveRebalancingResponse> records = saveRebalancingService.getRebalancingRecords(account, user_id);
             return ResponseEntity.ok(records);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
