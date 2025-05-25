@@ -1,21 +1,19 @@
-// 경로: src/styles/pages/setUpPage.styles.ts
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Theme } from '../../types/theme';
 
-// 스타일 타입 정의
-interface SetUpPageStyles {
+interface TermsPageStyles {
   container: ViewStyle;
   header: ViewStyle;
   headerTitle: TextStyle;
-  divider: ViewStyle;
-  sectionTitle: TextStyle;
   content: ViewStyle;
+  lastUpdated: TextStyle;
+  sectionTitle: TextStyle;
   paragraph: TextStyle;
   bottomSpacing: ViewStyle;
 }
 
-export default function createStyles(theme: Theme): SetUpPageStyles {
-  return StyleSheet.create<SetUpPageStyles>({
+export default function createStyles(theme: Theme): TermsPageStyles {
+  return StyleSheet.create<TermsPageStyles>({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
@@ -34,20 +32,21 @@ export default function createStyles(theme: Theme): SetUpPageStyles {
       fontWeight: '600',
       color: theme.colors.text,
     },
-    divider: {
-      height: 1,
-      backgroundColor: theme.colors.border,
-      marginVertical: 8,
+    content: {
+      flex: 1,
+      padding: 16,
+    },
+    lastUpdated: {
+      fontSize: 12,
+      color: theme.colors.textLight,
+      marginBottom: 24,
     },
     sectionTitle: {
       fontSize: 16,
       fontWeight: '600',
       color: theme.colors.text,
-      marginBottom: 8,
-    },
-    content: {
-      flex: 1,
-      padding: 16,
+      marginTop: 24,
+      marginBottom: 12,
     },
     paragraph: {
       fontSize: 14,
@@ -59,4 +58,4 @@ export default function createStyles(theme: Theme): SetUpPageStyles {
       height: 40,
     },
   });
-}
+} 
