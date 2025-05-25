@@ -1134,75 +1134,79 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
         </View>
       </View>
 
-      {/* 통화 전환 버튼 - 현금 영역 위에 배치 */}
-      <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10, marginTop: 2, marginRight: 2}}>
-        {/* 화면 회전 버튼 */}
-        <TouchableOpacity 
-          style={styles.rotateButton}
-          onPress={handleRotateScreen}
-        >
-          <Text style={styles.rotateButtonText}>↻</Text>
-        </TouchableOpacity>
-        
-        <View style={styles.currencyToggleContainer}>
-          <TouchableOpacity
-            style={[
-              styles.currencyButton,
-              currencyType === 'dollar' ? styles.activeCurrency : null
-            ]}
-            onPress={() => setCurrencyType('dollar')}
-          >
-            <Text style={[
-              styles.currencyText,
-              currencyType === 'dollar' ? styles.activeCurrencyText : null
-            ]}>$</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.currencyButton,
-              currencyType === 'won' ? styles.activeCurrency : null
-            ]}
-            onPress={() => setCurrencyType('won')}
-          >
-            <Text style={[
-              styles.currencyText,
-              currencyType === 'won' ? styles.activeCurrencyText : null
-            ]}>원</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {currentRecord && (
+        <>
+          {/* 통화 전환 버튼 - 현금 영역 위에 배치 */}
+          <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10, marginTop: 2, marginRight: 2}}>
+            {/* 화면 회전 버튼 */}
+            <TouchableOpacity 
+              style={styles.rotateButton}
+              onPress={handleRotateScreen}
+            >
+              <Text style={styles.rotateButtonText}>↻</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.currencyToggleContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.currencyButton,
+                  currencyType === 'dollar' ? styles.activeCurrency : null
+                ]}
+                onPress={() => setCurrencyType('dollar')}
+              >
+                <Text style={[
+                  styles.currencyText,
+                  currencyType === 'dollar' ? styles.activeCurrencyText : null
+                ]}>$</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.currencyButton,
+                  currencyType === 'won' ? styles.activeCurrency : null
+                ]}
+                onPress={() => setCurrencyType('won')}
+              >
+                <Text style={[
+                  styles.currencyText,
+                  currencyType === 'won' ? styles.activeCurrencyText : null
+                ]}>원</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      {/* 현금 카드 */}
-      <RMoneyComponent
-        totalAmount={totalCash}
-        cashItems={getCashItems}
-        currencyType={currencyType}
-        exchangeRate={currentExchangeRate}
-        totalBalance={totalBalance}
-        calculateCurrentPortion={calculateCurrentPortion}
-      />
+          {/* 현금 카드 */}
+          <RMoneyComponent
+            totalAmount={totalCash}
+            cashItems={getCashItems}
+            currencyType={currencyType}
+            exchangeRate={currentExchangeRate}
+            totalBalance={totalBalance}
+            calculateCurrentPortion={calculateCurrentPortion}
+          />
 
-      {/* 해외주식 카드 */}
-      <RForeignComponent
-        totalAmount={totalForeign}
-        percentChange={getForeignPercentChange}
-        stocks={getForeignStocks}
-        currencyType={currencyType}
-        exchangeRate={currentExchangeRate}
-        totalBalance={totalBalance}
-        calculateCurrentPortion={calculateCurrentPortion}
-      />
+          {/* 해외주식 카드 */}
+          <RForeignComponent
+            totalAmount={totalForeign}
+            percentChange={getForeignPercentChange}
+            stocks={getForeignStocks}
+            currencyType={currencyType}
+            exchangeRate={currentExchangeRate}
+            totalBalance={totalBalance}
+            calculateCurrentPortion={calculateCurrentPortion}
+          />
 
-      {/* 국내주식 카드 */}
-      <RDomesticComponent
-        totalAmount={totalDomestic}
-        percentChange={getDomesticPercentChange}
-        stocks={getDomesticStocks}
-        currencyType={currencyType}
-        exchangeRate={currentExchangeRate}
-        totalBalance={totalBalance}
-        calculateCurrentPortion={calculateCurrentPortion}
-      />
+          {/* 국내주식 카드 */}
+          <RDomesticComponent
+            totalAmount={totalDomestic}
+            percentChange={getDomesticPercentChange}
+            stocks={getDomesticStocks}
+            currencyType={currencyType}
+            exchangeRate={currentExchangeRate}
+            totalBalance={totalBalance}
+            calculateCurrentPortion={calculateCurrentPortion}
+          />
+        </>
+      )}
 
       {/* 포트폴리오 추가 모달 */}
       <Modal

@@ -2,7 +2,7 @@
 export interface AccountInfo {
   company: string;
   accountNumber: string;
-  returnRate?: number;
+  returnRate: number;
 }
 
 // API에서 가져오는 계좌 정보 인터페이스
@@ -69,8 +69,8 @@ export interface BalanceInfo {
 export interface SavedAccountInfo {
   account: string;
   account_password: string;
-  connectedId: string;
   organization: string;
+  connectedId: string;
 }
 
 // 계좌 비밀번호 파라미터
@@ -87,4 +87,9 @@ export interface ChartColors {
     krw: string;
     usd: string;
   };
+}
+
+export interface ConnectedAccount {
+  accountNumber: string;
+  connectedId: string;
 } 
