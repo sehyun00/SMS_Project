@@ -1,3 +1,6 @@
+// 파일 경로: src/components/PortfolioEditor.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > PortfolioEditor.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,

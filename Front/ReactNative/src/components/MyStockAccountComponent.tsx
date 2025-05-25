@@ -2,13 +2,16 @@
 // 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > MyStockAccountComponent.tsx
 
 import React, { useEffect, useState, ReactElement, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, TextInput, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 컴포넌트 임포트
-import CircularGraphComponent from './CircularGraphComponent';
-import IndividualStockComponent from './IndividualStockComponent';
+import CircularGraphComponent from './common/CircularGraphComponent';
+import IndividualStockComponent from './common/IndividualStockComponent';
+import AccountPasswordModal from './common/AccountPasswordModal';
+import AccountSelectorComponent from './AccountSelectorComponent';
 
 // API 임포트
 import { 
@@ -29,9 +32,12 @@ import { FLASK_SERVER_URL } from '../constants/config';
 
 // 스타일 임포트
 import withTheme from '../hoc/withTheme';
-import createStyles from '../styles/components/myStockAccountComponent.styles';
+import createStyles, { MyStockAccountComponentStylesType } from '../styles/components/myStockAccountComponent.styles';
 // 공통 Theme 타입 가져오기
 import { Theme } from '../types/theme';
+
+// 계좌 정보 Context 임포트
+import { useAccounts } from '../context/AccountsContext';
 
 // 주식 데이터 인터페이스 정의
 interface StockData {
@@ -68,12 +74,15 @@ interface MyStockAccountComponentProps {
 // 컴포넌트 정의
 const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React.ReactElement => {
   const insets = useSafeAreaInsets();
-  const styles = createStyles(theme);
+  const styles: MyStockAccountComponentStylesType = createStyles(theme);
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
   const [stockAccounts, setStockAccounts] = useState<AccountInfo[]>([]);
   const [balanceInfo, setBalanceInfo] = useState<Record<string, BalanceInfo>>({});
   const [selectedAccountIndex, setSelectedAccountIndex] = useState(0);
   const [currencyType, setCurrencyType] = useState<'KRW' | 'USD'>('KRW');
+  
+  // 계좌 정보 Context 사용
+  const { accounts: savedAccounts, addAccount: saveAccount, updateAccount } = useAccounts();
   
   // 비밀번호 입력 관련 상태
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -101,6 +110,33 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
   const findConnectedIdByAccountNumber = (accountNumber: string): string | undefined => {
     const account = connectedAccounts.find(acc => acc.accountNumber === accountNumber);
     return account?.connectedId;
+  };
+  
+  // 로컬에 저장된 계좌 정보 찾기
+  const findSavedAccount = (accountNumber: string, organization: string) => {
+    return savedAccounts.find(acc => 
+      acc.account === accountNumber && acc.organization === organization
+    );
+  };
+
+  // 저장된 계좌 비밀번호 확인 (직접 AsyncStorage도 함께 확인)
+  const checkSavedPassword = async (accountNumber: string, organization: string) => {
+    // 1. AccountsContext에서 계좌 정보 찾기
+    const savedAccount = findSavedAccount(accountNumber, organization);
+    const hasContextPassword = !!(savedAccount && savedAccount.account_password);
+    
+    // 2. 직접 AsyncStorage에서도 확인
+    let hasDirectPassword = false;
+    try {
+      const directPassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
+      hasDirectPassword = !!directPassword;
+    } catch (err) {
+      console.error('직접 저장소 확인 오류:', err);
+    }
+    
+    console.log(`계좌 ${accountNumber} 비밀번호 확인 결과: Context=${hasContextPassword}, Direct=${hasDirectPassword}`);
+    
+    return hasContextPassword || hasDirectPassword;
   };
 
   // 계좌 선택 핸들러
@@ -139,13 +175,37 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
       }
     }
     
-    // connectedId가 있으면 모달 표시
+    // connectedId가 있으면 계좌 정보 설정
     if (connectedId) {
       setAccountToLoad({account, connectedId});
-      setAccountPassword(""); // 비밀번호 초기화
-      setPasswordError(""); // 에러 메시지 초기화
-      console.log('모달 표시 설정: true');
-      setShowPasswordModal(true);
+      
+      // 증권사 코드 찾기
+      const organizationCode = getOrganizationCode(account.company);
+      
+      // 저장된 계좌 정보 확인
+      const savedAccount = findSavedAccount(account.accountNumber, organizationCode);
+      
+      if (savedAccount && savedAccount.account_password) {
+        // 저장된 비밀번호가 있으면 바로 계좌 정보 조회
+        console.log('저장된 계좌 비밀번호 사용');
+        getAccountBalance(account, connectedId, savedAccount.account_password)
+          .then(() => {
+            console.log('저장된 비밀번호로 계좌 잔고 조회 완료');
+          })
+          .catch(error => {
+            console.error('저장된 비밀번호로 계좌 조회 실패, 재입력 요청:', error);
+            // 저장된 비밀번호로 조회 실패 시 비밀번호 입력 요청
+            setAccountPassword("");
+            setPasswordError("저장된 비밀번호가 유효하지 않습니다. 다시 입력해주세요.");
+            setShowPasswordModal(true);
+          });
+      } else {
+        // 저장된 비밀번호가 없으면 비밀번호 입력 요청
+        setAccountPassword("");
+        setPasswordError("");
+        console.log('저장된 비밀번호 없음, 모달 표시');
+        setShowPasswordModal(true);
+      }
     } else {
       console.error('이용 가능한 connectedId가 없습니다.');
     }
@@ -186,7 +246,48 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
           accountPassword
         );
         
-        console.log('계좌 잔고 조회 완료');
+        // 성공적으로 조회했다면 계좌 정보 저장
+        const organizationCode = getOrganizationCode(accountToLoad.account.company);
+        
+        // 계좌 정보 생성
+        const accountInfo = {
+          account: accountToLoad.account.accountNumber,
+          account_password: accountPassword,
+          connectedId: accountToLoad.connectedId,
+          organization: organizationCode
+        };
+        
+        // 이미 저장된 계좌인지 확인
+        const existingAccount = findSavedAccount(accountToLoad.account.accountNumber, organizationCode);
+        
+        // 계좌 정보 저장 - 기존 계좌면 update, 없으면 add
+        if (existingAccount) {
+          console.log(`기존 계좌 정보 업데이트: ${accountToLoad.account.accountNumber}`);
+          const result = await updateAccount(accountInfo);
+          if (!result) {
+            console.error('계좌 정보 업데이트 실패');
+          }
+        } else {
+          console.log(`새 계좌 정보 저장: ${accountToLoad.account.accountNumber}`);
+          const result = await saveAccount(accountInfo);
+          if (!result) {
+            console.error('계좌 정보 저장 실패');
+          }
+        }
+        
+        // 확인을 위해 저장 후 계좌 정보 다시 조회
+        const savedAgain = findSavedAccount(accountToLoad.account.accountNumber, organizationCode);
+        console.log(`계좌 ${accountToLoad.account.accountNumber}의 비밀번호 저장 확인:`, savedAgain ? '성공' : '실패');
+        
+        // 추가로 AsyncStorage에 직접 저장 (이중 보장)
+        try {
+          await AsyncStorage.setItem(`direct_password_${accountToLoad.account.accountNumber}`, accountPassword);
+          console.log(`계좌 ${accountToLoad.account.accountNumber}의 비밀번호 직접 저장 완료`);
+        } catch (err) {
+          console.error('직접 저장 오류:', err);
+        }
+        
+        console.log('계좌 잔고 조회 완료 및 계좌 정보 저장');
       }
     } catch (error: any) {
       console.error('계좌 잔고 조회 실패:', error);
@@ -300,13 +401,59 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
       setAccountPassword("");
       setPasswordError("");
       
-      // 모달 표시
-      setTimeout(() => {
-        console.log('초기 모달 자동 표시');
-        setShowPasswordModal(true);
-      }, 800); // 약간 더 긴 지연 시간
+      // 증권사 코드 찾기
+      const organizationCode = getOrganizationCode(account.company);
+      
+      // 비밀번호 확인 (직접 저장소도 함께 확인)
+      checkSavedPassword(account.accountNumber, organizationCode).then(hasPassword => {
+        if (hasPassword) {
+          // 저장된 비밀번호가 있으면 자동으로 계좌 정보 조회
+          console.log('저장된 계좌 비밀번호로 자동 조회 시도');
+          
+          // 비밀번호 가져오기 (Context 혹은 직접 저장소)
+          const getPassword = async () => {
+            // Context에서 먼저 확인
+            const savedAccount = findSavedAccount(account.accountNumber, organizationCode);
+            if (savedAccount && savedAccount.account_password) {
+              return savedAccount.account_password;
+            }
+            
+            // 직접 저장소에서 확인
+            try {
+              return await AsyncStorage.getItem(`direct_password_${account.accountNumber}`);
+            } catch (err) {
+              console.error('직접 저장소에서 비밀번호 가져오기 오류:', err);
+              return null;
+            }
+          };
+          
+          getPassword().then(password => {
+            if (password) {
+              getAccountBalance(account, connectedId, password)
+                .then(() => {
+                  console.log('저장된 비밀번호로 계좌 잔고 조회 완료');
+                })
+                .catch(error => {
+                  console.error('저장된 비밀번호로 계좌 조회 실패, 재입력 요청:', error);
+                  // 저장된 비밀번호로 조회 실패 시 비밀번호 입력 요청
+                  setShowPasswordModal(true);
+                });
+            } else {
+              // 비밀번호를 찾을 수 없는 경우
+              console.log('비밀번호를 가져올 수 없음, 모달 표시');
+              setShowPasswordModal(true);
+            }
+          });
+        } else {
+          // 저장된 비밀번호가 없으면 모달 표시
+          setTimeout(() => {
+            console.log('저장된 비밀번호 없음, 초기 모달 자동 표시');
+            setShowPasswordModal(true);
+          }, 800);
+        }
+      });
     }
-  }, [stockAccounts, connectedAccounts]); // 계좌 정보가 바뀌면 실행
+  }, [stockAccounts, connectedAccounts, savedAccounts]); // 계좌 정보와 저장된 계좌 정보가 바뀌면 실행
   
   // 계좌 잔고 정보 가져오기
   const getAccountBalance = async (account: AccountInfo, connectedId: string, password: string) => {
@@ -620,24 +767,13 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
     >
       {/* 계좌 선택 버튼 영역 */}
       <View style={styles.accountSelectorContainer}>
-        {stockAccounts.map((account, index) => (
-          <TouchableOpacity
-            key={account.accountNumber}
-            style={[
-              styles.accountButton,
-              selectedAccountIndex === index ? styles.selectedAccountButton : null
-            ]}
-            onPress={() => handleAccountChange(index)}
-          >
-            <Text style={
-              selectedAccountIndex === index ? 
-                styles.selectedAccountText : 
-                styles.accountText
-            }>
-              {account.company} {account.accountNumber.slice(-4)}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        <AccountSelectorComponent 
+          theme={theme}
+          accounts={stockAccounts.length > 0 ? stockAccounts : []}
+          selectedAccountIndex={selectedAccountIndex < stockAccounts.length ? selectedAccountIndex : 0}
+          onAccountChange={handleAccountChange}
+          isLoading={false}
+        />
       </View>
       
       {/* 통화 선택 버튼 영역 */}
@@ -717,57 +853,22 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
           ))}
       </View>
       
-      {/* 비밀번호 입력 모달 */}
-      <Modal
+      {/* 계좌 비밀번호 모달 - 공통 컴포넌트 사용 */}
+      <AccountPasswordModal
+        theme={theme}
         visible={showPasswordModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => {
-          console.log('모달 뒤로가기 버튼');
-          setShowPasswordModal(false);
-        }}
-      >
-        <View style={modalStyles.modalBackground}>
-          <View style={modalStyles.modalContainer}>
-            <Text style={modalStyles.modalTitle}>계좌 비밀번호 입력</Text>
-            <Text style={modalStyles.modalSubtitle}>
-              {accountToLoad ? `${accountToLoad.account.company} (${accountToLoad.account.accountNumber.slice(-4)})` : ''}
-            </Text>
-            
-            <TextInput
-              style={modalStyles.passwordInput}
-              placeholder="계좌 비밀번호"
-              placeholderTextColor={theme.colors.placeholder}
-              secureTextEntry={true}
-              keyboardType="number-pad"
-              maxLength={10}
-              value={accountPassword}
-              onChangeText={setAccountPassword}
-              autoFocus={true}
-            />
-            
-            {passwordError ? (
-              <Text style={modalStyles.errorText}>{passwordError}</Text>
-            ) : null}
-            
-            <View style={modalStyles.buttonContainer}>
-              <TouchableOpacity
-                style={[modalStyles.button, modalStyles.cancelButton]}
-                onPress={handlePasswordCancel}
-              >
-                <Text style={modalStyles.cancelButtonText}>취소</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[modalStyles.button, modalStyles.confirmButton]}
-                onPress={handlePasswordConfirm}
-              >
-                <Text style={modalStyles.confirmButtonText}>확인</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        account={accountToLoad ? 
+          {
+            company: accountToLoad.account.company,
+            accountNumber: accountToLoad.account.accountNumber
+          } : null}
+        password={accountPassword}
+        onChangePassword={setAccountPassword}
+        onConfirm={handlePasswordConfirm}
+        onCancel={handlePasswordCancel}
+        isLoading={false} // MyStockAccountComponent에서는 별도의 로딩 상태 변수가 없어서 false 사용
+        errorMessage={passwordError}
+      />
     </ScrollView>
   );
 };
@@ -778,78 +879,3 @@ MemoizedComponent.displayName = 'MyStockAccountComponent';
 
 // 최상위 레벨에서 export
 export default withTheme(MemoizedComponent);
-
-// 모달 스타일
-const modalStyles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalContainer: {
-    width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 20,
-  },
-  passwordInput: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    marginBottom: 15,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 15,
-    fontSize: 14,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  button: {
-    width: '48%',
-    height: 45,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  confirmButton: {
-    backgroundColor: '#007AFF',
-  },
-  cancelButtonText: {
-    color: '#333',
-    fontSize: 16,
-  },
-  confirmButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
-});

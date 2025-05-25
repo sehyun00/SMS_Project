@@ -5,6 +5,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } f
 import { Platform } from 'react-native'; // 플랫폼 정보 가져오기
 import { login as loginApi, signup as signupApi } from '../api/authApi';
 import { SPRING_SERVER_URL } from '../constants/config';
+import { useAccounts } from './AccountsContext'; // AccountsContext 추가
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -69,12 +70,25 @@ api.interceptors.response.use(
   }
 );
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+// 계좌 정보 삭제 Context 접근을 위한 래퍼
+export const AuthProviderWithAccountsContext: React.FC<{ children: ReactNode }> = ({ children }) => {
+  return (
+    <AuthProviderInternal>
+      {children}
+    </AuthProviderInternal>
+  );
+};
+
+// 내부 AuthProvider 구현
+const AuthProviderInternal: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true); // 초기 상태를 true로 설정
   const [lastError, setLastError] = useState<string | null>(null);
   const [loggedInId, setLoggedInId] = useState(null);
   const [loggedToken, setLoggedToken] = useState(null);
+  
+  // AccountsContext 훅 사용 (내부 컴포넌트에서만)
+  const { clearAccounts } = useAccounts();
 
   // 앱 시작 시 저장된 로그인 상태 확인
   useEffect(() => {
@@ -217,11 +231,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLoading(true);
 
     try {
+      // 인증 정보 삭제
       await AsyncStorage.removeItem('isLoggedIn');
       await AsyncStorage.removeItem('authToken');
+      
+      // 계좌 정보 삭제 (AccountsContext의 clearAccounts 호출)
+      await clearAccounts();
+      
+      console.log('로그아웃 성공: 인증 정보 및 계좌 정보 삭제');
       setIsLoggedIn(false);
       setLastError(null);
     } catch (error) {
+      console.error('로그아웃 중 오류:', error);
       setLastError('로그아웃 중 오류 발생');
     } finally {
       setLoading(false);
@@ -245,11 +266,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+// 기존 AuthProvider를 AuthProviderWithAccountsContext로 대체
+export const AuthProvider = AuthProviderWithAccountsContext;
+
 // 커스텀 훅으로 AuthContext 사용 편의 제공
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth는 AuthProvider 내부에서만 사용할 수 있습니다');
+  if (!context) {
+    throw new Error('useAuth는 AuthProvider 내부에서 사용해야 합니다');
   }
   return context;
 };
