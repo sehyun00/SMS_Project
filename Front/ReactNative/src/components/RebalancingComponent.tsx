@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchConnectedAccounts } from '../api/connectedAccountApi';
 import { FLASK_SERVER_URL } from '../constants/config';
 import axios from 'axios';
-import AccountPasswordModal from './AccountPasswordModal';
+import AccountPasswordModal from './common/AccountPasswordModal';
 import { useAccounts } from '../context/AccountsContext';
 
 // 컴포넌트 임포트
@@ -97,6 +97,9 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   const defaultNavigation = useNavigation<MainPageNavigationProp>();
   const { loggedToken } = useAuth();
   
+  // navigation prop이 제공되지 않은 경우 useNavigation 훅 사용
+  const nav = navigation || defaultNavigation;
+  
   // API에서 가져온 증권 계좌 정보 상태
   const [stockAccounts, setStockAccounts] = useState<ApiAccountInfo[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -115,9 +118,6 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 계좌 정보 Context 사용
   const { accounts: savedAccounts, addAccount: saveAccount, updateAccount } = useAccounts();
   
-  // navigation prop이 제공되지 않은 경우 useNavigation 훅 사용
-  const nav = navigation || defaultNavigation;
-
   // 화면 너비 구하기
   const screenWidth = Dimensions.get('window').width;
   const cardWidth = screenWidth - 32; // 카드 너비 (양쪽 16px 패딩 제외)
@@ -1005,12 +1005,15 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           onMomentumScrollEnd={handleScrollEnd}
           snapToInterval={cardTotalWidth}
           decelerationRate="fast"
-          snapToAlignment="center"
-          contentContainerStyle={{ paddingLeft: 0, paddingRight: 0 }}
+          snapToAlignment="start"
+          contentContainerStyle={{ 
+            paddingLeft: 16,
+            paddingRight: 16
+          }}
         >
           {/* 기록이 없을 때 표시할 카드 */}
           {recordNames.length === 0 ? (
-            <View style={[styles.recordItemContainer, { width: cardWidth, marginLeft: 16, marginRight: screenWidth - cardWidth - 16 }]}>
+            <View style={[styles.recordItemContainer, { width: cardWidth }]}>
               <View style={{alignItems: 'center', justifyContent: 'center', padding: 20}}>
                 <Ionicons name="document-text-outline" size={50} color={theme.colors.textLight} style={{marginBottom: 16}} />
                 <Text style={{fontSize: 18, fontWeight: 'bold', color: theme.colors.text, marginBottom: 8}}>
@@ -1024,7 +1027,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           ) : (
             // 기존 기록 카드들
             recordNames.map((record, index) => (
-              <View key={record.record_id} style={[styles.recordItemContainer, { width: cardWidth, marginLeft: 16, marginRight: screenWidth - cardWidth - 16 }]}>
+              <View key={record.record_id} style={[styles.recordItemContainer, { width: cardWidth }]}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <Text style={[styles.recordToggleText, {fontSize: 18, fontWeight: '600'}]}>
@@ -1078,7 +1081,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           )}
           
           {/* 포트폴리오 추가 카드 (맨 오른쪽) */}
-          <View style={[styles.loadPortfolioContainer, { width: cardWidth, marginLeft: 16, marginRight: screenWidth - cardWidth - 16 }]}>
+          <View style={[styles.loadPortfolioContainer, { width: cardWidth }]}>
             <Text style={styles.loadPortfolioIcon}>+</Text>
             <Text style={styles.addRecordText}>새 포트폴리오 추가하기</Text>
           </View>

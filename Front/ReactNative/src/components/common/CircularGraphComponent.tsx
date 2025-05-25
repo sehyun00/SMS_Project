@@ -6,10 +6,10 @@ import { View, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 
 // 스타일 임포트
-import withTheme from '../hoc/withTheme';
-import createStyles from '../styles/components/circularGraphComponent.styles';
+import withTheme from '../../hoc/withTheme';
+import createStyles from '../../styles/components/circularGraphComponent.styles';
 // 전역 Theme 타입 가져오기
-import { Theme } from '../types/theme'; // 공통 Theme 인터페이스 사용
+import { Theme } from '../../types/theme'; // 공통 Theme 인터페이스 사용
 
 // 데이터 아이템 인터페이스 정의
 interface DataItem {

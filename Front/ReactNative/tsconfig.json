@@ -3,6 +3,8 @@
     "allowJs": true,
     "jsx": "react-native",
     "target": "esnext",
+    "module": "node16",
+    "moduleResolution": "node16",
     "lib": [
       "esnext"
     ],
@@ -10,7 +12,6 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "strict": false,
     "skipLibCheck": true

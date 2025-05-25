@@ -8,9 +8,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 컴포넌트 임포트
-import CircularGraphComponent from './CircularGraphComponent';
-import IndividualStockComponent from './IndividualStockComponent';
-import AccountPasswordModal from './AccountPasswordModal';
+import CircularGraphComponent from './common/CircularGraphComponent';
+import IndividualStockComponent from './common/IndividualStockComponent';
+import AccountPasswordModal from './common/AccountPasswordModal';
 import AccountSelectorComponent from './AccountSelectorComponent';
 
 // API 임포트
