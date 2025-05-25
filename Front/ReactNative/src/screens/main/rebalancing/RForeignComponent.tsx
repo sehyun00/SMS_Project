@@ -1,14 +1,13 @@
-// 파일 경로: src/components/RDomesticComponent.tsx
-// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RDomesticComponent.tsx
+// 파일 경로: src/components/RForeignComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RForeignComponent.tsx
 
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import withTheme from '../hoc/withTheme';
-import { Theme } from '../types/theme';
-import { COLUMN_WIDTHS } from '../constants/tableConfig';
-import { createTableStyles } from '../styles/components/rtableComponents.styles';
+import withTheme from '../../../hoc/withTheme';
+import { Theme } from '../../../types/theme';
+import { COLUMN_WIDTHS } from '../../../constants/tableConfig';
+import { createTableStyles } from '../../../styles/components/rtableComponents.styles';
 
-// 주식 데이터 인터페이스
 interface StockItem {
   name: string;
   ticker: string;
@@ -20,7 +19,7 @@ interface StockItem {
   market_order?: number;
 }
 
-interface RDomesticComponentProps {
+interface RForeignComponentProps {
   totalAmount: number;
   percentChange: number;
   stocks: StockItem[];
@@ -31,7 +30,7 @@ interface RDomesticComponentProps {
   theme?: Theme;
 }
 
-const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
+const RForeignComponent: React.FC<RForeignComponentProps> = ({
   totalAmount,
   percentChange,
   stocks,
@@ -58,16 +57,14 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.categoryTitle}>국내주식</Text>
+        <Text style={styles.categoryTitle}>해외주식</Text>
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>
             {currencyType === 'won'
               ? `${KRW_SYMBOL}${Math.round(totalAmount * exchangeRate).toLocaleString()}`
               : `$${totalAmount.toFixed(2)}`}
           </Text>
-          <Text style={[styles.percentChange, percentChange < 0 ? styles.negativeChange : styles.positiveChange]}>
-            {percentChange}%
-          </Text>
+          <Text style={[styles.percentChange, styles.negativeChange]}>{percentChange}%</Text>
         </View>
       </View>
 
@@ -160,4 +157,4 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
   );
 };
 
-export default withTheme(RDomesticComponent);
+export default withTheme(RForeignComponent);

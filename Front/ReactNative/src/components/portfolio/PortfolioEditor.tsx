@@ -1,4 +1,4 @@
-// 파일 경로: src/components/PortfolioEditor.tsx
+// 파일 경로: src/components/portfolio/PortfolioEditor.tsx
 // 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > PortfolioEditor.tsx
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -14,9 +14,9 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList, PortfolioEditorNavigationProp } from '../types/navigation';
+import { RootStackParamList, PortfolioEditorNavigationProp } from '../../types/navigation';
 
 // API 함수 임포트
 import { 
@@ -25,7 +25,7 @@ import {
   createPortfolio,
   updatePortfolio,
   searchStocks
-} from '../api/rebalancingApi';
+} from '../../api/rebalancingApi';
 
 // 더미 데이터 임포트
 import {
@@ -34,12 +34,12 @@ import {
   getCurrentExchangeRate,
   updateRecordName,
   updateRecordRuds
-} from '../data/dummyData';
+} from '../../data/dummyData';
 
 // 스타일 임포트
-import withTheme from '../hoc/withTheme';
-import { Theme } from '../types/theme';
-import createStyles from '../styles/components/portfolioEditor.styles';
+import withTheme from '../../hoc/withTheme';
+import { Theme } from '../../types/theme';
+import createStyles from '../../styles/components/portfolioEditor.styles';
 
 // 검색 결과 항목 인터페이스
 interface SearchResultItem {

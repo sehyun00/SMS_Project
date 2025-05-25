@@ -11,10 +11,10 @@ import {
   getAccountRecords,
   getRecordRuds,
   getCurrentExchangeRate
-} from '../data/dummyData';
+} from '../../../data/dummyData';
 
 // 스타일 임포트
-import { styles } from '../styles/components/recordComponent.styles';
+import { styles } from '../../../styles/components/recordComponent.styles';
 
 // Record 인터페이스 정의
 interface Record {

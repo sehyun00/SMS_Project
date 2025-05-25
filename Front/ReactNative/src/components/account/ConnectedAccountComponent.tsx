@@ -24,14 +24,14 @@ import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 
 // 공통 Theme 타입 가져오기
-import { Theme } from '../types/theme';
-import withTheme from '../hoc/withTheme';
+import { Theme } from '../../types/theme';
+import withTheme from '../../hoc/withTheme';
 
 // data import
-import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../data/organizationData';
-import { useAuth } from '../context/AuthContext';
-import { verifySocialInfo, registerAccount, getAccountBalance } from '../api/connectedAccountApi';
-import { useExchangeRate } from '../hooks/useExchangeRate';
+import { findSecuritiesFirmByName, SECURITIES_FIRMS } from '../../data/organizationData';
+import { useAuth } from '../../context/AuthContext';
+import { verifySocialInfo, registerAccount, getAccountBalance } from '../../api/connectedAccountApi';
+import { useExchangeRate } from '../../hooks/useExchangeRate';
 
 /**
  * ConnectedAccountComponent Props

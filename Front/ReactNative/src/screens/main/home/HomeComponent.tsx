@@ -4,18 +4,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../context/AuthContext';
-import { fetchStockAccounts } from '../api/homeApi';
-import { useAccounts } from '../context/AccountsContext';
-import { findSecuritiesFirmByName } from '../data/organizationData';
+import { useAuth } from '../../../context/AuthContext';
+import { fetchStockAccounts } from '../../../api/homeApi';
+import { useAccounts } from '../../../context/AccountsContext';
+import { findSecuritiesFirmByName } from '../../../data/organizationData';
 
 // 컴포넌트 임포트
-import ConnectedAccountComponent from './ConnectedAccountComponent';
+import ConnectedAccountComponent from '../../../components/account/ConnectedAccountComponent';
 
 // 스타일 임포트
-import withTheme from '../hoc/withTheme';
-import createStyles from '../styles/components/homeComponent.styles';
-import { Theme } from '../types/theme';
+import withTheme from '../../../hoc/withTheme';
+import createStyles from '../../../styles/components/homeComponent.styles';
+import { Theme } from '../../../types/theme';
 
 // 계좌 데이터 인터페이스 정의
 interface AccountData {

@@ -1,5 +1,5 @@
-// 파일 경로: src/components/ErrorBoundary.tsx
-// 컴포넌트 흐름: 
+// 파일 경로: src/components/common/layout/ErrorBoundary.tsx
+// 컴포넌트 흐름: App.js > ErrorBoundary.tsx
 
 import React, { Component, ReactNode } from 'react';
 import { Text, View, StyleSheet } from 'react-native';

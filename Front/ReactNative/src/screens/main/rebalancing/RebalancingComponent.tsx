@@ -5,17 +5,17 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList, Alert, Dimensions, InteractionManager, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { MainPageNavigationProp } from '../types/navigation';
-import { useAuth } from '../context/AuthContext';
+import { MainPageNavigationProp } from '../../../types/navigation';
+import { useAuth } from '../../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { fetchStockAccounts } from '../api/homeApi';
-import { findSecuritiesFirmByName } from '../data/organizationData';
+import { fetchStockAccounts } from '../../../api/homeApi';
+import { findSecuritiesFirmByName } from '../../../data/organizationData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchConnectedAccounts } from '../api/connectedAccountApi';
-import { FLASK_SERVER_URL } from '../constants/config';
+import { fetchConnectedAccounts } from '../../../api/connectedAccountApi';
+import { FLASK_SERVER_URL } from '../../../constants/config';
 import axios from 'axios';
-import AccountPasswordModal from './common/AccountPasswordModal';
-import { useAccounts } from '../context/AccountsContext';
+import AccountPasswordModal from '../../../components/common/modals/AccountPasswordModal';
+import { useAccounts } from '../../../context/AccountsContext';
 
 // 컴포넌트 임포트
 import RForeignComponent from './RForeignComponent';
@@ -30,20 +30,20 @@ import {
   getRecordRuds,
   calculateRecordValue,
   getCurrentExchangeRate
-} from '../data/dummyData';
+} from '../../../data/dummyData';
 
 // 스타일 임포트
-import withTheme from '../hoc/withTheme';
-import createStyles from '../styles/components/rebalancingComponent.styles';
+import withTheme from '../../../hoc/withTheme';
+import createStyles from '../../../styles/components/rebalancingComponent.styles';
 
 // 커스텀 훅 임포트
-import { useExchangeRate } from '../hooks/useExchangeRate';
+import { useExchangeRate } from '../../../hooks/useExchangeRate';
 
 // 공통 Theme 타입 가져오기
-import { Theme } from '../types/theme';
+import { Theme } from '../../../types/theme';
 
 // 계좌 선택 컴포넌트 임포트
-import AccountSelectorComponent from './AccountSelectorComponent';
+import AccountSelectorComponent from '../../../components/account/AccountSelectorComponent';
 
 // API에서 가져오는 계좌 정보 인터페이스
 interface ApiAccountInfo {
@@ -118,10 +118,9 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 계좌 정보 Context 사용
   const { accounts: savedAccounts, addAccount: saveAccount, updateAccount } = useAccounts();
   
-  // 화면 너비 구하기
+  // 카드 너비 계산 수정
   const screenWidth = Dimensions.get('window').width;
-  const cardWidth = screenWidth - 32; // 카드 너비 (양쪽 16px 패딩 제외)
-  const cardTotalWidth = screenWidth; // 스와이프 시 한 번에 이동할 너비
+  const cardWidth = screenWidth; // 전체 화면 너비로 설정
 
   // 스크롤뷰 참조
   const scrollViewRef = useRef<ScrollView>(null);
@@ -872,8 +871,8 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 스와이프 종료 후 핸들러
   const handleScrollEnd = (event: any) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    // 카드 너비와 마진을 고려한 페이지 계산
-    const newIndex = Math.round(contentOffsetX / cardTotalWidth);
+    // 카드 너비와 패딩을 고려한 페이지 계산
+    const newIndex = Math.round(contentOffsetX / (cardWidth + 16));
     
     // 현재 페이지 인덱스 업데이트
     setCurrentPageIndex(newIndex);
@@ -885,8 +884,10 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
       setShowLoadPortfolioModal(true);
       // 스크롤 위치를 다시 왼쪽으로 복원
       setTimeout(() => {
-        const targetX = recordNames.length > 0 ? 0 : 0; // 첫 번째 카드로
-        scrollViewRef.current?.scrollTo({ x: targetX, animated: true });
+        scrollViewRef.current?.scrollTo({ 
+          x: 0,
+          animated: true 
+        });
         setCurrentPageIndex(0);
         setCurrentRecordIndex(recordNames.length > 0 ? 0 : -1);
       }, 300);
@@ -895,18 +896,15 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     
     // 기록이 없는 경우 특별 처리
     if (recordNames.length === 0) {
-      // 기록 없음 카드가 항상 왼쪽에 보이도록 처리
       setCurrentRecordIndex(-1);
       return;
     }
     
-    // 실제 기록 인덱스 계산 (더 이상 포트폴리오 카드를 고려할 필요 없음)
-    const actualIndex = newIndex;
-    
-    if (actualIndex !== currentRecordIndex && actualIndex >= 0 && actualIndex < recordNames.length) {
-      setCurrentRecordIndex(actualIndex);
+    // 실제 기록 인덱스 계산
+    if (newIndex >= 0 && newIndex < recordNames.length) {
+      setCurrentRecordIndex(newIndex);
       // 기록 ID 업데이트
-      const record_id = recordNames[actualIndex]?.record_id;
+      const record_id = recordNames[newIndex]?.record_id;
       if (record_id) {
         setSelectedRecordId(record_id);
       }
@@ -996,25 +994,31 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
       </View>
 
       {/* 리밸런싱 기록 스와이프 영역 */}
-      <View style={styles.recordSwipeContainer}>
+      <View style={[styles.recordSwipeContainer, {
+        flex: 1,
+        alignItems: 'center'
+      }]}>
         <ScrollView
           ref={scrollViewRef}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={handleScrollEnd}
-          snapToInterval={cardTotalWidth}
           decelerationRate="fast"
           snapToAlignment="start"
+          snapToInterval={cardWidth}
           contentContainerStyle={{ 
-            paddingLeft: 16,
-            paddingRight: 16
+            flexGrow: 1,
+            alignItems: 'center',
+            paddingLeft: screenWidth / 2 - cardWidth / 2,
+            paddingRight: screenWidth / 2 - cardWidth / 2,
+            gap: 16  // 카드 간 간격 추가
           }}
         >
           {/* 기록이 없을 때 표시할 카드 */}
           {recordNames.length === 0 ? (
-            <View style={[styles.recordItemContainer, { width: cardWidth }]}>
-              <View style={{alignItems: 'center', justifyContent: 'center', padding: 20}}>
+            <View style={[styles.recordItemContainer, styles.card]}>
+              <View style={{alignItems: 'center', justifyContent: 'center'}}>
                 <Ionicons name="document-text-outline" size={50} color={theme.colors.textLight} style={{marginBottom: 16}} />
                 <Text style={{fontSize: 18, fontWeight: 'bold', color: theme.colors.text, marginBottom: 8}}>
                   기록이 없어요
@@ -1027,7 +1031,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           ) : (
             // 기존 기록 카드들
             recordNames.map((record, index) => (
-              <View key={record.record_id} style={[styles.recordItemContainer, { width: cardWidth }]}>
+              <View key={record.record_id} style={[styles.recordItemContainer, styles.card]}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <Text style={[styles.recordToggleText, {fontSize: 18, fontWeight: '600'}]}>
@@ -1080,8 +1084,8 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
             ))
           )}
           
-          {/* 포트폴리오 추가 카드 (맨 오른쪽) */}
-          <View style={[styles.loadPortfolioContainer, { width: cardWidth }]}>
+          {/* 포트폴리오 추가 카드 */}
+          <View style={[styles.loadPortfolioContainer, styles.card, { backgroundColor: theme.colors.primary }]}>
             <Text style={styles.loadPortfolioIcon}>+</Text>
             <Text style={styles.addRecordText}>새 포트폴리오 추가하기</Text>
           </View>

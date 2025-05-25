@@ -6,8 +6,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // 스타일 임포트
-import { Theme } from '../types/theme';
-import createStyles from '../styles/components/setUoItemComponent.styles';
+import { Theme } from '../../../types/theme';
+import createStyles from '../../../styles/components/setUoItemComponent.styles';
 
 // 메뉴 아이템 속성 정의
 interface SetUpItemProps {

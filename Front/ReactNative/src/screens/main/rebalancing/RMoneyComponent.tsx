@@ -1,28 +1,24 @@
-// 파일 경로: src/components/RForeignComponent.tsx
-// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RForeignComponent.tsx
+// 파일 경로: src/components/RMoneyComponent.tsx
+// 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > RMoneyComponent.tsx
 
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import withTheme from '../hoc/withTheme';
-import { Theme } from '../types/theme';
-import { COLUMN_WIDTHS } from '../constants/tableConfig';
-import { createTableStyles } from '../styles/components/rtableComponents.styles';
+import withTheme from '../../../hoc/withTheme';
+import { Theme } from '../../../types/theme';
+import { COLUMN_WIDTHS } from '../../../constants/tableConfig';
+import { createTableStyles } from '../../../styles/components/rtableComponents.styles';
 
-interface StockItem {
+interface CashItem {
   name: string;
-  ticker: string;
   value: number;
   krwValue: number;
-  percentChange: number;
   targetPortion: number;
   rebalanceAmount: number;
-  market_order?: number;
 }
 
-interface RForeignComponentProps {
+interface RMoneyComponentProps {
   totalAmount: number;
-  percentChange: number;
-  stocks: StockItem[];
+  cashItems: CashItem[];
   currencyType: 'dollar' | 'won';
   exchangeRate: number;
   totalBalance: number;
@@ -30,10 +26,9 @@ interface RForeignComponentProps {
   theme?: Theme;
 }
 
-const RForeignComponent: React.FC<RForeignComponentProps> = ({
+const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
   totalAmount,
-  percentChange,
-  stocks,
+  cashItems,
   currencyType,
   exchangeRate,
   totalBalance,
@@ -57,15 +52,12 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.categoryTitle}>해외주식</Text>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalAmount}>
-            {currencyType === 'won'
-              ? `${KRW_SYMBOL}${Math.round(totalAmount * exchangeRate).toLocaleString()}`
-              : `$${totalAmount.toFixed(2)}`}
-          </Text>
-          <Text style={[styles.percentChange, styles.negativeChange]}>{percentChange}%</Text>
-        </View>
+        <Text style={styles.headerTitle}>현금</Text>
+        <Text style={styles.headerAmount}>
+          {currencyType === 'won'
+            ? `${KRW_SYMBOL}${Math.round(totalAmount * exchangeRate).toLocaleString()}`
+            : `$${totalAmount.toFixed(2)}`}
+        </Text>
       </View>
 
       <View style={styles.tableContainer}>
@@ -75,10 +67,9 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
             <Text style={styles.headerCell}>종목명</Text>
           </View>
 
-          {stocks.map((stock, index) => (
+          {cashItems.map((item, index) => (
             <View key={index} style={styles.fixedCell}>
-              <Text style={styles.stockName}>{stock.name}</Text>
-              <Text style={styles.stockTicker}>{stock.ticker}</Text>
+              <Text style={styles.cashName}>{item.name}</Text>
             </View>
           ))}
         </View>
@@ -88,7 +79,6 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
           <View>
             {/* 스크롤 가능한 헤더 */}
             <View style={styles.scrollableHeader}>
-              <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.change }]}>등락률</Text>
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.amount }]}>총금액</Text>
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.currentPortion }]}>현재 비중</Text>
               <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.targetPortion }]}>목표 비중</Text>
@@ -96,57 +86,46 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
             </View>
 
             {/* 스크롤 가능한 데이터 행 */}
-            {stocks.map((stock, index) => (
+            {cashItems.map((item, index) => (
               <View key={index} style={styles.scrollableRow}>
-                <View style={[styles.changeColumn, { width: COLUMN_WIDTHS.change }]}>
-                  <Text style={[
-                    styles.changeText,
-                    stock.percentChange < 0 ? styles.negativeChange : styles.positiveChange
-                  ]}>
-                    {stock.percentChange}%
-                  </Text>
-                </View>
-
-                <View style={[styles.valueColumn, { width: COLUMN_WIDTHS.amount }]}>
-                  {/* 총금액 표시 */}
+                {/* 총금액 표시 */}
+                <View style={[styles.amountColumn, { width: COLUMN_WIDTHS.amount }]}>
                   <Text style={styles.mainAmount}>
                     {currencyType === 'won'
-                      ? `${KRW_SYMBOL}${Math.round(stock.value * exchangeRate).toLocaleString()}`
-                      : `$${stock.value.toFixed(2)}`}
+                      ? `${KRW_SYMBOL}${Math.round(item.value * exchangeRate).toLocaleString()}`
+                      : `$${item.value.toFixed(2)}`}
                   </Text>
-                  {/* 총금액 부수 표시 */}
                   <Text style={styles.subAmount}>
                     {currencyType === 'won'
-                      ? `$${stock.value.toFixed(2)}`
-                      : `${KRW_SYMBOL}${Math.round(stock.value * exchangeRate).toLocaleString()}`}
+                      ? `$${item.value.toFixed(2)}`
+                      : `${KRW_SYMBOL}${Math.round(item.value * exchangeRate).toLocaleString()}`}
                   </Text>
                 </View>
                 {/* 현재 비중 표시 */}
                 <Text style={[styles.portionText, { width: COLUMN_WIDTHS.currentPortion }]}>
-                  {calculateCurrentPortion(stock.value)}%
+                  {calculateCurrentPortion(item.value)}%
                 </Text>
                 {/* 목표 비중 표시 */}
                 <Text style={[styles.targetText, { width: COLUMN_WIDTHS.targetPortion }]}>
-                  {stock.targetPortion}%
+                  {item.targetPortion}%
                 </Text>
-                {/* 조정 금액 부수 표시 */}
+                {/* 조정 금액 표시 */}
                 <View style={[styles.rebalanceColumn, { width: COLUMN_WIDTHS.rebalance }]}>
                   <Text style={[
                     styles.rebalanceText,
-                    stock.rebalanceAmount < 0 ? styles.negativeChange : styles.positiveChange,
-                    { width: COLUMN_WIDTHS.rebalance }
+                    item.rebalanceAmount < 0 ? styles.negativeText : styles.positiveText
                   ]}>
-                    {formatProfit(stock.rebalanceAmount, currencyType)}
-
+                    {formatProfit(item.rebalanceAmount, currencyType)}
                   </Text>
-                  {stock.market_order ? (
-                    <Text style={[
-                      styles.subAmount,
-                      stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
-                    ]}>
-                      {(stock.rebalanceAmount / stock.market_order).toFixed(2)}주
-                    </Text>
-                  ) : null}
+                  {/* 조정 금액 부수 표시 */}
+                  <Text style={[
+                    styles.subAmount,
+                    item.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
+                  ]}>
+                    {currencyType === 'won'
+                      ? `$${item.rebalanceAmount.toFixed(2)}`
+                      : `${KRW_SYMBOL}${Math.round(item.rebalanceAmount * exchangeRate).toLocaleString()}`}
+                  </Text>
                 </View>
               </View>
             ))}
@@ -157,4 +136,4 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
   );
 };
 
-export default withTheme(RForeignComponent);
+export default withTheme(RMoneyComponent);

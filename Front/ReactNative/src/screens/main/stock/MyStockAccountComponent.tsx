@@ -8,10 +8,10 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 컴포넌트 임포트
-import CircularGraphComponent from './common/CircularGraphComponent';
-import IndividualStockComponent from './common/IndividualStockComponent';
-import AccountPasswordModal from './common/AccountPasswordModal';
-import AccountSelectorComponent from './AccountSelectorComponent';
+import CircularGraphComponent from '../../../components/common/graphs/CircularGraphComponent';
+import IndividualStockComponent from '../../../components/portfolio/IndividualStockComponent';
+import AccountPasswordModal from '../../../components/common/modals/AccountPasswordModal';
+import AccountSelectorComponent from '../../../components/account/AccountSelectorComponent';
 
 // API 임포트
 import { 
@@ -22,22 +22,22 @@ import {
   AccountInfo,
   BalanceInfo,
   StockItem
-} from '../api/connectedAccountApi';
+} from '../../../api/connectedAccountApi';
 
 // 증권사 데이터 매핑 임포트
-import { findSecuritiesFirmByName } from '../data/organizationData';
+import { findSecuritiesFirmByName } from '../../../data/organizationData';
 
 // 환경 설정 임포트
-import { FLASK_SERVER_URL } from '../constants/config';
+import { FLASK_SERVER_URL } from '../../../constants/config';
 
 // 스타일 임포트
-import withTheme from '../hoc/withTheme';
-import createStyles, { MyStockAccountComponentStylesType } from '../styles/components/myStockAccountComponent.styles';
+import withTheme from '../../../hoc/withTheme';
+import createStyles, { MyStockAccountComponentStylesType } from '../../../styles/components/myStockAccountComponent.styles';
 // 공통 Theme 타입 가져오기
-import { Theme } from '../types/theme';
+import { Theme } from '../../../types/theme';
 
 // 계좌 정보 Context 임포트
-import { useAccounts } from '../context/AccountsContext';
+import { useAccounts } from '../../../context/AccountsContext';
 
 // 주식 데이터 인터페이스 정의
 interface StockData {

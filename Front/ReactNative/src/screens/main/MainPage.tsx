@@ -8,18 +8,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
 // 컴포넌트 임포트
-import HomeComponent from '../components/HomeComponent';
-import MyStockAccountComponent from '../components/MyStockAccountComponent';
-import RebalancingComponent from '../components/RebalancingComponent';
-import RecordComponent from '../components/RecordComponent';
+import HomeComponent from './home/HomeComponent';
+import MyStockAccountComponent from './stock/MyStockAccountComponent';
+import RebalancingComponent from './rebalancing/RebalancingComponent';
+import RecordComponent from './record/RecordComponent';
 
 // 네비게이트 타입 임포트
-import { MainPageNavigationProp } from '../types/navigation';
+import { MainPageNavigationProp } from '../../types/navigation';
 
 // 스타일 임포트
-import createStyles from '../styles/pages/mainPage.styles';
-import withTheme from '../hoc/withTheme';
-import { Theme } from '../types/theme';
+import createStyles from '../../styles/pages/mainPage.styles';
+import withTheme from '../../hoc/withTheme';
+import { Theme } from '../../types/theme';
 
 // 탭 타입 정의
 type TabType = '홈' | '자산' | '리밸런싱' | '기록';
@@ -60,7 +60,7 @@ const MainPage: React.FC<MainPageProps> = ({ theme }) => {
           style={styles.button}
           onPress={() => setActiveTab('홈')}
         >
-          <Image source={require('../../assets/ant_head.png')} style={styles.logoImage} resizeMode="contain" />
+          <Image source={require('../../../assets/ant_head.png')} style={styles.logoImage} resizeMode="contain" />
         </TouchableOpacity>
         
         <Text style={styles.pageName}>{activeTab}</Text>

@@ -1,8 +1,8 @@
 // 경로: src/styles/components/rebalancingComponent.styles.js
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { Theme } from '../../types/theme';
 
-export default function createStyles(theme: Theme) {
+export default function createStyles(theme: Theme, cardWidth?: number) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -347,6 +347,20 @@ export default function createStyles(theme: Theme) {
     },
     activeCurrencyText: {
       color: '#fff',
+    },
+    card: {
+      width: cardWidth || Dimensions.get('window').width - 32,
+      padding: 20,
+      backgroundColor: theme.colors.card,
+      borderRadius: 12,
+      elevation: 2,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
     },
   });
 }

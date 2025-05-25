@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
-import { useAccounts } from '../context/AccountsContext';
-import { maskAccountNumber } from '../utils/encryptionUtils';
+import { useAccounts } from '../../context/AccountsContext';
+import { maskAccountNumber } from '../../utils/encryptionUtils';
 
 const AccountStoreExample: React.FC = () => {
   const { accounts, loading, addAccount, removeAccount } = useAccounts();

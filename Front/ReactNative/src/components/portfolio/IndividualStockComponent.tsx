@@ -5,10 +5,11 @@ import React from 'react';
 import { View, Text } from 'react-native';
 
 // HOC 임포트
-import withTheme from '../hoc/withTheme';
-import createStyles from '../styles/components/individualStockComponent.styles';
-// 공통 Theme 타입 가져오기 - 프로젝트 전체에서 일관된 테마 타입 사용
-import { Theme } from '../types/theme';
+import withTheme from '../../hoc/withTheme';
+import createStyles from '../../styles/components/individualStockComponent.styles';
+
+// 공통 Theme 타입
+import { Theme } from '../../types/theme';
 
 // 주식 데이터 인터페이스 정의
 interface Stock {

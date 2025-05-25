@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
-import { Theme } from '../types/theme';
+import { Theme } from '../../../types/theme';
 
 // 계좌 비밀번호 모달 props 인터페이스
 interface AccountPasswordModalProps {

@@ -1,4 +1,4 @@
-// 파일 경로: src/pages/SignUpPage.tsx
+// 파일 경로: src/screens/auth/SignUpPage.tsx
 // 컴포넌트 흐름: App.js > AuthNavigator.tsx > SignUpPage.tsx
 
 import React, { useState, useEffect } from 'react';
@@ -19,13 +19,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext'; // AuthContext 불러오기
+import { useAuth } from '../../context/AuthContext'; // AuthContext 불러오기
 
 // 스타일 임포트
-import createStyles from '../styles/pages/signUpPage.styles';
-import withTheme from '../hoc/withTheme';
-import { Theme } from '../types/theme';
-import { LoginPageNavigationProp } from '../types/navigation';
+import createStyles from '../../styles/pages/signUpPage.styles';
+import withTheme from '../../hoc/withTheme';
+import { Theme } from '../../types/theme';
+import { LoginPageNavigationProp } from '../../types/navigation';
 
 // 컴포넌트 props 인터페이스 정의
 interface SignUpPageProps {

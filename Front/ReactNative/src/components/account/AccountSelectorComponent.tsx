@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { findSecuritiesFirmByName } from '../data/organizationData';
-import createStyles from '../styles/components/accountSelectorComponent.styles';
-import { Theme } from '../types/theme';
+import { findSecuritiesFirmByName } from '../../data/organizationData';
+import createStyles from '../../styles/components/accountSelectorComponent.styles';
+import { Theme } from '../../types/theme';
 
 // API에서 가져오는 계좌 정보 인터페이스
 interface ApiAccountInfo {

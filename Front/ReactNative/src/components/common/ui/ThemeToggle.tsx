@@ -1,14 +1,14 @@
-// 경로: src/components/common/ThemeToggle.tsx
+// 경로: src/components/common/ui/ThemeToggle.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../styles/theme/ThemeContext';
-import withTheme from '../../hoc/withTheme';
-import createStyles from '../../styles/components/themeToggle.styles';
-import { Theme } from '../../types/theme';
+import { useTheme } from '../../../styles/theme/ThemeContext';
+import withTheme from '../../../hoc/withTheme';
+import createStyles from '../../../styles/components/themeToggle.styles';
+import { Theme } from '../../../types/theme';
 
 // 테마 타입 정의
 type ThemeType = 'light' | 'dark' | 'system';

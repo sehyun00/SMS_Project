@@ -1,4 +1,4 @@
-// 파일 경로: src/pages/SetUpPage.tsx
+// 파일 경로: src/screens/setup/SetUpPage.tsx
 // 컴포넌트 흐름: App.js > AuthNavigator.tsx > SetUpPage.tsx
 
 import React from 'react';
@@ -8,13 +8,13 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // 컴포넌트 임포트
-import SetUoItemComponent from '../components/setUoItemComponent';
-import { useAuth } from '../context/AuthContext';
+import SetUoItemComponent from '../../components/common/ui/setUoItemComponent';
+import { useAuth } from '../../context/AuthContext';
 
 // 스타일 임포트
-import createStyles from '../styles/pages/setUpPage.styles';
-import withTheme from '../hoc/withTheme';
-import { Theme } from '../types/theme';
+import createStyles from '../../styles/pages/setUpPage.styles';
+import withTheme from '../../hoc/withTheme';
+import { Theme } from '../../types/theme';
 
 // 설정 메뉴 항목 타입 정의
 interface MenuItem {
