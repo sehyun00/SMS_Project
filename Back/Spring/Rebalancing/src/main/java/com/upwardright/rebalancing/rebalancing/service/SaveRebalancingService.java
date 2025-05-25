@@ -62,7 +62,7 @@ public class SaveRebalancingService {
         }
     }
 
-    //특정 기록 날짜 세부 내용 보기
+    //특정 계좌의 기록 데이터 전송
     @Transactional(readOnly = true)
     public List<SaveRebalancingResponse> getRebalancingRecords(String account, String user_id) {
         try {
