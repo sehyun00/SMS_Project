@@ -48,19 +48,6 @@ public class RebalancingRecordController {
 //    }
 
     /**
-     * 특정 기록 ID로 상세 조회
-     */
-    @GetMapping("/upwardright/mystockaccount/record/{recordId}")
-    public ResponseEntity<SaveRebalancingResponse> rebalancingRecordDetail(@PathVariable int recordId) {
-        try {
-            SaveRebalancingResponse record = saveRebalancingService.getRebalancingRecord(recordId);
-            return ResponseEntity.ok(record);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
      * 특정 계좌의 리벨런싱 기록 목록 조회
      */
     @GetMapping("/upwardright/mystockaccount/record/account")

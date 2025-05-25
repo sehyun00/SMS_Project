@@ -62,75 +62,44 @@ public class SaveRebalancingService {
         }
     }
 
+    //특정 기록 날짜 세부 내용 보기
     @Transactional(readOnly = true)
     public List<SaveRebalancingResponse> getRebalancingRecords(String account, String user_id) {
         try {
+            System.out.println("조회 파라미터 - account: " + account + ", user_id: " + user_id);
+            System.out.println("account 타입: " + account.getClass().getName());
+            System.out.println("user_id 타입: " + user_id.getClass().getName());
+            
+            // 전체 레코드 확인
+            List<SaveRebalancing> allRecords = saveRebalancingRepository.findAll();
+            System.out.println("\n=== 전체 레코드 정보 ===");
+            allRecords.forEach(record -> {
+                System.out.println("Record ID: " + record.getRecord_id());
+                System.out.println("Account: " + record.getAccount() + " (길이: " + record.getAccount().length() + ")");
+                System.out.println("User ID: " + record.getUser_id() + " (길이: " + record.getUser_id().length() + ")");
+                System.out.println("Record Date: " + record.getRecord_date());
+                System.out.println("-------------------");
+            });
+            
+            // 파라미터 값 확인
+            System.out.println("\n=== 파라미터 값 확인 ===");
+            System.out.println("입력된 account 길이: " + account.length());
+            System.out.println("입력된 user_id 길이: " + user_id.length());
+            
             // 직접 user_id와 account로 조회
             List<SaveRebalancing> records = saveRebalancingRepository
-                    .findByUserIdAndAccountOrderByRecordDateDesc(user_id, account);
+                    .findByUserIdAndAccountOrderByRecordDateDesc(user_id.trim(), account.trim());
+            
+            System.out.println("\n조회된 레코드 수: " + records.size());
 
             return records.stream()
                     .map(SaveRebalancingResponse::new)
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
     }
-
-    @Transactional(readOnly = true)
-    public SaveRebalancingResponse getRebalancingRecord(int record_id) {
-        try {
-            SaveRebalancing record = saveRebalancingRepository.findById(record_id)
-                    .orElseThrow(() -> new RuntimeException("기록을 찾을 수 없습니다: " + record_id));
-
-            return new SaveRebalancingResponse(record);
-
-        } catch (Exception e) {
-            throw new RuntimeException("리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
-        }
-    }
-
-//    @Transactional(readOnly = true)
-//    public List<SaveRebalancingResponse> getRebalancingRecordsByDate(String user_id, String account, LocalDate date) {
-//        try {
-//            // 1. 계좌 존재 여부 확인
-//            List<Accounts> userAccounts = accountRepository.findByUserId(user_id);
-//            boolean accountExists = userAccounts.stream()
-//                    .anyMatch(acc -> acc.getAccount().equals(account));
-//
-//            if (!accountExists) {
-//                throw new RuntimeException("계좌를 찾을 수 없습니다: " + account);
-//            }
-//
-//            // 2. 특정 계좌의 특정 날짜 리벨런싱 기록 조회
-//            LocalDateTime startOfDay = date.atStartOfDay();
-//            LocalDateTime endOfDay = date.atTime(23, 59, 59);
-//
-//            List<SaveRebalancing> dateRecords = saveRebalancingRepository
-//                    .findByUser_idAndAccountAndRecord_dateBetween(user_id, account, startOfDay, endOfDay);
-//
-//            return dateRecords.stream()
-//                    .map(SaveRebalancingResponse::new)
-//                    .collect(Collectors.toList());
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("날짜별 리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
-//        }
-//    }
-//
-//    // 사용자의 계좌 목록 조회 메서드
-//    @Transactional(readOnly = true)
-//    public List<String> getUserAccounts(String user_id) {
-//        try {
-//            List<Accounts> userAccounts = accountRepository.findByUserId(user_id);
-//
-//            return userAccounts.stream()
-//                    .map(Accounts::getAccount)
-//                    .collect(Collectors.toList());
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("사용자 계좌 목록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
-//        }
-//    }
 }

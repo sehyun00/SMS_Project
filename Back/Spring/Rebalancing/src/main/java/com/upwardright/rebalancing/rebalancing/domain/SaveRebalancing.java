@@ -37,13 +37,13 @@ public class SaveRebalancing {
     @Column(nullable = false)
     private double total_balance; //리벨런싱 시점 총잔고
 
-    @Column(nullable = false)
+    @Column
     private String record_name;
 
     @Lob
-    @Column(nullable = false)
+    @Column
     private String memo;
 
-    @Column(nullable = false)
+    @Column
     private double profit_rate; //수익률
 }
