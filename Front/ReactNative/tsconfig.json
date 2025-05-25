@@ -3,8 +3,8 @@
     "allowJs": true,
     "jsx": "react-native",
     "target": "esnext",
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "lib": [
       "esnext"
     ],
