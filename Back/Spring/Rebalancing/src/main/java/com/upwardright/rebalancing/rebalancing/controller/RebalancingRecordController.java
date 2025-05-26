@@ -2,6 +2,8 @@ package com.upwardright.rebalancing.rebalancing.controller;
 
 import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingRequest;
 import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingResponse;
+import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingStockRequest;
+import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingStockResponse;
 import com.upwardright.rebalancing.rebalancing.service.SaveRebalancingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,17 +37,16 @@ public class RebalancingRecordController {
     }
 
     /**
-     * 기록 전체 보기 - 사용자의 모든 리벨런싱 기록 조회
+     * 리벨런싱 세부내용 저장
      */
-//    @GetMapping("/upwardright/mystockaccount/record")
-//    public ResponseEntity<List<SaveRebalancingResponse>> rebalancingRecord(@RequestParam String userId) {
-//        try {
-//            List<SaveRebalancingResponse> records = saveRebalancingService.getUserRebalancingRecords(userId);
-//            return ResponseEntity.ok(records);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
+    @PostMapping("/upwardright/mystockaccount/record/detail/save")
+    public ResponseEntity<SaveRebalancingStockResponse> saveStocks(
+            @RequestBody SaveRebalancingStockRequest request,
+            Authentication authentication) {
+
+        SaveRebalancingStockResponse response = saveRebalancingService.saveRebalancingStock(request);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 특정 계좌의 리벨런싱 기록 목록 조회
