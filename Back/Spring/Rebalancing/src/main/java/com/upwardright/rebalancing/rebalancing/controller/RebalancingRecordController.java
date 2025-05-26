@@ -1,5 +1,7 @@
 package com.upwardright.rebalancing.rebalancing.controller;
 
+import com.upwardright.rebalancing.exception.AccountNotFoundException;
+import com.upwardright.rebalancing.exception.RecordNotFoundException;
 import com.upwardright.rebalancing.rebalancing.dto.*;
 import com.upwardright.rebalancing.rebalancing.service.SaveRebalancingService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -40,49 +43,55 @@ public class RebalancingRecordController {
     public ResponseEntity<SaveRebalancingStockResponse> saveStocks(
             @RequestBody SaveRebalancingStockRequest request,
             Authentication authentication) {
-
-        SaveRebalancingStockResponse response = saveRebalancingService.saveRebalancingStock(request);
-        return ResponseEntity.ok(response);
+        try {
+            SaveRebalancingStockResponse response = saveRebalancingService.saveRebalancingStock(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
      * 특정 계좌의 리벨런싱 기록 목록 조회
      */
     @GetMapping("/upwardright/mystockaccount/record/account")
-    public ResponseEntity<List<SaveRebalancingResponse>> getAccountRebalancingRecords(
-            @RequestParam String account,
-            Authentication authentication) {
-        try {
-            String user_id = authentication.getName();
-            List<SaveRebalancingResponse> records = saveRebalancingService.getRebalancingRecords(account, user_id);
-            return ResponseEntity.ok(records);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<List<SaveRebalancingResponse>> getAccountRebalancingRecords(@RequestParam String account, Authentication authentication) {
+        String user_id = authentication.getName();
+        List<SaveRebalancingResponse> responses = saveRebalancingService.getRebalancingRecords(account, user_id);
+
+        return ResponseEntity.ok(responses);
     }
 
     /**
      * 특정 기록 세부 내용 조회
      */
-    /**
-     * 특정 기록 세부 내용 조회
-     */
     @GetMapping("/upwardright/mystockaccount/record/account/detail/{record_id}")
-    public ResponseEntity<List<GetRebalancingStockResponse>> getRebalancingStockRecord(
-            @PathVariable int record_id,
-            Authentication authentication) {
+    public ResponseEntity<List<GetRebalancingStockResponse>> getRebalancingStockRecord(@PathVariable int record_id, Authentication authentication) {
+        List<GetRebalancingStockResponse> responses = saveRebalancingService.getRebalancingStockResponses(record_id);
 
-        try {
-            List<GetRebalancingStockResponse> responses = saveRebalancingService.getRebalancingStockResponses(record_id);
+        return ResponseEntity.ok(responses);
+    }
 
-            if (responses.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
+    //에러 처리 로직
+    @ExceptionHandler(RecordNotFoundException.class)
+    public ResponseEntity<Object> handleRecordNotFound(RecordNotFoundException e) {
+        System.out.println("Record 조회 실패: " + e.getMessage());
+        return ResponseEntity.status(404)
+                .body(Map.of("message", e.getMessage()));
+    }
 
-            return ResponseEntity.ok(responses);
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<Object> handleAccountNotFound(AccountNotFoundException e) {
+        System.out.println("계좌 조회 실패: " + e.getMessage());
+        return ResponseEntity.status(404)
+                .body(Map.of("message", e.getMessage()));
+    }
 
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGeneralException(Exception e) {
+        System.out.println("일반 오류 발생: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", "요청 처리 중 오류가 발생했습니다"));
     }
 }

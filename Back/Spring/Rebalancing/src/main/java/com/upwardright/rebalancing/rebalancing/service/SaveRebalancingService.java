@@ -1,5 +1,7 @@
 package com.upwardright.rebalancing.rebalancing.service;
 
+import com.upwardright.rebalancing.exception.AccountNotFoundException;
+import com.upwardright.rebalancing.exception.RecordNotFoundException;
 import com.upwardright.rebalancing.rebalancing.domain.SaveRebalancing;
 import com.upwardright.rebalancing.rebalancing.domain.SaveRebalancingStock;
 import com.upwardright.rebalancing.rebalancing.dto.*;
@@ -86,7 +88,7 @@ public class SaveRebalancingService {
         }
     }
 
-    // stock_region 결정 헬퍼 메서드
+    // stock_region 로직
     private int determineStockRegion(String marketType) {
         if (marketType == null) return 0;
 
@@ -99,96 +101,32 @@ public class SaveRebalancingService {
     }
 
 
-    // 3. 특정 계좌의 리밸런싱 기록 날짜 전송
+    // 3. 특정 계좌의 기록 확인
     @Transactional(readOnly = true)
     public List<SaveRebalancingResponse> getRebalancingRecords(String account, String user_id) {
-        try {
-            
-            // 1. 직접 user_id와 account로 조회
-            List<SaveRebalancing> records = rebalancingRepository
-                    .findByUserIdAndAccountOrderByRecordDateDesc(user_id.trim(), account.trim());
+        List<SaveRebalancing> records = rebalancingRepository.findByUserIdAndAccountOrderByRecordDateDesc(account, user_id);
 
-            // 2. 리밸런성 기록 결과 출력
-            return records.stream()
-                    .map(SaveRebalancingResponse::new)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            System.out.println("에러 발생: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("리벨런싱 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
+        if (records.isEmpty()) {
+            throw new AccountNotFoundException("계좌를 찾을 수 없습니다: " + account);
         }
+
+        return records.stream()
+                .map(SaveRebalancingResponse::new)
+                .collect(Collectors.toList());
     }
 
     // 4. record_id로 세부 기록 확인
-    // 4. record_id로 세부 기록 확인
     @Transactional(readOnly = true)
     public List<GetRebalancingStockResponse> getRebalancingStockResponses(int record_id) {
-        try {
-            System.out.println("=== getRebalancingStockResponses 시작 ===");
-            System.out.println("입력받은 record_id: " + record_id);
+        List<SaveRebalancingStock> records = rebalancingStockRepository.findByRecordId(record_id);
 
-            // 2. Repository 호출 전 로깅
-            System.out.println("Repository findByRecordId 호출 시작...");
-            List<SaveRebalancingStock> records = rebalancingStockRepository.findByRecordId(record_id);
-            System.out.println("Repository 호출 완료. 조회된 데이터 개수: " + records.size());
-
-            // 3. 조회된 데이터 상세 로깅
-            if (records.isEmpty()) {
-                System.out.println("해당 record_id로 조회된 데이터가 없습니다: " + record_id);
-                return new ArrayList<>();
-            }
-
-            // 4. 각 레코드 정보 출력
-            for (int i = 0; i < records.size(); i++) {
-                SaveRebalancingStock stock = records.get(i);
-                System.out.println("레코드 " + (i+1) + ": " +
-                        "record_id=" + stock.getRecord_id() +
-                        ", stock_name=" + stock.getStock_name() +
-                        ", stock_region=" + stock.getStock_region());
-            }
-
-            // 5. DTO 변환 시작
-            System.out.println("DTO 변환 시작...");
-            List<GetRebalancingStockResponse> responses = new ArrayList<>();
-
-            for (SaveRebalancingStock record : records) {
-                try {
-                    GetRebalancingStockResponse response = new GetRebalancingStockResponse(record);
-                    responses.add(response);
-                    System.out.println("DTO 변환 성공: " + record.getStock_name());
-                } catch (Exception e) {
-                    System.out.println("DTO 변환 실패 - 주식명: " + record.getStock_name() +
-                            ", 에러: " + e.getMessage());
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-
-            System.out.println("DTO 변환 완료. 변환된 개수: " + responses.size());
-            System.out.println("=== getRebalancingStockResponses 성공 ===");
-
-            return responses;
-
-        } catch (Exception e) {
-            System.out.println("=== getRebalancingStockResponses 에러 발생 ===");
-            System.out.println("에러 타입: " + e.getClass().getSimpleName());
-            System.out.println("에러 메시지: " + e.getMessage());
-            System.out.println("스택 트레이스:");
-            e.printStackTrace();
-            System.out.println("=== 에러 정보 끝 ===");
-
-            // 구체적인 예외별 처리
-            if (e instanceof IllegalArgumentException) {
-                throw new RuntimeException("잘못된 파라미터: " + e.getMessage(), e);
-            } else if (e instanceof NullPointerException) {
-                throw new RuntimeException("Null 값 참조 오류: " + e.getMessage(), e);
-            } else if (e.getMessage() != null && e.getMessage().contains("findByRecordId")) {
-                throw new RuntimeException("데이터베이스 조회 오류: " + e.getMessage(), e);
-            } else {
-                throw new RuntimeException("리벨런싱 세부 기록 조회 중 오류가 발생했습니다: " + e.getMessage(), e);
-            }
+        if (records.isEmpty()) {
+            throw new RecordNotFoundException("record_id를 찾을 수 없습니다: " + record_id);
         }
+
+        return records.stream()
+                .map(GetRebalancingStockResponse::new)
+                .collect(Collectors.toList());
     }
 
 }
