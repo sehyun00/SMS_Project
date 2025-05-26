@@ -64,6 +64,14 @@ interface AccountInfo {
   totalProfitPercent: number;
 }
 
+// dummyAccounts 인터페이스 추가
+interface DummyAccount {
+  company: string;
+  account: string;
+  principal: number;
+  pre_principal: number;
+}
+
 // 현금 항목 데이터 인터페이스
 interface CashItem {
   name: string;
@@ -90,6 +98,8 @@ interface RebalancingComponentProps {
   theme: Theme;
   navigation?: MainPageNavigationProp;
 }
+
+import CurrencyToggle from '../../../components/common/ui/CurrencyToggle';
 
 const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -286,7 +296,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     // 그 외에는 더미 데이터 사용
     const dummyAccountIndex = stockAccounts.length > 0 ? 
       selectedAccountIndex - stockAccounts.length : selectedAccountIndex;
-    const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0];
+    const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0] as DummyAccount;
     return getAccountRecords(account.account);
   }, [selectedAccountIndex, stockAccounts]);
 
@@ -441,7 +451,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     // 더미 계좌인 경우 (기존 로직 유지)
     const dummyAccountIndex = stockAccounts.length > 0 ? 
       selectedAccountIndex - stockAccounts.length : selectedAccountIndex;
-    const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0];
+    const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0] as DummyAccount;
 
     // 총 자산 가치 계산
     const totalValue = currentRecordId ? calculateRecordValue(currentRecordId) : 0;
@@ -580,16 +590,17 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   };
 
   // 로컬 스토리지에서 계좌 비밀번호 가져오기 (마스킹된 형태로)
-  const getAccountPassword = async (accountNumber: string) => {
+  const getAccountPassword = async (accountNumber: string): Promise<string | undefined> => {
     try {
       // 1. AccountsContext에서 계좌 정보 찾기
       const organizationCode = getOrganizationCode(stockAccounts.find(acc => acc.accountNumber === accountNumber)?.company || '');
       const savedAccount = findSavedAccount(accountNumber, organizationCode);
-      let storedPassword = savedAccount?.account_password;
+      let storedPassword = savedAccount?.account_password || '';
       
       // 2. 직접 AsyncStorage에서도 확인
       if (!storedPassword) {
-        storedPassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
+        const asyncStoragePassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
+        storedPassword = asyncStoragePassword || '';
       }
       
       if (storedPassword) {
@@ -599,10 +610,10 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           : '*'.repeat(storedPassword.length);
         return maskedPassword;
       }
-      return null;
+      return undefined;
     } catch (error) {
       console.error('비밀번호 조회 오류:', error);
-      return null;
+      return undefined;
     }
   };
 
@@ -961,7 +972,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
       // 더미 계좌 선택된 경우
       const dummyAccountIndex = stockAccounts.length > 0 ? 
         selectedAccountIndex - stockAccounts.length : selectedAccountIndex;
-      const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0];
+      const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0] as DummyAccount;
       const secFirm = findSecuritiesFirmByName(account.company);
       const displayName = secFirm?.shortName || account.company;
       return `${displayName} (${account.account.slice(-4)})`;
@@ -1146,32 +1157,11 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
               <Text style={styles.rotateButtonText}>↻</Text>
             </TouchableOpacity>
             
-            <View style={styles.currencyToggleContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.currencyButton,
-                  currencyType === 'dollar' ? styles.activeCurrency : null
-                ]}
-                onPress={() => setCurrencyType('dollar')}
-              >
-                <Text style={[
-                  styles.currencyText,
-                  currencyType === 'dollar' ? styles.activeCurrencyText : null
-                ]}>$</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.currencyButton,
-                  currencyType === 'won' ? styles.activeCurrency : null
-                ]}
-                onPress={() => setCurrencyType('won')}
-              >
-                <Text style={[
-                  styles.currencyText,
-                  currencyType === 'won' ? styles.activeCurrencyText : null
-                ]}>원</Text>
-              </TouchableOpacity>
-            </View>
+            <CurrencyToggle
+              theme={theme}
+              currencyType={currencyType}
+              onCurrencyChange={setCurrencyType}
+            />
           </View>
 
           {/* 현금 카드 */}

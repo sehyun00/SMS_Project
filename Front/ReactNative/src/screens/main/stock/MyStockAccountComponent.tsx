@@ -12,6 +12,7 @@ import CircularGraphComponent from '../../../components/common/graphs/CircularGr
 import IndividualStockComponent from '../../../components/portfolio/IndividualStockComponent';
 import AccountPasswordModal from '../../../components/common/modals/AccountPasswordModal';
 import AccountSelectorComponent from '../../../components/account/AccountSelectorComponent';
+import CurrencyToggle from '../../../components/common/ui/CurrencyToggle';
 
 // API 임포트
 import { 
@@ -777,34 +778,12 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
       </View>
       
       {/* 통화 선택 버튼 영역 */}
-      <View style={styles.currencySelectorContainer}>
-        <TouchableOpacity
-          style={[
-            styles.currencyButton,
-            currencyType === 'KRW' ? styles.selectedCurrencyButton : null
-          ]}
-          onPress={() => handleCurrencyChange('KRW')}
-        >
-          <Text style={
-            currencyType === 'KRW' ? styles.selectedCurrencyText : styles.currencyText
-          }>
-            원화 (₩)
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[
-            styles.currencyButton,
-            currencyType === 'USD' ? styles.selectedCurrencyButton : null
-          ]}
-          onPress={() => handleCurrencyChange('USD')}
-        >
-          <Text style={
-            currencyType === 'USD' ? styles.selectedCurrencyText : styles.currencyText
-          }>
-            달러 ($)
-          </Text>
-        </TouchableOpacity>
+      <View style={[styles.currencySelectorContainer, { justifyContent: 'flex-end', marginTop: 2, marginRight: 2 }]}>
+        <CurrencyToggle
+          theme={theme}
+          currencyType={currencyType === 'KRW' ? 'won' : 'dollar'}
+          onCurrencyChange={(type) => handleCurrencyChange(type === 'won' ? 'KRW' : 'USD')}
+        />
       </View>
       
       {/* 요약 정보 영역 */}
