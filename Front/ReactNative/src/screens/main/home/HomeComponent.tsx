@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../context/AuthContext';
 import { fetchStockAccounts } from '../../../api/homeApi';
 import { useAccounts } from '../../../context/AccountsContext';
@@ -38,7 +37,7 @@ interface HomeComponentProps {
 const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
   const { loggedToken } = useAuth();
   const { accounts: savedAccounts, addAccount } = useAccounts();
-  
+
   // DB에서 불러온 계좌 데이터
   const [hasAccounts, setHasAccounts] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<AccountData[]>([]);
@@ -48,17 +47,17 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
       console.log('토큰 없음, API 호출 안함');
       return;
     }
-    
+
     // 계좌 정보 가져오기
     const getAccounts = async () => {
       console.log('계좌 정보 가져오기 시도...');
       const result = await fetchStockAccounts(loggedToken);
-      
+
       if (result.success && result.data) {
         console.log('계좌 API 응답:', result.data);
         setAccounts(result.data);
         setHasAccounts(result.data.length > 0);
-        
+
         // 로컬에 계좌 정보 저장
         saveAccountsToLocal(result.data);
       } else {
@@ -67,7 +66,7 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
         setHasAccounts(false);
       }
     };
-    
+
     getAccounts();
   }, [loggedToken]);
 
@@ -75,24 +74,24 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
   const saveAccountsToLocal = async (accountsData: AccountData[]) => {
     try {
       console.log('계좌 정보 로컬 저장 시작...');
-      
+
       // 이미 저장된 계좌 찾기 (계좌번호로 비교)
       const alreadySavedAccountNumbers = savedAccounts.map(acc => acc.account);
-      
+
       for (const account of accountsData) {
         // 이미 저장된 계좌는 건너뛰기
         if (alreadySavedAccountNumbers.includes(account.accountNumber)) {
           console.log(`계좌 ${account.accountNumber}는 이미 저장되어 있습니다.`);
           continue;
         }
-        
+
         // 증권사 코드 찾기
         const firmInfo = findSecuritiesFirmByName(account.company);
         if (!firmInfo) {
           console.warn(`증권사 ${account.company}에 대한 코드를 찾을 수 없습니다.`);
           continue;
         }
-        
+
         // 새 계좌 정보 객체 생성 (비밀번호는 아직 없음)
         const newAccount = {
           account: account.accountNumber,
@@ -100,12 +99,12 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           connectedId: '', // connectedId도 비워둠 (실제 연결 시 업데이트)
           organization: firmInfo.code
         };
-        
+
         // AccountsContext에 저장
         await addAccount(newAccount);
         console.log(`계좌 ${account.accountNumber} 로컬에 저장됨`);
       }
-      
+
       console.log('모든 계좌 정보 로컬 저장 완료');
     } catch (error) {
       console.error('계좌 정보 로컬 저장 중 오류:', error);
@@ -120,24 +119,14 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
     { name: '한투 안전형 투자', returnRate: 0.3 }
   ]);
 
-  // 테스트용 함수: 계좌 유무 토글
-  const toggleAccounts = () => {
-    setHasAccounts(!hasAccounts);
-  };
-
-  // 테스트용 함수: 기록 유무 토글
-  const toggleRecords = () => {
-    setHasRecords(!hasRecords);
-  };
-  
   // 모달 상태 추가
   const [isConnectModalVisible, setIsConnectModalVisible] = useState(false);
-  
+
   // 모달 열기
   const openConnectModal = () => {
     setIsConnectModalVisible(true);
   };
-  
+
   // 모달 닫기
   const closeConnectModal = () => {
     setIsConnectModalVisible(false);
@@ -146,7 +135,7 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
   const styles = createStyles(theme);
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
@@ -158,7 +147,7 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           <Text style={styles.linkText}>계좌 연동하기 &gt;</Text>
         </TouchableOpacity>
       </View>
-      
+
       {hasAccounts ? (
         <View style={styles.card}>
           {accounts.map((account, index) => (
@@ -182,15 +171,15 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           <Text style={styles.sectionTitle}>계좌 수익률</Text>
           <Text style={styles.dateText}>1월 1일 기준</Text>
         </View>
-        
+
         {hasAccounts ? (
           <View style={styles.card}>
             {accounts.map((account, index) => (
               <View key={index}>
                 <View style={styles.returnRow}>
                   <Text style={styles.accountShortName}>
-                    {account.company.includes('증권') 
-                      ? account.company.split('증권')[0] 
+                    {account.company.includes('증권')
+                      ? account.company.split('증권')[0]
                       : account.company.substring(0, 2)}
                     {account.accountNumber.split('-')[0]}
                   </Text>
@@ -217,7 +206,7 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
           <Text style={styles.sectionTitle}>리밸런싱 기록 수익률</Text>
           <Text style={styles.dateText}>1일 전 기준</Text>
         </View>
-        
+
         {hasRecords ? (
           <View style={styles.card}>
             {records.map((record, index) => (
@@ -245,27 +234,6 @@ const HomeComponent: React.FC<HomeComponentProps> = ({ theme }) => {
         onClose={closeConnectModal}
       />
 
-      {/* 테스트를 위한 토글 버튼 (실제 앱에서는 제거) */}
-      {process.env.NODE_ENV === 'development' && (
-        <View style={{marginTop: 20}}>
-          <TouchableOpacity 
-            style={{backgroundColor: theme.colors.primary, padding: 10, borderRadius: 5, marginBottom: 10}}
-            onPress={toggleAccounts}
-          >
-            <Text style={{color: 'white', textAlign: 'center'}}>
-              테스트: 계좌 {hasAccounts ? '없음' : '있음'} 상태로 전환
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={{backgroundColor: theme.colors.primary, padding: 10, borderRadius: 5}}
-            onPress={toggleRecords}
-          >
-            <Text style={{color: 'white', textAlign: 'center'}}>
-              테스트: 기록 {hasRecords ? '없음' : '있음'} 상태로 전환
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </ScrollView>
   );
 };
