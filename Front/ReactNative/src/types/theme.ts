@@ -37,5 +37,17 @@ export interface Theme {
     medium: number;
     large: number;
   };
+  shadows: {
+    default: {
+      shadowColor: string;
+      shadowOffset: {
+        width: number;
+        height: number;
+      };
+      shadowOpacity: number;
+      shadowRadius: number;
+      elevation: number;
+    };
+  };
   mode?: string;
 }

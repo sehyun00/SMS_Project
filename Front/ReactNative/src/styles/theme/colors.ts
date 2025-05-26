@@ -7,6 +7,8 @@ export interface Colors {
   secondary: string;
   background: string;
   text: string;
+  textLight: string;
+  textLighter: string;
   placeholder: string;
   error: string;
   success: string;
@@ -14,8 +16,10 @@ export interface Colors {
   card: string;
   border: string;
   notification?: string; 
-  positive?: string; // 양수(수익) 색상 추가
-  negative?: string; // 음수(손실) 색상 추가
+  positive: string;
+  negative: string;
+  gain: string;
+  loss: string;
 }
 
 // 라이트 테마(기본)
@@ -24,6 +28,8 @@ export const lightColors: Colors = {
   secondary: '#FF6B35', // 보조 색상
   background: '#FFFFFF', // 배경색
   text: '#1A1A1A', // 텍스트 색상
+  textLight: '#AAAAAA', // 텍스트 밝은 색상
+  textLighter: '#AAAAAA', // 텍스트 더 밝은 색상
   placeholder: '#AAAAAA', // 플레이스홀더 색상
   error: '#E53935', // 오류 색상
   success: '#4CAF50', // 성공 색상
@@ -33,6 +39,8 @@ export const lightColors: Colors = {
   notification: '#FF3B30', // 알림 색상 (선택사항)
   positive: '#FF0000', // 양수(수익) 색상
   negative: '#0022FF', // 음수(손실) 색상
+  gain: '#FF0000', // 수익 색상
+  loss: '#0022FF', // 손실 색상
 };
 
 // 다크 테마
@@ -41,6 +49,8 @@ export const darkColors: Colors = {
   secondary: '#FF8C5F', // 보조 색상 (어두운 모드용)
   background: '#17171C', // 배경색
   text: '#FFFFFF', // 텍스트 색상
+  textLight: '#777777', // 텍스트 밝은 색상
+  textLighter: '#777777', // 텍스트 더 밝은 색상
   placeholder: '#777777', // 플레이스홀더 색상
   error: '#EF5350', // 오류 색상
   success: '#66BB6A', // 성공 색상
@@ -50,6 +60,8 @@ export const darkColors: Colors = {
   notification: '#FF453A', // 알림 색상 (선택사항)
   positive: '#FF0000', // 양수(수익) 색상
   negative: '#0022FF', // 음수(손실) 색상
+  gain: '#FF0000', // 수익 색상
+  loss: '#0022FF', // 손실 색상
 };
 
 export default { lightColors, darkColors };
