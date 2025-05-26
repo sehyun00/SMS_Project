@@ -59,7 +59,7 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
   const styles = createStyles(theme);
   const { logout } = useAuth();
   
-  const menuSections = [
+  const menuSections: MenuSection[] = [
     {
       items: [
         { id: 'profile', name: '프로필 관리', navigationTarget: '프로필관리' },
@@ -112,6 +112,7 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
                 itemName={item.name}
                 onPress={() => handleItemPress(item)}
                 theme={theme}
+                textColor={item.id === 'logout' ? theme.colors.error : undefined}
               />
             ))}
             

@@ -14,14 +14,15 @@ interface SetUpItemProps {
   itemName: string;
   theme: Theme;
   onPress?: () => void;
+  textColor?: string;
 }
 
-const SetUoItemComponent: React.FC<SetUpItemProps> = ({ itemName, theme, onPress }) => {
+const SetUoItemComponent: React.FC<SetUpItemProps> = ({ itemName, theme, onPress, textColor }) => {
   const styles = createStyles(theme);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Text style={styles.itemText}>{itemName}</Text>
+      <Text style={[styles.itemText, textColor ? { color: textColor } : null]}>{itemName}</Text>
       <View style={styles.iconContainer}>
         <Ionicons 
           name="chevron-forward" 

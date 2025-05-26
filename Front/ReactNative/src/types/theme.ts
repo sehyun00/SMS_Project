@@ -14,6 +14,7 @@ export interface Theme {
     negative: string;
     gain: string;
     loss: string;
+    error: string;
   };
   text?: {
     primary: string;
