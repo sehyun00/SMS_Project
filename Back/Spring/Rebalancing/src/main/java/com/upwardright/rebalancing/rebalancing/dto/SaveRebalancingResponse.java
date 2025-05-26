@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class SaveRebalancingResponse {
-
     private int record_id;
     private String account;
     private String user_id;
