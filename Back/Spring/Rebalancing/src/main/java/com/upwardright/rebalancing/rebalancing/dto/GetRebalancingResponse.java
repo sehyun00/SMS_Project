@@ -1,11 +1,7 @@
 package com.upwardright.rebalancing.rebalancing.dto;
 
 import com.upwardright.rebalancing.rebalancing.domain.Rebalancing;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SaveRebalancingResponse {
+public class GetRebalancingResponse {
     private int record_id;
     private String account;
     private String user_id;
@@ -24,7 +20,7 @@ public class SaveRebalancingResponse {
     private String memo;
     private double profit_rate;
 
-    public SaveRebalancingResponse(Rebalancing rebalancing) {
+    public GetRebalancingResponse(Rebalancing rebalancing) {
         this.record_id = rebalancing.getRecord_id();
         this.account = rebalancing.getAccount();
         this.user_id = rebalancing.getUser_id();

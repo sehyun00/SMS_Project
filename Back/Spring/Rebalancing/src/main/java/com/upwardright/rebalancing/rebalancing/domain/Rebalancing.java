@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "record")
-public class SaveRebalancing {
+public class Rebalancing {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

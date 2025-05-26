@@ -2,9 +2,6 @@ package com.upwardright.rebalancing.rebalancing.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -13,8 +10,8 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "rud")
-@IdClass(SaveRebalancingStockId.class)
-public class SaveRebalancingStock {
+@IdClass(RebalancingStockId.class)
+public class RebalancingStock {
 
     @Id
     @Column(nullable = false)

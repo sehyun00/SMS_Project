@@ -1,6 +1,6 @@
 package com.upwardright.rebalancing.rebalancing.dto;
 
-import com.upwardright.rebalancing.rebalancing.domain.SaveRebalancingStock;
+import com.upwardright.rebalancing.rebalancing.domain.RebalancingStock;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ public class GetRebalancingStockResponse {
     private String market_type_name;
 
     // 단일 Entity를 받는 생성자
-    public GetRebalancingStockResponse(SaveRebalancingStock stock) {
+    public GetRebalancingStockResponse(RebalancingStock stock) {
         this.record_id = stock.getRecord_id();
         this.stock_name = stock.getStock_name();
         this.expert_per = stock.getExpert_per();

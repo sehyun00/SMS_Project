@@ -9,7 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class SaveRebalancingStockId implements Serializable {
+public class RebalancingStockId implements Serializable {
     private int record_id; // 기록 번호
     private String stock_name; // 주식명
 }

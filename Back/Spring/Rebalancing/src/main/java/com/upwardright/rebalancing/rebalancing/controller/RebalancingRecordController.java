@@ -22,9 +22,7 @@ public class RebalancingRecordController {
      * 리벨런싱 기록 저장
      */
     @PostMapping("/upwardright/mystockaccount/record/save")
-    public ResponseEntity<SaveRebalancingResponse> saveRebalancing(
-            @RequestBody SaveRebalancingRequest request,
-            Authentication authentication) {
+    public ResponseEntity<SaveRebalancingResponse> saveRebalancing(@RequestBody SaveRebalancingRequest request, Authentication authentication) {
         try {
             String user_id = authentication.getName();
             request.setUser_id(user_id); // JWT에서 추출한 user_id를 request에 세팅
@@ -40,9 +38,7 @@ public class RebalancingRecordController {
      * 리벨런싱 세부내용 저장
      */
     @PostMapping("/upwardright/mystockaccount/record/detail/save")
-    public ResponseEntity<SaveRebalancingStockResponse> saveStocks(
-            @RequestBody SaveRebalancingStockRequest request,
-            Authentication authentication) {
+    public ResponseEntity<SaveRebalancingStockResponse> saveStocks(@RequestBody SaveRebalancingStockRequest request) {
         try {
             SaveRebalancingStockResponse response = saveRebalancingService.saveRebalancingStock(request);
             return ResponseEntity.ok(response);
@@ -54,10 +50,10 @@ public class RebalancingRecordController {
     /**
      * 특정 계좌의 리벨런싱 기록 목록 조회
      */
-    @GetMapping("/upwardright/mystockaccount/record/account")
-    public ResponseEntity<List<SaveRebalancingResponse>> getAccountRebalancingRecords(@RequestParam String account, Authentication authentication) {
+    @GetMapping("/upwardright/mystockaccount/record/account/{account}")
+    public ResponseEntity<List<GetRebalancingResponse>> getAccountRebalancingRecords(@PathVariable String account, Authentication authentication) {
         String user_id = authentication.getName();
-        List<SaveRebalancingResponse> responses = saveRebalancingService.getRebalancingRecords(account, user_id);
+        List<GetRebalancingResponse> responses = saveRebalancingService.getRebalancingRecords(user_id, account);
 
         return ResponseEntity.ok(responses);
     }

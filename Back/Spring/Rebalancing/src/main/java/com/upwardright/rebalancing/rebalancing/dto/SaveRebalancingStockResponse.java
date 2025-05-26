@@ -1,6 +1,6 @@
 package com.upwardright.rebalancing.rebalancing.dto;
 
-import com.upwardright.rebalancing.rebalancing.domain.SaveRebalancingStock;
+import com.upwardright.rebalancing.rebalancing.domain.RebalancingStock;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ public class SaveRebalancingStockResponse {
     private int totalCount;
     private String message;
 
-    public SaveRebalancingStockResponse(List<SaveRebalancingStock> stocks) {
+    public SaveRebalancingStockResponse(List<RebalancingStock> stocks) {
         this.savedStocks = stocks.stream()
                 .map(stock -> new StockSaveResult(
                         stock.getRecord_id(),

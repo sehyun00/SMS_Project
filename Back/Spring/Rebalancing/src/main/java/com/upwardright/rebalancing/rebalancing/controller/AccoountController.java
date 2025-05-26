@@ -26,6 +26,7 @@ public class AccoountController {
     private final AccountRepository accountRepository;
     private final UserConnectedIdRepository userConnectedIdRepository;
 
+    // Connected_id로 계좌 주식 조회하기
     @PostMapping("/upwardright/getAccountStock")
     public ResponseEntity<?> getConnectedId(Authentication authentication) {
         String user_id = authentication.getName();
@@ -43,7 +44,7 @@ public class AccoountController {
         return ResponseEntity.ok(connectedIds);
     }
 
-
+    // 2.계좌 번호만 출력
     @GetMapping("/upwardright/showstockaccounts")
     public ResponseEntity<List<GetAccountResponse>> getAccounts(Authentication authentication) {
         String userId = authentication.getName();
@@ -56,7 +57,7 @@ public class AccoountController {
         return ResponseEntity.ok(response);
     }
 
-
+    // 3.계죄 추가
     @PostMapping("/upwardright/addstockaccount")
     public ResponseEntity<AddAccountResponse> addAccount(@Valid Authentication authentication, @RequestBody AddAccountRequest request) {
         try {

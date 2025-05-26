@@ -2,8 +2,8 @@ package com.upwardright.rebalancing.rebalancing.service;
 
 import com.upwardright.rebalancing.exception.AccountNotFoundException;
 import com.upwardright.rebalancing.exception.RecordNotFoundException;
-import com.upwardright.rebalancing.rebalancing.domain.SaveRebalancing;
-import com.upwardright.rebalancing.rebalancing.domain.SaveRebalancingStock;
+import com.upwardright.rebalancing.rebalancing.domain.Rebalancing;
+import com.upwardright.rebalancing.rebalancing.domain.RebalancingStock;
 import com.upwardright.rebalancing.rebalancing.dto.*;
 import com.upwardright.rebalancing.rebalancing.repository.RebalancingRepository;
 import com.upwardright.rebalancing.rebalancing.repository.RebalancingStockRepository;
@@ -29,7 +29,7 @@ public class SaveRebalancingService {
         try {
 
             // 1. 리벨런싱 기록 생성
-            SaveRebalancing saveRebalancing = SaveRebalancing.builder()
+            Rebalancing rebalancing = Rebalancing.builder()
                     .user_id(request.getUser_id())
                     .account(request.getAccount())
                     .record_date(LocalDateTime.now())
@@ -40,7 +40,7 @@ public class SaveRebalancingService {
                     .build();
 
             // 2. 리밸런싱 기록 저장
-            SaveRebalancing savedRecord = rebalancingRepository.save(saveRebalancing);
+            Rebalancing savedRecord = rebalancingRepository.save(rebalancing);
 
             // 3. 결과값 반환
             return new SaveRebalancingResponse(savedRecord);
@@ -53,7 +53,7 @@ public class SaveRebalancingService {
     @Transactional
     public SaveRebalancingStockResponse saveRebalancingStock(SaveRebalancingStockRequest request) {
         try {
-            List<SaveRebalancingStock> savedStocks = new ArrayList<>();
+            List<RebalancingStock> savedStocks = new ArrayList<>();
 
             // 각 주식 정보를 순회하며 저장
             for (SaveRebalancingStockRequest.StockInfo stockInfo : request.getStocks()) {
@@ -62,7 +62,7 @@ public class SaveRebalancingService {
                 int stockRegion = determineStockRegion(stockInfo.getMarket_type());
 
                 // 리벨런싱 세부 기록 생성
-                SaveRebalancingStock saveRebalancingStock = SaveRebalancingStock.builder()
+                RebalancingStock rebalancingStock = RebalancingStock.builder()
                         .record_id(request.getRecord_id())
                         .stock_name(stockInfo.getStock_name())
                         .expert_per(stockInfo.getExpert_per())
@@ -76,7 +76,7 @@ public class SaveRebalancingService {
                         .build();
 
                 // 각 주식 정보 저장
-                SaveRebalancingStock savedStock = rebalancingStockRepository.save(saveRebalancingStock);
+                RebalancingStock savedStock = rebalancingStockRepository.save(rebalancingStock);
                 savedStocks.add(savedStock);
             }
 
@@ -103,22 +103,22 @@ public class SaveRebalancingService {
 
     // 3. 특정 계좌의 기록 확인
     @Transactional(readOnly = true)
-    public List<SaveRebalancingResponse> getRebalancingRecords(String account, String user_id) {
-        List<SaveRebalancing> records = rebalancingRepository.findByUserIdAndAccountOrderByRecordDateDesc(account, user_id);
+    public List<GetRebalancingResponse> getRebalancingRecords(String account, String user_id) {
+        List<Rebalancing> records = rebalancingRepository.findByUserIdAndAccountOrderByRecordDateDesc(account, user_id);
 
         if (records.isEmpty()) {
             throw new AccountNotFoundException("계좌를 찾을 수 없습니다: " + account);
         }
 
         return records.stream()
-                .map(SaveRebalancingResponse::new)
+                .map(GetRebalancingResponse::new)
                 .collect(Collectors.toList());
     }
 
     // 4. record_id로 세부 기록 확인
     @Transactional(readOnly = true)
     public List<GetRebalancingStockResponse> getRebalancingStockResponses(int record_id) {
-        List<SaveRebalancingStock> records = rebalancingStockRepository.findByRecordId(record_id);
+        List<RebalancingStock> records = rebalancingStockRepository.findByRecordId(record_id);
 
         if (records.isEmpty()) {
             throw new RecordNotFoundException("record_id를 찾을 수 없습니다: " + record_id);
