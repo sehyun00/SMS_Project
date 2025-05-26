@@ -34,6 +34,31 @@ type SetUpStackParamList = {
 
 const SetUpStack = createNativeStackNavigator<SetUpStackParamList>();
 
+// 공통 헤더 컴포넌트
+interface SetUpHeaderProps {
+  title: string;
+  theme: Theme;
+}
+
+const SetUpHeader: React.FC<SetUpHeaderProps> = ({ title, theme }) => {
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(theme);
+
+  return (
+    <View style={[styles.header, { marginTop: insets.top }]}>
+      <Ionicons 
+        name="arrow-back" 
+        size={24} 
+        color={theme.colors.text} 
+        onPress={() => navigation.goBack()} 
+      />
+      <Text style={styles.headerTitle}>{title}</Text>
+      <View style={{ width: 24 }} />
+    </View>
+  );
+};
+
 // 설정 메뉴 항목 타입 정의
 interface MenuItem {
   id: string;
@@ -90,16 +115,7 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Ionicons 
-          name="arrow-back" 
-          size={24} 
-          color={theme.colors.text} 
-          onPress={() => navigation.goBack()} 
-        />
-        <Text style={styles.headerTitle}>설정</Text>
-        <View style={{ width: 24 }} />
-      </View>
+      <SetUpHeader title="설정" theme={theme} />
       
       <ScrollView>
         {menuSections.map((section, sectionIndex) => (
@@ -126,14 +142,28 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
 
 // 설정 페이지 메인 컴포넌트
 const SetUpPage = () => {
+  const ThemedSetUpMain = withTheme(SetUpMain);
+  const ThemedProfilePage = withTheme(ProfilePage);
+  const ThemedNotificationPage = withTheme(NotificationPage);
+  const ThemedThemeToggle = withTheme(ThemeToggle);
+  const ThemedTermsPage = withTheme(TermsPage);
+  const ThemedPrivacyPage = withTheme(PrivacyPage);
+
   return (
-    <SetUpStack.Navigator screenOptions={{ headerShown: false }}>
-      <SetUpStack.Screen name="설정메인" component={withTheme(SetUpMain)} />
-      <SetUpStack.Screen name="프로필관리" component={ProfilePage} />
-      <SetUpStack.Screen name="알림설정" component={NotificationPage} />
-      <SetUpStack.Screen name="테마설정" component={ThemeToggle} />
-      <SetUpStack.Screen name="이용약관" component={TermsPage} />
-      <SetUpStack.Screen name="개인정보처리방침" component={PrivacyPage} />
+    <SetUpStack.Navigator 
+      screenOptions={({ route }) => ({
+        header: ({ navigation }) => {
+          const ThemedHeader = withTheme(SetUpHeader);
+          return <ThemedHeader title={route.name} />;
+        }
+      })}
+    >
+      <SetUpStack.Screen name="설정메인" component={ThemedSetUpMain} />
+      <SetUpStack.Screen name="프로필관리" component={ThemedProfilePage} />
+      <SetUpStack.Screen name="알림설정" component={ThemedNotificationPage} />
+      <SetUpStack.Screen name="테마설정" component={ThemedThemeToggle} />
+      <SetUpStack.Screen name="이용약관" component={ThemedTermsPage} />
+      <SetUpStack.Screen name="개인정보처리방침" component={ThemedPrivacyPage} />
     </SetUpStack.Navigator>
   );
 };

@@ -4,6 +4,7 @@ import { Theme } from '../../types/theme';
 
 // 스타일 타입 정의
 interface SetUpPageStyles {
+  // 공통 스타일
   container: ViewStyle;
   header: ViewStyle;
   headerTitle: TextStyle;
@@ -12,10 +13,21 @@ interface SetUpPageStyles {
   content: ViewStyle;
   paragraph: TextStyle;
   bottomSpacing: ViewStyle;
+
+  // 테마 토글 스타일
+  themeOptionContainer: ViewStyle;
+  themeOptionText: TextStyle;
+  themeSelectedIndicator: ViewStyle;
+  themeUnselectedIndicator: ViewStyle;
+
+  // 프로필/알림 페이지 스타일
+  pageContainer: ViewStyle;
+  pageText: TextStyle;
 }
 
 export default function createStyles(theme: Theme): SetUpPageStyles {
   return StyleSheet.create<SetUpPageStyles>({
+    // 공통 스타일
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
@@ -57,6 +69,47 @@ export default function createStyles(theme: Theme): SetUpPageStyles {
     },
     bottomSpacing: {
       height: 40,
+    },
+
+    // 테마 토글 스타일
+    themeOptionContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: theme.colors.card,
+      borderRadius: 8,
+      marginBottom: 8,
+    },
+    themeOptionText: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    themeSelectedIndicator: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: theme.colors.primary,
+    },
+    themeUnselectedIndicator: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+    },
+
+    // 프로필/알림 페이지 스타일
+    pageContainer: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      padding: 16,
+    },
+    pageText: {
+      color: theme.colors.text,
+      fontSize: 16,
+      textAlign: 'center',
     },
   });
 }
