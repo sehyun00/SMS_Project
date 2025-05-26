@@ -1,9 +1,6 @@
 package com.upwardright.rebalancing.rebalancing.controller;
 
-import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingRequest;
-import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingResponse;
-import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingStockRequest;
-import com.upwardright.rebalancing.rebalancing.dto.SaveRebalancingStockResponse;
+import com.upwardright.rebalancing.rebalancing.dto.*;
 import com.upwardright.rebalancing.rebalancing.service.SaveRebalancingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +56,31 @@ public class RebalancingRecordController {
             String user_id = authentication.getName();
             List<SaveRebalancingResponse> records = saveRebalancingService.getRebalancingRecords(account, user_id);
             return ResponseEntity.ok(records);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * 특정 기록 세부 내용 조회
+     */
+    /**
+     * 특정 기록 세부 내용 조회
+     */
+    @GetMapping("/upwardright/mystockaccount/record/account/detail/{record_id}")
+    public ResponseEntity<List<GetRebalancingStockResponse>> getRebalancingStockRecord(
+            @PathVariable int record_id,
+            Authentication authentication) {
+
+        try {
+            List<GetRebalancingStockResponse> responses = saveRebalancingService.getRebalancingStockResponses(record_id);
+
+            if (responses.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(responses);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

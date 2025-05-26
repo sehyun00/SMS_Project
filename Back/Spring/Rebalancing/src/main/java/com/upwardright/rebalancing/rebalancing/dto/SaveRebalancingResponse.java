@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class SaveRebalancingResponse {
-
+    private int record_id;
     private String account;
     private String user_id;
     private LocalDateTime record_date;
@@ -25,6 +25,7 @@ public class SaveRebalancingResponse {
     private double profit_rate;
 
     public SaveRebalancingResponse(SaveRebalancing saveRebalancing) {
+        this.record_id = saveRebalancing.getRecord_id();
         this.account = saveRebalancing.getAccount();
         this.user_id = saveRebalancing.getUser_id();
         this.record_date = saveRebalancing.getRecord_date();

@@ -39,4 +39,6 @@ public class SaveRebalancingStockResponse {
         private String stock_name;
         private int stock_region;
     }
+
+
 }
