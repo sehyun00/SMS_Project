@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/upwardright/emails/verify","/upwardright/emails/verify/**", "/upwardright/signup",
+                        .requestMatchers("/upwardright/emails/send","/upwardright/emails/verify/**", "/upwardright/signup",
                                 "/upwardright/login"
                                 ).permitAll()
                         .requestMatchers("/upwardright/**").authenticated())
