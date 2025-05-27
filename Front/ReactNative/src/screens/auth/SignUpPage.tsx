@@ -20,6 +20,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext'; // AuthContext 불러오기
+import { sendVerificationEmail, verifyEmailCode, EmailVerificationResponse } from '../../api/authApi';
 
 // 스타일 임포트
 import createStyles from '../../styles/pages/signUpPage.styles';
@@ -39,6 +40,12 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ theme }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  // 이메일 인증 관련 상태 추가
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isVerificationSent, setIsVerificationSent] = useState(false);
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   // UI 상태 관리
   const [showPassword, setShowPassword] = useState(false);
@@ -303,9 +310,57 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ theme }) => {
     }
   };
 
+  // 이메일 인증 코드 전송
+  const handleSendVerification = async () => {
+    if (!email) {
+      Alert.alert('입력 오류', '이메일을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setVerificationLoading(true);
+      await sendVerificationEmail(email);
+      setIsVerificationSent(true);
+      Alert.alert('인증 코드 전송', '입력하신 이메일로 인증 코드가 전송되었습니다.');
+    } catch (error) {
+      Alert.alert('오류 발생', '인증 코드 전송 중 오류가 발생했습니다.');
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  // 이메일 인증 코드 확인
+  const handleVerifyCode = async () => {
+    if (!verificationCode) {
+      Alert.alert('입력 오류', '인증 코드를 입력해주세요.');
+      return;
+    }
+
+    try {
+      setVerificationLoading(true);
+      const response = await verifyEmailCode(email, verificationCode);
+      
+      if (response.success) {
+        setIsEmailVerified(true);
+        Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.');
+      } else {
+        Alert.alert('인증 실패', response.message || '잘못된 인증 코드입니다.');
+      }
+    } catch (error) {
+      Alert.alert('인증 실패', '잘못된 인증 코드입니다.');
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
   // 회원가입 처리 - 서버 연동 기능 추가
   const handleSignUp = async () => {
     Keyboard.dismiss();
+
+    if (!isEmailVerified) {
+      Alert.alert('이메일 인증 필요', '이메일 인증을 완료해주세요.');
+      return;
+    }
 
     // 유효성 검사 - 이름 필드 추가
     if (!email || !name || !password || !confirmPassword || !phoneNumber) {
@@ -387,16 +442,60 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ theme }) => {
         <View style={styles.formContainer}>
           <Text style={styles.headerTitle}>회원가입</Text>
 
-          {/* 이메일 입력 필드 - 항상 표시 */}
+          {/* 이메일 입력 필드 수정 */}
           <Text style={styles.inputLabel}>이메일 <Text style={styles.requiredMark}>*</Text></Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={handleEmailChange}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholder="예) superant@gmail.com"
-          />
+          <View style={styles.emailContainer}>
+            <TextInput
+              style={[styles.emailInput, isEmailVerified && styles.verifiedInput]}
+              value={email}
+              onChangeText={handleEmailChange}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="예) superant@gmail.com"
+              editable={!isEmailVerified}
+            />
+            <TouchableOpacity
+              style={[
+                styles.verificationButton,
+                isEmailVerified && styles.verifiedButton
+              ]}
+              onPress={handleSendVerification}
+              disabled={isEmailVerified || verificationLoading}
+            >
+              {verificationLoading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Text style={styles.verificationButtonText}>
+                  {isEmailVerified ? '인증완료' : '인증코드 전송'}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* 인증 코드 입력 필드 */}
+          {isVerificationSent && !isEmailVerified && (
+            <View style={styles.verificationCodeContainer}>
+              <TextInput
+                style={styles.verificationCodeInput}
+                value={verificationCode}
+                onChangeText={setVerificationCode}
+                placeholder="인증 코드 6자리 입력"
+                keyboardType="number-pad"
+                maxLength={6}
+              />
+              <TouchableOpacity
+                style={styles.verifyButton}
+                onPress={handleVerifyCode}
+                disabled={verificationLoading}
+              >
+                {verificationLoading ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Text style={styles.verifyButtonText}>확인</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* 이름 입력 필드 - 애니메이션과 함께 표시 */}
           <Animated.View style={{

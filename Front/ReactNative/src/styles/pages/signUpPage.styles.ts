@@ -25,6 +25,16 @@ interface SignUpPageStyles {
   backButtonText: TextStyle;
   termsText: TextStyle;
   errorText: TextStyle;
+  emailContainer: ViewStyle;
+  emailInput: TextStyle;
+  verifiedInput: TextStyle;
+  verificationButton: ViewStyle;
+  verifiedButton: ViewStyle;
+  verificationButtonText: TextStyle;
+  verificationCodeContainer: ViewStyle;
+  verificationCodeInput: TextStyle;
+  verifyButton: ViewStyle;
+  verifyButtonText: TextStyle;
 }
 
 export default function createStyles(theme: Theme): SignUpPageStyles {
@@ -149,6 +159,68 @@ export default function createStyles(theme: Theme): SignUpPageStyles {
       fontSize: 12,
       marginTop: -15,
       marginBottom: 15,
+    },
+    emailContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    emailInput: {
+      flex: 1,
+      height: 50,
+      borderBottomWidth: 1,
+      borderBottomColor: '#DDDDDD',
+      fontSize: 16,
+      color: '#000000',
+      marginRight: 10,
+    },
+    verifiedInput: {
+      borderBottomColor: theme.colors.primary,
+    },
+    verificationButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minWidth: 100,
+    },
+    verifiedButton: {
+      backgroundColor: '#4CAF50',
+    },
+    verificationButtonText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    verificationCodeContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    verificationCodeInput: {
+      flex: 1,
+      height: 50,
+      borderBottomWidth: 1,
+      borderBottomColor: '#DDDDDD',
+      fontSize: 16,
+      color: '#000000',
+      marginRight: 10,
+    },
+    verifyButton: {
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      borderRadius: 8,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minWidth: 60,
+    },
+    verifyButtonText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '500',
     },
   });
 }
