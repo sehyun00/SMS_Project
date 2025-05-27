@@ -54,11 +54,14 @@ public class SignUpService {
         return userRepository.save(user);
     }
 
+//
     public void sendCode(SendCodeRequest requestParam) {
         String code = createCode();
+        String key = EMAIL_AUTH_CODE_PREFIX + requestParam.email();
         emailService.sendEmail(requestParam.email(), code);
-        redisService.saveWithExpiration(EMAIL_AUTH_CODE_PREFIX + requestParam.email(), code, authCodeExpirationMillis);
+        redisService.saveWithExpiration(key, code, authCodeExpirationMillis);
     }
+
 
     private String createCode() {
         Random random = new Random();
@@ -67,7 +70,13 @@ public class SignUpService {
 
     public EmailVerificationResponse verifyCode(VerifyCodeRequest requestParam) {
         String findCode = (String) redisService.get(EMAIL_AUTH_CODE_PREFIX + requestParam.email());
-        boolean isVerified = requestParam.code().equals(findCode);
+
+        if (findCode == null) {
+            return new EmailVerificationResponse(false);
+        }
+
+        boolean isVerified = requestParam.code().trim().equals(findCode.trim());
         return new EmailVerificationResponse(isVerified);
     }
+
 }
