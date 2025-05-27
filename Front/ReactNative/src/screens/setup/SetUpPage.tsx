@@ -2,14 +2,13 @@
 // 컴포넌트 흐름: App.js > AuthNavigator.tsx > SetUpPage.tsx
 
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // 컴포넌트 임포트
-import SetUpItemComponent from '../../components/common/ui/setUoItemComponent';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from './setupItem/ThemeToggle';
 import TermsPage from './setupItem/TermsPage';
@@ -24,10 +23,10 @@ import { Theme } from '../../types/theme';
 
 // 설정 스택 네비게이터 타입 정의
 type SetUpStackParamList = {
-  설정메인: undefined;
+  설정: undefined;
   프로필관리: undefined;
   알림설정: undefined;
-  테마설정: undefined;
+  테마: undefined;
   이용약관: undefined;
   개인정보처리방침: undefined;
 };
@@ -47,40 +46,52 @@ const SetUpHeader: React.FC<SetUpHeaderProps> = ({ title, theme }) => {
 
   return (
     <View style={[styles.header, { marginTop: insets.top }]}>
-      <Ionicons 
-        name="arrow-back" 
-        size={24} 
-        color={theme.colors.text} 
-        onPress={() => navigation.goBack()} 
-      />
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+      </TouchableOpacity>
       <Text style={styles.headerTitle}>{title}</Text>
       <View style={{ width: 24 }} />
     </View>
   );
 };
 
-// 설정 메뉴 항목 타입 정의
-interface MenuItem {
+interface MenuItemType {
   id: string;
   name: string;
   navigationTarget?: string;
+  isRed?: boolean;
 }
 
-// 섹션 타입 정의
 interface MenuSection {
-  title?: string;
-  items: MenuItem[];
+  items: MenuItemType[];
 }
 
-// 컴포넌트 props 인터페이스 정의
-interface SetUpPageProps {
+const MenuItem: React.FC<{
+  name: string;
+  onPress: () => void;
   theme: Theme;
-}
+  isRed?: boolean;
+}> = ({ name, onPress, theme, isRed }) => {
+  const styles = createStyles(theme);
+  
+  return (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+      <Text style={[
+        styles.menuItemText,
+        isRed && { color: theme.colors.error }
+      ]}>{name}</Text>
+      <Ionicons 
+        name="chevron-forward" 
+        size={20} 
+        color={theme.colors.textLight}
+      />
+    </TouchableOpacity>
+  );
+};
 
 // 메인 설정 화면 컴포넌트
-const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
+const SetUpMain: React.FC<{ theme: Theme }> = ({ theme }) => {
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
   const { logout } = useAuth();
   
@@ -89,7 +100,7 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
       items: [
         { id: 'profile', name: '프로필 관리', navigationTarget: '프로필관리' },
         { id: 'notification', name: '알림 설정', navigationTarget: '알림설정' },
-        { id: 'theme', name: '테마', navigationTarget: '테마설정' },
+        { id: 'theme', name: '테마', navigationTarget: '테마' },
       ]
     },
     {
@@ -100,12 +111,12 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
     },
     {
       items: [
-        { id: 'logout', name: '로그아웃' },
+        { id: 'logout', name: '로그아웃', isRed: true },
       ]
     }
   ];
 
-  const handleItemPress = (item: MenuItem) => {
+  const handleItemPress = (item: MenuItemType) => {
     if (item.id === 'logout') {
       logout();
     } else if (item.navigationTarget) {
@@ -114,34 +125,35 @@ const SetUpMain: React.FC<SetUpPageProps> = ({ theme }) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <SetUpHeader title="설정" theme={theme} />
-      
-      <ScrollView>
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
         {menuSections.map((section, sectionIndex) => (
-          <View key={`section-${sectionIndex}`}>
-            {section.title && <Text style={styles.sectionTitle}>{section.title}</Text>}
-            
-            {section.items.map((item) => (
-              <SetUpItemComponent
-                key={item.id}
-                itemName={item.name}
-                onPress={() => handleItemPress(item)}
-                theme={theme}
-                textColor={item.id === 'logout' ? theme.colors.error : undefined}
-              />
+          <View key={`section-${sectionIndex}`} style={styles.menuSection}>
+            {section.items.map((item, itemIndex) => (
+              <React.Fragment key={item.id}>
+                <MenuItem
+                  name={item.name}
+                  onPress={() => handleItemPress(item)}
+                  theme={theme}
+                  isRed={item.isRed}
+                />
+                {itemIndex < section.items.length - 1 && (
+                  <View style={styles.divider} />
+                )}
+              </React.Fragment>
             ))}
-            
-            {sectionIndex < menuSections.length - 1 && <View style={styles.divider} />}
           </View>
         ))}
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 
-// 설정 페이지 메인 컴포넌트
-const SetUpPage = () => {
+interface SetUpPageProps {
+  theme: Theme;
+}
+
+const SetUpPage: React.FC<SetUpPageProps> = ({ theme }) => {
   const ThemedSetUpMain = withTheme(SetUpMain);
   const ThemedProfilePage = withTheme(ProfilePage);
   const ThemedNotificationPage = withTheme(NotificationPage);
@@ -151,21 +163,24 @@ const SetUpPage = () => {
 
   return (
     <SetUpStack.Navigator 
-      screenOptions={({ route }) => ({
-        header: ({ navigation }) => {
+      screenOptions={{
+        header: ({ route }) => {
           const ThemedHeader = withTheme(SetUpHeader);
           return <ThemedHeader title={route.name} />;
+        },
+        contentStyle: {
+          backgroundColor: theme.colors.card
         }
-      })}
+      }}
     >
-      <SetUpStack.Screen name="설정메인" component={ThemedSetUpMain} />
+      <SetUpStack.Screen name="설정" component={ThemedSetUpMain} />
       <SetUpStack.Screen name="프로필관리" component={ThemedProfilePage} />
       <SetUpStack.Screen name="알림설정" component={ThemedNotificationPage} />
-      <SetUpStack.Screen name="테마설정" component={ThemedThemeToggle} />
+      <SetUpStack.Screen name="테마" component={ThemedThemeToggle} />
       <SetUpStack.Screen name="이용약관" component={ThemedTermsPage} />
       <SetUpStack.Screen name="개인정보처리방침" component={ThemedPrivacyPage} />
     </SetUpStack.Navigator>
   );
 };
 
-export default SetUpPage;
+export default withTheme(SetUpPage);

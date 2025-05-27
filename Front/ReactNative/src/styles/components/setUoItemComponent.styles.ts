@@ -17,19 +17,23 @@ export default function createStyles(theme: Theme): SetUpItemStyles {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingHorizontal: 16,
+      paddingHorizontal: 20,
       backgroundColor: theme.colors.background,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
     },
     itemText: {
       fontSize: 16,
       fontWeight: '400',
       color: theme.colors.text,
+      flex: 1,
     },
     iconContainer: {
       width: 24,
       height: 24,
       alignItems: 'center',
       justifyContent: 'center',
+      marginLeft: 8,
     }
   });
 }

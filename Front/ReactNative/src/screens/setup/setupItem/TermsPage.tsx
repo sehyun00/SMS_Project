@@ -1,7 +1,5 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import withTheme from '../../../hoc/withTheme';
@@ -13,26 +11,11 @@ interface TermsPageProps {
 }
 
 const TermsPage: React.FC<TermsPageProps> = ({ theme }) => {
-  const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <Ionicons 
-          name="arrow-back" 
-          size={24} 
-          color={theme.colors.text} 
-          onPress={() => navigation.goBack()} 
-        />
-        <Text style={styles.headerTitle}>이용약관</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      {/* 이용약관 내용 */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.content}>
         <Text style={styles.lastUpdated}>마지막 업데이트: 2024년 3월 21일</Text>
         
         <Text style={styles.sectionTitle}>1. 서비스 이용약관</Text>
@@ -68,8 +51,8 @@ const TermsPage: React.FC<TermsPageProps> = ({ theme }) => {
         </Text>
 
         <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 

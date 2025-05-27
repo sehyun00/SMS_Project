@@ -1,7 +1,5 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import withTheme from '../../../hoc/withTheme';
@@ -13,24 +11,11 @@ interface PrivacyPageProps {
 }
 
 const PrivacyPage: React.FC<PrivacyPageProps> = ({ theme }) => {
-  const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Ionicons 
-          name="arrow-back" 
-          size={24} 
-          color={theme.colors.text} 
-          onPress={() => navigation.goBack()} 
-        />
-        <Text style={styles.headerTitle}>개인정보 처리방침</Text>
-        <View style={{ width: 24 }} />
-      </View>
-      
-      <ScrollView style={styles.section}>
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
         <Text style={styles.sectionTitle}>1. 개인정보의 처리 목적</Text>
         <Text style={styles.paragraph}>
           회사는 다음의 목적을 위하여 개인정보를 처리하고 있으며, 다음의 목적 이외의 용도로는 이용하지 않습니다.
@@ -47,8 +32,8 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ theme }) => {
         </Text>
 
         <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 
