@@ -60,7 +60,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/upwardright/login", "/upwardright/signup",
-                                "/emails/verify","/emails/verify/**").permitAll()
+                                "/upwardright/emails/verify","/upwardright/emails/verify/**").permitAll()
                         .requestMatchers("/upwardright/**").authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
