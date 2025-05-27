@@ -8,23 +8,18 @@ interface ThemeToggleStyles {
   header: ViewStyle;
   headerTitle: TextStyle;
   backButton: ViewStyle;
-  label: TextStyle;
-  button: ViewStyle;
-  buttonText: TextStyle;
+  optionsContainer: ViewStyle;
+  optionItem: ViewStyle;
+  optionText: TextStyle;
+  radioOuter: ViewStyle;
+  radioInner: ViewStyle;
 }
 
 export default function createStyles(theme: Theme): ThemeToggleStyles {
   return StyleSheet.create<ThemeToggleStyles>({
     container: {
-      margin: 16,
-      padding: 16,
-      borderRadius: 8,
-      backgroundColor: theme.colors.card,
-      shadowColor: theme.colors.text,
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      flex: 1,
+      backgroundColor: theme.colors.background,
     },
     header: {
       flexDirection: 'row',
@@ -33,6 +28,7 @@ export default function createStyles(theme: Theme): ThemeToggleStyles {
       paddingHorizontal: 16,
       height: 56,
       borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
       backgroundColor: theme.colors.background,
     },
     headerTitle: {
@@ -46,22 +42,37 @@ export default function createStyles(theme: Theme): ThemeToggleStyles {
       justifyContent: 'center',
       alignItems: 'center',
     },
-    label: {
+    optionsContainer: {
+      paddingTop: 8,
+      backgroundColor: theme.colors.background,
+    },
+    optionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      backgroundColor: theme.colors.background,
+    },
+    optionText: {
       fontSize: 16,
-      fontWeight: '500',
       color: theme.colors.text,
     },
-    button: {
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderRadius: 8,
+    radioOuter: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+      justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: theme.colors.card,
     },
-    buttonText: {
-      color: '#FFFFFF',
-      fontSize: 16,
-      fontWeight: '600',
+    radioInner: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: theme.colors.primary,
     },
   });
 }

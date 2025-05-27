@@ -1,8 +1,8 @@
 // 경로: src/styles/components/rebalancingComponent.styles.js
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { Theme } from '../../types/theme';
 
-export default function createStyles(theme: Theme) {
+export default function createStyles(theme: Theme, cardWidth?: number) {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -33,13 +33,7 @@ export default function createStyles(theme: Theme) {
       borderRightWidth: 1,
       borderBottomColor: 'rgba(0,0,0,0.2)',
       borderRightColor: 'rgba(0,0,0,0.1)',
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 2,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       // 위치 및 크기 효과
       marginBottom: 10,
       marginTop: 0,
@@ -61,13 +55,7 @@ export default function createStyles(theme: Theme) {
       borderRadius: 12,
       padding: 16,
       marginBottom: 12,
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 2,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       // 테두리 효과
       borderColor: 'rgba(0,0,0,0.05)',
       borderWidth: 1,
@@ -89,13 +77,7 @@ export default function createStyles(theme: Theme) {
       width: '100%',
       borderRadius: 12,
       backgroundColor: theme.colors.background,
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      // 안드로이드용 그림자
-      elevation: 1,
+      ...theme.shadows.default,
       // 테두리 효과
       borderColor: 'rgba(0,0,0,0.05)',
       borderWidth: 1,
@@ -117,13 +99,7 @@ export default function createStyles(theme: Theme) {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: 150,
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.15,
-      shadowRadius: 5,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       overflow: 'visible',
       marginVertical: 5,
     },
@@ -135,13 +111,7 @@ export default function createStyles(theme: Theme) {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: 150,
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.15,
-      shadowRadius: 5,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       overflow: 'visible',
       marginVertical: 5,
     },
@@ -218,13 +188,7 @@ export default function createStyles(theme: Theme) {
       borderRadius: 10,
       padding: 16,
       maxHeight: 300,
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 2,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       // 테두리 효과
       borderColor: 'rgba(0,0,0,0.05)',
       borderWidth: 1,
@@ -289,13 +253,7 @@ export default function createStyles(theme: Theme) {
       backgroundColor: theme.colors.card,
       borderRadius: 16,
       overflow: 'hidden',
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 2,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       // 테두리 효과
       borderColor: 'rgba(0,0,0,0.05)',
       borderWidth: 1,
@@ -313,13 +271,7 @@ export default function createStyles(theme: Theme) {
       borderRadius: 16,
       backgroundColor: theme.colors.card,
       marginRight: 8,
-      // 그림자 효과 (iOS)
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 2,
-      // 안드로이드용 그림자
-      elevation: 4,
+      ...theme.shadows.default,
       // 테두리 효과
       borderColor: 'rgba(0,0,0,0.05)',
       borderWidth: 1,
@@ -347,6 +299,13 @@ export default function createStyles(theme: Theme) {
     },
     activeCurrencyText: {
       color: '#fff',
+    },
+    card: {
+      width: cardWidth || Dimensions.get('window').width - 32,
+      padding: 20,
+      backgroundColor: theme.colors.card,
+      borderRadius: 12,
+      ...theme.shadows.default,
     },
   });
 }
