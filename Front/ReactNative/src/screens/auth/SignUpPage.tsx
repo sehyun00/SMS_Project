@@ -312,6 +312,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ theme }) => {
 
   // 이메일 인증 코드 전송
   const handleSendVerification = async () => {
+    console.log(email);
     if (!email) {
       Alert.alert('입력 오류', '이메일을 입력해주세요.');
       return;

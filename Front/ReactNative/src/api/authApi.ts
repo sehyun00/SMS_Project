@@ -3,9 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { SPRING_SERVER_URL } from '../constants/config';
 
-// API URL에서 /upwardright 제거
-const API_URL = SPRING_SERVER_URL.replace('/upwardright', '');
-
 // 이메일 인증 응답 인터페이스
 export interface EmailVerificationResponse {
   success: boolean;
@@ -22,9 +19,9 @@ export interface VerifyCodeRequest {
   code: string;
 }
 
-// 인증이 필요한 API용 인스턴스
-const authApi: AxiosInstance = axios.create({
-  baseURL: SPRING_SERVER_URL, // /upwardright 포함
+// 인증이 필요없는 API용 axios 인스턴스
+const publicAxios = axios.create({
+  baseURL: SPRING_SERVER_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -33,9 +30,9 @@ const authApi: AxiosInstance = axios.create({
   timeout: 15000,
 });
 
-// 인증이 필요없는 public API용 인스턴스
-const publicApi: AxiosInstance = axios.create({
-  baseURL: API_URL, // /upwardright 제거된 URL
+// 인증이 필요한 API용 인스턴스
+const authApi: AxiosInstance = axios.create({
+  baseURL: SPRING_SERVER_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -82,13 +79,14 @@ export const login = async (user_id: string, password: string) => {
   return authApi.post('/upwardright/login', { user_id, password });
 };
 
-// 이메일 인증 관련 API 함수 (publicApi 사용)
+// 이메일 인증 관련 API 함수 (publicAxios 사용)
 export const sendVerificationEmail = async (email: string) => {
   try {
     const requestData: SendCodeRequest = {
       email: email
     };
-    const response = await publicApi.post('/emails/verify', requestData);
+    // publicAxios 인스턴스 사용
+    const response = await publicAxios.post('/emails/verify', requestData);
     console.log('이메일 인증 요청 응답:', response);
     return response.status === 200;
   } catch (error) {
@@ -98,7 +96,8 @@ export const sendVerificationEmail = async (email: string) => {
         status: error.response?.status,
         data: error.response?.data,
         headers: error.response?.headers,
-        config: error.config // 요청 설정도 로깅
+        config: error.config,
+        url: `${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`
       });
     }
     throw error;
@@ -111,7 +110,8 @@ export const verifyEmailCode = async (email: string, code: string) => {
       email: email,
       code: code
     };
-    const response = await publicApi.get<EmailVerificationResponse>('/emails/verify', {
+    // publicAxios 인스턴스 사용
+    const response = await publicAxios.get<EmailVerificationResponse>('/emails/verify', {
       params: requestData
     });
     console.log('인증 코드 확인 응답:', response);
@@ -123,7 +123,8 @@ export const verifyEmailCode = async (email: string, code: string) => {
         status: error.response?.status,
         data: error.response?.data,
         headers: error.response?.headers,
-        config: error.config // 요청 설정도 로깅
+        config: error.config,
+        url: `${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`
       });
     }
     throw error;
