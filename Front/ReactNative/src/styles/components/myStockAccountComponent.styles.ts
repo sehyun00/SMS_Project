@@ -16,10 +16,6 @@ export interface MyStockAccountComponentStylesType {
   
   // 통화 선택 영역 스타일
   currencySelectorContainer: ViewStyle;
-  currencyButton: ViewStyle;
-  selectedCurrencyButton: ViewStyle;
-  currencyText: TextStyle;
-  selectedCurrencyText: TextStyle;
   
   // 요약 정보 영역 스타일
   summaryContainer: ViewStyle;
@@ -82,25 +78,7 @@ const createStyles = (theme: Theme): MyStockAccountComponentStylesType => StyleS
   // 통화 선택 영역 스타일
   currencySelectorContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
-  },
-  currencyButton: {
-    padding: 8,
-    backgroundColor: theme.colors.card,
-    borderRadius: 8,
-    marginRight: 8,
-    width: 80,
-    alignItems: 'center',
-  },
-  selectedCurrencyButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  currencyText: {
-    color: theme.colors.text,
-  },
-  selectedCurrencyText: {
-    color: 'white',
-    fontWeight: 'bold',
+    marginBottom: 10,
   },
   
   // 요약 정보 영역 스타일

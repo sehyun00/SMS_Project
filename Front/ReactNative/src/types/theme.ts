@@ -14,6 +14,7 @@ export interface Theme {
     negative: string;
     gain: string;
     loss: string;
+    error: string;
   };
   text?: {
     primary: string;
@@ -35,6 +36,18 @@ export interface Theme {
     small: number;
     medium: number;
     large: number;
+  };
+  shadows: {
+    default: {
+      shadowColor: string;
+      shadowOffset: {
+        width: number;
+        height: number;
+      };
+      shadowOpacity: number;
+      shadowRadius: number;
+      elevation: number;
+    };
   };
   mode?: string;
 }

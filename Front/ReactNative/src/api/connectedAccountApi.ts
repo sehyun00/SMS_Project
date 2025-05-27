@@ -248,7 +248,7 @@ export const verifySocialInfo = async (payload: any) => {
   });
 };
 
-export const registerAccount = async (data: any) => {
+export const registerAccount = async (data: any, token?: string) => {
   try {
     // 자체적으로 토큰 가져오기
     const token = await getAuthToken();
