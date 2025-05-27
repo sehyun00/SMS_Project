@@ -42,14 +42,14 @@ public class SignController {
     }
 
     @Operation(summary = "이메일 인증 코드 전송")
-    @PostMapping("/emails/verify")
+    @PostMapping("/upwardright/emails/verify")
     public ResponseEntity<Void> sendCode(@Valid @RequestBody SendCodeRequest requestParam) {
         signUpService.sendCode(requestParam);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "이메일 인증 코드 검증")
-    @GetMapping("/emails/verify")
+    @GetMapping("/upwardright/emails/verify")
     public ResponseEntity<EmailVerificationResponse> verifyCode(@Valid @RequestBody VerifyCodeRequest requestParam) {
         EmailVerificationResponse response = signUpService.verifyCode(requestParam);
         return ResponseEntity.ok(response);
