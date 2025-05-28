@@ -72,11 +72,11 @@ authApi.interceptors.response.use(
 );
 
 export const signup = async (user_id: string, password: string, name: string, phone_number: string) => {
-  return authApi.post('/upwardright/signup', { user_id, password, name, phone_number });
+  return authApi.post('/signup', { user_id, password, name, phone_number });
 };
 
 export const login = async (user_id: string, password: string) => {
-  return authApi.post('/upwardright/login', { user_id, password });
+  return authApi.post('/login', { user_id, password });
 };
 
 // 이메일 인증 관련 API 함수 (publicAxios 사용)
@@ -86,7 +86,7 @@ export const sendVerificationEmail = async (email: string) => {
       email: email
     };
     // publicAxios 인스턴스 사용
-    const response = await publicAxios.post('/emails/verify', requestData);
+    const response = await publicAxios.post('/emails/send', requestData);
     console.log('이메일 인증 요청 응답:', response);
     return response.status === 200;
   } catch (error) {
@@ -110,11 +110,10 @@ export const verifyEmailCode = async (email: string, code: string) => {
       email: email,
       code: code
     };
+    console.log('인증 코드 검증 요청:', requestData);
     // publicAxios 인스턴스 사용
-    const response = await publicAxios.get<EmailVerificationResponse>('/emails/verify', {
-      params: requestData
-    });
-    console.log('인증 코드 확인 응답:', response);
+    const response = await publicAxios.post('/emails/verify', requestData);
+    console.log('인증 코드 검증 응답:', response.data);
     return response.data;
   } catch (error) {
     console.error('이메일 인증 코드 확인 실패:', error);

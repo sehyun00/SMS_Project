@@ -54,7 +54,7 @@ export default function createStyles(theme: Theme): SignUpPageStyles {
       width: width,
       backgroundColor: theme.colors.background,
       padding: 20,
-      paddingTop: 30,
+      paddingTop: 50,
       paddingBottom: 30,
     },
     headerTitle: {
@@ -62,6 +62,7 @@ export default function createStyles(theme: Theme): SignUpPageStyles {
       fontWeight: 'bold',
       color: '#000000',
       marginBottom: 30,
+      marginTop: 20,
     },
     inputLabel: {
       fontSize: 14,
