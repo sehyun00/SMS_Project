@@ -1,7 +1,7 @@
 // 파일 경로: src/components/portfolio/PortfolioEditor.tsx
 // 컴포넌트 흐름: App.js > AppNavigator.js > MainPage.jsx > RebalancingComponent.tsx > PortfolioEditor.tsx
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,15 +17,28 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList, PortfolioEditorNavigationProp } from '../../types/navigation';
+import axios from 'axios';
+import SearchModal from './SearchModal';
 
 // API 함수 임포트
 import { 
   Portfolio, 
-  PortfolioItem,
+  PortfolioItem as BasePortfolioItem,
   createPortfolio,
   updatePortfolio,
   searchStocks
 } from '../../api/rebalancingApi';
+
+// API 임포트 추가
+import { 
+  fetchConnectedAccounts, 
+  fetchStockAccounts,
+  getStockBalance,
+  ConnectedAccount, 
+  AccountInfo,
+  BalanceInfo,
+  StockItem
+} from '../../api/connectedAccountApi';
 
 // 더미 데이터 임포트
 import {
@@ -40,6 +53,15 @@ import {
 import withTheme from '../../hoc/withTheme';
 import { Theme } from '../../types/theme';
 import createStyles from '../../styles/components/portfolioEditor.styles';
+
+// 증권사 데이터 매핑 임포트
+import { findSecuritiesFirmByName } from '../../data/organizationData';
+
+// 환경 설정 임포트
+import { FLASK_SERVER_URL } from '../../constants/config';
+
+// 계좌 정보 Context 임포트
+import { useAccounts } from '../../context/AccountsContext';
 
 // 검색 결과 항목 인터페이스
 interface SearchResultItem {
@@ -56,6 +78,11 @@ interface PortfolioEditorProps {
   onClose?: () => void;
   portfolioToEdit?: Portfolio; // 수정할 포트폴리오 (없으면 새로 생성)
   onSave?: (portfolio: Portfolio) => void;
+}
+
+// PortfolioItem 인터페이스 확장
+interface ExtendedPortfolioItem extends BasePortfolioItem {
+  currency?: string; // 통화
 }
 
 const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ 
@@ -100,6 +127,28 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   const [totalPercentage, setTotalPercentage] = useState(0);
   const [isValidPercentage, setIsValidPercentage] = useState(true);
   
+  // 계좌 관련 상태 추가
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
+  const [stockAccounts, setStockAccounts] = useState<AccountInfo[]>([]);
+  const [balanceInfo, setBalanceInfo] = useState<Record<string, BalanceInfo>>({});
+  const { accounts: savedAccounts } = useAccounts();
+  
+  // 고정 환율 (실제로는 API에서 가져와야 함)
+  const exchangeRate = 1350; // 1 USD = 1350 KRW
+
+  // 증권사 이름으로 기관코드 찾기
+  const getOrganizationCode = (companyName: string): string => {
+    const firm = findSecuritiesFirmByName(companyName);
+    if (firm) {
+      console.log(`증권사 ${companyName} -> 코드 ${firm.code} 변환 성공`);
+      return firm.code;
+    } else {
+      console.warn(`증권사 코드를 찾을 수 없음: ${companyName}`);
+      // 기본 코드 반환 (삼성증권)
+      return '0240';
+    }
+  };
+
   // 초기화 - 두 가지 소스에서 portfolioToEdit 처리 (props와 route.params)
   useEffect(() => {
     const fetchPortfolioData = async () => {
@@ -123,7 +172,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           const recordName = recordInfo?.record_name || `포트폴리오 ${portfolioId}`;
           
           // 포트폴리오 객체 구성
-          const portfolioAssets: PortfolioItem[] = recordRuds.map(rud => ({
+          const portfolioAssets: ExtendedPortfolioItem[] = recordRuds.map(rud => ({
             name: rud.stock_name,
             ticker: rud.market_order ? `${rud.stock_name}` : undefined,
             region: rud.stock_region as 0 | 1 | 2,
@@ -200,31 +249,32 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
 
   // 주식 검색 함수
   const handleSearch = async () => {
-    if (!searchQuery.trim() || !loggedToken) return;
+    if (!searchQuery.trim()) return;
     
     setSearchLoading(true);
     try {
-      const result = await searchStocks(loggedToken, searchQuery, selectedRegion);
-      if (result.success && result.data) {
-        setSearchResults(result.data);
-      } else {
-        // 테스트용 더미 데이터 (실제로는 API 연결 필요)
-        const dummyResults: SearchResultItem[] = [
-          { name: '삼성전자', ticker: '005930.KS', region: 1, price: 72500 },
-          { name: 'SK하이닉스', ticker: '000660.KS', region: 1, price: 167500 },
-          { name: 'Apple Inc.', ticker: 'AAPL', region: 2, price: 186.48 },
-          { name: 'Microsoft Corp.', ticker: 'MSFT', region: 2, price: 416.13 }
-        ];
-        
-        // 현금 항목 (region이 0인 경우)
-        if (selectedRegion === 0) {
-          setSearchResults([
-            { name: '원화', ticker: 'KRW', region: 0 },
-            { name: '달러', ticker: 'USD', region: 0 }
-          ]);
-        } else {
-          setSearchResults(dummyResults.filter(item => item.region === selectedRegion));
+      // 현금 항목 (region이 0인 경우)
+      if (selectedRegion === 0) {
+        setSearchResults([
+          { name: '원화', ticker: 'KRW', region: 0 },
+          { name: '달러', ticker: 'USD', region: 0 }
+        ]);
+        return;
+      }
+
+      // FastAPI 서버에 검색 요청
+      const response = await axios.get(`http://localhost:5001/api/stocks/search`, {
+        params: {
+          query: searchQuery,
+          region: selectedRegion.toString()
         }
+      });
+
+      if (response.data.success && response.data.data) {
+        setSearchResults(response.data.data);
+      } else {
+        console.error('검색 실패:', response.data.message);
+        Alert.alert('검색 오류', '종목 검색 중 오류가 발생했습니다.');
       }
     } catch (error) {
       console.error('검색 에러:', error);
@@ -236,7 +286,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
 
   // 검색 결과 항목 선택 핸들러
   const handleSelectSearchItem = (item: SearchResultItem) => {
-    const newItem: PortfolioItem = {
+    const newItem: ExtendedPortfolioItem = {
       name: item.name,
       ticker: item.ticker,
       region: item.region as 0 | 1 | 2,
@@ -334,6 +384,209 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     }
   };
 
+  // 계좌 잔고 조회 함수 수정
+  const getAccountBalance = async (account: AccountInfo, connectedId: string, password: string) => {
+    try {
+      const firmInfo = findSecuritiesFirmByName(account.company);
+      if (!firmInfo) {
+        throw new Error(`증권사 ${account.company}에 대한 코드를 찾을 수 없습니다.`);
+      }
+
+      const response = await axios.post(`${FLASK_SERVER_URL}/stock/balance`, {
+        connectedId,
+        organization: firmInfo.code,
+        account: account.accountNumber,
+        account_password: password
+      });
+
+      if (response.data.result.code === 'CF-00000') {
+        const apiData = response.data.data;
+        console.log('API 응답 데이터:', apiData);
+
+        let stocks: any[] = [];
+        let cashBalance = {
+          krw: 0,
+          usd: 0
+        };
+        
+        // NH투자증권 형식 (resItemList)
+        if (apiData.resItemList) {
+          // 현금 잔고 처리
+          cashBalance.krw = parseFloat(apiData.resCashBalance || apiData.resDepositReceived || '0');
+          cashBalance.usd = parseFloat(apiData.resOverseasCashBalance || '0');
+
+          stocks = apiData.resItemList.map((item: any) => {
+            const isForeign = 
+              item.resAccountCurrency === 'USD' || 
+              item.resNation === 'USA' || 
+              item.resNation === 'US' || 
+              (item.resMarket && ['NASDAQ', 'NYSE', 'AMEX'].includes(item.resMarket));
+            
+            const currency = item.resAccountCurrency === 'USD' ? 'USD' : 'KRW';
+            
+            return {
+              name: item.resItemName || '알 수 없음',
+              amount: parseFloat(item.resQuantity || '0'),
+              balance: parseFloat(item.resValuationAmt || item.resEvaluation || '0'),
+              isForeign,
+              currency,
+              region: isForeign ? 2 : 1
+            };
+          });
+        }
+        // 삼성증권 등 다른 형식 (resAccountStock)
+        else if (apiData.resAccountStock && Array.isArray(apiData.resAccountStock)) {
+          // 현금 잔고 처리
+          cashBalance.krw = parseFloat(apiData.resBalance || apiData.resAccountBalance || '0');
+          cashBalance.usd = parseFloat(apiData.resUsdBalance || '0');
+
+          stocks = apiData.resAccountStock.map((item: any) => {
+            const isForeign = 
+              item.marketCode === 'NYSE' || 
+              item.marketCode === 'NASDAQ' || 
+              item.nation === 'USA' || 
+              item.nation === 'US';
+            
+            const currency = isForeign ? 'USD' : 'KRW';
+            
+            return {
+              name: item.name || item.stockName || '알 수 없음',
+              amount: parseFloat(item.quantity || '0'),
+              balance: parseFloat(item.evaluation || item.amount || '0'),
+              isForeign,
+              currency,
+              region: isForeign ? 2 : 1
+            };
+          });
+        }
+
+        return {
+          cashBalance,
+          stocks
+        };
+      } else {
+        throw new Error(response.data.result.message || '잔고 조회 실패');
+      }
+    } catch (error) {
+      console.error('계좌 잔고 조회 중 에러:', error);
+      throw error;
+    }
+  };
+
+  // 초기화 시 보유종목 가져오기 수정
+  useEffect(() => {
+    const fetchPortfolioData = async () => {
+      if (propPortfolioToEdit || portfolioId) {
+        return;
+      }
+
+      try {
+        const accounts = await fetchConnectedAccounts();
+        setConnectedAccounts(accounts);
+
+        const stockAccountsData = await fetchStockAccounts();
+        setStockAccounts(stockAccountsData);
+
+        if (stockAccountsData.length > 0) {
+          const firstAccount = stockAccountsData[0];
+          const connectedId = typeof accounts[0] === 'string' ? accounts[0] : accounts[0]?.connectedId;
+          
+          if (!connectedId) {
+            throw new Error('유효한 connectedId를 찾을 수 없습니다.');
+          }
+
+          const organizationCode = getOrganizationCode(firstAccount.company);
+          const savedAccount = savedAccounts.find(acc => 
+            acc.account === firstAccount.accountNumber && 
+            acc.organization === organizationCode
+          );
+
+          if (savedAccount?.account_password) {
+            try {
+              const balance = await getAccountBalance(firstAccount, connectedId, savedAccount.account_password);
+              console.log('잔고 조회 결과:', balance);
+
+              const portfolioAssets: ExtendedPortfolioItem[] = [
+                { 
+                  name: '원화', 
+                  region: 0 as const, 
+                  target_percent: 30,
+                  current_amount: balance.cashBalance.krw,
+                  currency: 'KRW'
+                },
+                { 
+                  name: '달러', 
+                  region: 0 as const, 
+                  target_percent: 20,
+                  current_amount: balance.cashBalance.usd,
+                  currency: 'USD'
+                },
+                ...balance.stocks.map((stock: any): ExtendedPortfolioItem => ({
+                  name: stock.name,
+                  ticker: stock.isForeign ? stock.name : undefined,
+                  region: stock.isForeign ? (2 as const) : (1 as const),
+                  target_percent: 0,
+                  current_qty: stock.amount,
+                  current_amount: stock.balance,
+                  currency: stock.currency
+                }))
+              ];
+
+              setPortfolio({
+                portfolio_name: '',
+                assets: portfolioAssets,
+                description: ''
+              });
+            } catch (error) {
+              console.error('계좌 잔고 조회 실패:', error);
+              setDefaultPortfolio();
+            }
+          } else {
+            setDefaultPortfolio();
+          }
+        } else {
+          setDefaultPortfolio();
+        }
+      } catch (error) {
+        console.error('초기 데이터 로딩 실패:', error);
+        setDefaultPortfolio();
+      }
+    };
+
+    fetchPortfolioData();
+  }, [propPortfolioToEdit, portfolioId, savedAccounts]);
+
+  // 기본 포트폴리오 설정 함수
+  const setDefaultPortfolio = () => {
+    setPortfolio({
+      portfolio_name: '',
+      assets: [
+        { name: '원화', region: 0, target_percent: 50 },
+        { name: '달러', region: 0, target_percent: 50 }
+      ],
+      description: ''
+    });
+  };
+
+  // 포트폴리오 항목을 카테고리별로 그룹화하는 함수 추가
+  const groupedAssets = useMemo(() => {
+    const groups = {
+      cash: portfolio.assets.filter(item => item.region === 0),
+      domestic: portfolio.assets.filter(item => item.region === 1),
+      foreign: portfolio.assets.filter(item => item.region === 2)
+    };
+    return groups;
+  }, [portfolio.assets]);
+
+  // 금액 포맷 함수
+  const formatBalance = (balance: number | undefined, currency: string | undefined) => {
+    if (balance === undefined) return '';
+    
+    return currency === 'USD' 
+      ? `$${balance.toLocaleString()}`
+      : `${balance.toLocaleString()}원`;
+  };
+
   // Modal로 쓰일때는 isVisible=false면 null 반환
   if (!isVisible && propIsVisible !== undefined) return null;
 
@@ -405,39 +658,111 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
               </Text>
             </View>
 
-            {portfolio.assets.map((item, index) => (
-              <View key={index} style={styles.itemRow}>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemName}>
-                    {item.name}
-                  </Text>
-                  <Text style={styles.itemRegion}>
-                    {item.region === 0 ? '현금' : item.region === 1 ? '국내주식' : '해외주식'}
-                  </Text>
-                </View>
-                <View style={styles.itemActions}>
-                  <TextInput
-                    style={styles.percentInput}
-                    value={item.target_percent.toString()}
-                    onChangeText={value => handlePercentChange(index, value)}
-                    keyboardType="numeric"
-                    placeholder="0"
-                    placeholderTextColor={theme.colors.text + '80'}
-                  />
-                  <Text style={styles.percentSymbol}>%</Text>
-                  <TouchableOpacity
-                    style={styles.removeButton}
-                    onPress={() => handleRemoveItem(index)}
-                  >
-                    <Ionicons name="trash-outline" size={20} color={theme.colors.negative} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+            {/* 현금 자산 그룹 */}
+            {groupedAssets.cash.length > 0 && (
+              <>
+                <Text style={styles.categoryLabel}>현금</Text>
+                {groupedAssets.cash.map((item: ExtendedPortfolioItem, index) => (
+                  <View key={`cash-${index}`} style={styles.itemRow}>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemAmount}>
+                        {formatBalance(item.current_amount, item.currency)}
+                      </Text>
+                    </View>
+                    <View style={styles.itemActions}>
+                      <TextInput
+                        style={styles.percentInput}
+                        value={item.target_percent.toString()}
+                        onChangeText={value => handlePercentChange(portfolio.assets.findIndex(a => a === item), value)}
+                        keyboardType="numeric"
+                        placeholder="0"
+                        placeholderTextColor={theme.colors.text + '80'}
+                      />
+                      <Text style={styles.percentSymbol}>%</Text>
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() => handleRemoveItem(portfolio.assets.findIndex(a => a === item))}
+                      >
+                        <Ionicons name="trash-outline" size={20} color={theme.colors.negative} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
+
+            {/* 국내주식 그룹 */}
+            {groupedAssets.domestic.length > 0 && (
+              <>
+                <Text style={[styles.categoryLabel, styles.categorySpacing]}>국내주식</Text>
+                {groupedAssets.domestic.map((item: ExtendedPortfolioItem, index) => (
+                  <View key={`domestic-${index}`} style={styles.itemRow}>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemAmount}>
+                        {item.current_qty?.toLocaleString()}주 ({formatBalance(item.current_amount, item.currency)})
+                      </Text>
+                    </View>
+                    <View style={styles.itemActions}>
+                      <TextInput
+                        style={styles.percentInput}
+                        value={item.target_percent.toString()}
+                        onChangeText={value => handlePercentChange(portfolio.assets.findIndex(a => a === item), value)}
+                        keyboardType="numeric"
+                        placeholder="0"
+                        placeholderTextColor={theme.colors.text + '80'}
+                      />
+                      <Text style={styles.percentSymbol}>%</Text>
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() => handleRemoveItem(portfolio.assets.findIndex(a => a === item))}
+                      >
+                        <Ionicons name="trash-outline" size={20} color={theme.colors.negative} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
+
+            {/* 해외주식 그룹 */}
+            {groupedAssets.foreign.length > 0 && (
+              <>
+                <Text style={[styles.categoryLabel, styles.categorySpacing]}>해외주식</Text>
+                {groupedAssets.foreign.map((item: ExtendedPortfolioItem, index) => (
+                  <View key={`foreign-${index}`} style={styles.itemRow}>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemAmount}>
+                        {item.current_qty?.toLocaleString()}주 ({formatBalance(item.current_amount, item.currency)})
+                      </Text>
+                    </View>
+                    <View style={styles.itemActions}>
+                      <TextInput
+                        style={styles.percentInput}
+                        value={item.target_percent.toString()}
+                        onChangeText={value => handlePercentChange(portfolio.assets.findIndex(a => a === item), value)}
+                        keyboardType="numeric"
+                        placeholder="0"
+                        placeholderTextColor={theme.colors.text + '80'}
+                      />
+                      <Text style={styles.percentSymbol}>%</Text>
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() => handleRemoveItem(portfolio.assets.findIndex(a => a === item))}
+                      >
+                        <Ionicons name="trash-outline" size={20} color={theme.colors.negative} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
 
             {/* 항목 추가 버튼 */}
             <TouchableOpacity
-              style={styles.addButton}
+              style={[styles.addButton, styles.categorySpacing]}
               onPress={handleAddItem}
             >
               <Text style={styles.addButtonText}>
@@ -447,148 +772,12 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           </View>
         </ScrollView>
 
-        {/* 검색 모달 */}
-        <Modal
+        {/* SearchModal 컴포넌트 사용 */}
+        <SearchModal
           visible={searchModalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setSearchModalVisible(false)}
-        >
-          <View style={styles.searchModalContainer}>
-            <View style={styles.searchModal}>
-              <View style={styles.searchHeader}>
-                <TouchableOpacity
-                  onPress={() => setSearchModalVisible(false)}
-                  style={styles.closeSearchButton}
-                >
-                  <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.searchTitle}>
-                  항목 검색
-                </Text>
-              </View>
-
-              {/* 지역 선택 탭 */}
-              <View style={styles.regionTabs}>
-                <TouchableOpacity
-                  style={[
-                    styles.regionTab,
-                    selectedRegion === 0 && {
-                      backgroundColor: theme.colors.primary + '20'
-                    }
-                  ]}
-                  onPress={() => setSelectedRegion(0)}
-                >
-                  <Text style={[
-                    styles.regionTabText,
-                    { color: selectedRegion === 0 ? theme.colors.primary : theme.colors.text }
-                  ]}>
-                    현금
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.regionTab,
-                    selectedRegion === 1 && {
-                      backgroundColor: theme.colors.primary + '20'
-                    }
-                  ]}
-                  onPress={() => setSelectedRegion(1)}
-                >
-                  <Text style={[
-                    styles.regionTabText,
-                    { color: selectedRegion === 1 ? theme.colors.primary : theme.colors.text }
-                  ]}>
-                    국내주식
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.regionTab,
-                    selectedRegion === 2 && {
-                      backgroundColor: theme.colors.primary + '20'
-                    }
-                  ]}
-                  onPress={() => setSelectedRegion(2)}
-                >
-                  <Text style={[
-                    styles.regionTabText,
-                    { color: selectedRegion === 2 ? theme.colors.primary : theme.colors.text }
-                  ]}>
-                    해외주식
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* 검색 입력 필드 */}
-              <View style={styles.searchInputContainer}>
-                <TextInput
-                  style={styles.searchInput}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholder={
-                    selectedRegion === 0
-                      ? "현금 종류 검색..."
-                      : selectedRegion === 1
-                      ? "국내주식 검색..."
-                      : "해외주식 검색..."
-                  }
-                  placeholderTextColor={theme.colors.text + '80'}
-                  onSubmitEditing={handleSearch}
-                />
-                <TouchableOpacity
-                  style={styles.searchButton}
-                  onPress={handleSearch}
-                >
-                  <Ionicons name="search" size={20} color="white" />
-                </TouchableOpacity>
-              </View>
-
-              {/* 검색 결과 */}
-              {searchLoading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                </View>
-              ) : (
-                <FlatList
-                  data={searchResults}
-                  keyExtractor={(item, index) => `${item.name}-${index}`}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.searchResultItem}
-                      onPress={() => handleSelectSearchItem(item)}
-                    >
-                      <View>
-                        <Text style={styles.resultItemName}>
-                          {item.name}
-                        </Text>
-                        {item.ticker && (
-                          <Text style={styles.resultItemTicker}>
-                            {item.ticker}
-                          </Text>
-                        )}
-                      </View>
-                      {item.price && (
-                        <Text style={styles.resultItemPrice}>
-                          {item.region === 1 
-                            ? `${item.price.toLocaleString()}원` 
-                            : `$${item.price.toLocaleString()}`}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  )}
-                  ListEmptyComponent={
-                    <View style={styles.emptyResultContainer}>
-                      <Text style={styles.emptyResultText}>
-                        검색 결과가 없습니다
-                      </Text>
-                    </View>
-                  }
-                />
-              )}
-            </View>
-          </View>
-        </Modal>
+          onClose={() => setSearchModalVisible(false)}
+          onSelect={handleSelectSearchItem}
+        />
       </View>
     </Modal>
   );

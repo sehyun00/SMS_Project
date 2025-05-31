@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SPRING_SERVER_URL } from '../constants/config';
+import { SPRING_SERVER_URL, FLASK_SERVER_URL, FASTAPI_SERVER_URL } from '../constants/config';
 import { Platform } from 'react-native';
 import { Account, Record, Rud } from '../data/dummyData';
 
@@ -162,12 +162,16 @@ export const deletePortfolio = async (token: string, portfolioId: number) => {
   }
 };
 
-// 주식 검색 API
+// 주식 검색 함수
 export const searchStocks = async (token: string, query: string, region: number) => {
   try {
     const response = await axios.get(
-      `${SPRING_SERVER_URL}/stocks/search?query=${encodeURIComponent(query)}&region=${region}`,
+      `${FASTAPI_SERVER_URL}/api/stocks/search`,
       {
+        params: {
+          query,
+          region: region.toString()
+        },
         headers: {
           'Accept': 'application/json',
           'Platform': Platform.OS,
@@ -175,13 +179,18 @@ export const searchStocks = async (token: string, query: string, region: number)
         }
       }
     );
-    
+
+    console.log('Search API Response:', response.data);
+
     return {
       success: true,
-      data: response.data
+      data: response.data.data || response.data
     };
   } catch (error) {
     console.error('주식 검색 에러:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Error Response:', error.response.data);
+    }
     return {
       success: false,
       error: error

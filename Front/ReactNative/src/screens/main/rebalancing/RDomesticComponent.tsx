@@ -28,7 +28,7 @@ interface RDomesticComponentProps {
   exchangeRate: number;
   totalBalance: number;
   calculateCurrentPortion: (amount: number) => number;
-  theme?: Theme;
+  theme: Theme;
 }
 
 const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
@@ -41,6 +41,7 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
   calculateCurrentPortion,
   theme
 }) => {
+  if (!theme) return null; // theme이 없으면 렌더링하지 않음
   const styles = createTableStyles(theme);
 
   // 원화 기호 상수

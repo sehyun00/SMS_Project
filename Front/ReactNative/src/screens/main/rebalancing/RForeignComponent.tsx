@@ -27,7 +27,7 @@ interface RForeignComponentProps {
   exchangeRate: number;
   totalBalance: number;
   calculateCurrentPortion: (amount: number) => number;
-  theme?: Theme;
+  theme: Theme;
 }
 
 const RForeignComponent: React.FC<RForeignComponentProps> = ({
@@ -40,6 +40,7 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
   calculateCurrentPortion,
   theme
 }) => {
+  if (!theme) return null;
   const styles = createTableStyles(theme);
 
   // 원화 기호 상수

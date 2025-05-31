@@ -1,10 +1,12 @@
 // 경로: src/styles/pages/signUpPage.styles.ts
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { Dimensions } from 'react-native';
 import { Theme } from '../../types/theme';
+import { Platform } from 'react-native';
 
 // 스타일 타입 정의
 interface SignUpPageStyles {
+  scrollViewContent: ViewStyle;
   safeArea: ViewStyle;
   container: ViewStyle;
   formContainer: ViewStyle;
@@ -56,6 +58,10 @@ export default function createStyles(theme: Theme): SignUpPageStyles {
       padding: 20,
       paddingTop: 50,
       paddingBottom: 30,
+    },
+    scrollViewContent: {
+      flexGrow: 1,
+      paddingBottom: Platform.OS === 'ios' ? 40 : 80,
     },
     headerTitle: {
       fontSize: 24,

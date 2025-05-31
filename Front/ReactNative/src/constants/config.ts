@@ -11,3 +11,7 @@ export const SPRING_SERVER_URL = Platform.OS === 'web'
 export const FLASK_SERVER_URL = Platform.OS === 'web'
   ? 'http://localhost:5000'
   : `http://${ip}:5000`; 
+
+  export const FASTAPI_SERVER_URL = Platform.OS === 'web'
+  ? 'http://localhost:5001'
+  : `http://${ip}:5001`; 

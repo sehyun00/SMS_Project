@@ -88,6 +88,11 @@ export default function createStyles(theme: Theme) {
       fontWeight: '500',
       color: theme.colors.text,
     },
+    itemAmount: {
+      fontSize: 14,
+      marginTop: 4,
+      color: theme.colors.text + '80',
+    },
     itemRegion: {
       fontSize: 14,
       marginTop: 4,
@@ -230,6 +235,17 @@ export default function createStyles(theme: Theme) {
     emptyResultText: {
       fontSize: 16,
       color: theme.colors.text + '80',
+    },
+    categoryLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginTop: 20,
+      marginBottom: 8,
+      paddingHorizontal: 4,
+    },
+    categorySpacing: {
+      marginTop: 24,
     },
   });
 } 

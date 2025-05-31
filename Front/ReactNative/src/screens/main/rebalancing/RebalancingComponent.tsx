@@ -16,6 +16,7 @@ import { FLASK_SERVER_URL } from '../../../constants/config';
 import axios from 'axios';
 import AccountPasswordModal from '../../../components/common/modals/AccountPasswordModal';
 import { useAccounts } from '../../../context/AccountsContext';
+import AddPortfolioModal from '../../../components/common/modals/AddPortfolioModal';
 
 // 컴포넌트 임포트
 import RForeignComponent from './RForeignComponent';
@@ -1199,37 +1200,14 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
       )}
 
       {/* 포트폴리오 추가 모달 */}
-      <Modal
+      <AddPortfolioModal
         visible={showLoadPortfolioModal}
-        transparent
-        animationType="fade"
-      >
-        <TouchableOpacity
-          style={styles.modalBackground}
-          activeOpacity={1}
-          onPressOut={() => setShowLoadPortfolioModal(false)}
-        >
-          <View style={styles.modalContent}>
-            <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 16}}>
-              새 포트폴리오 추가하기
-            </Text>
-            <TouchableOpacity
-              style={{
-                backgroundColor: theme.colors.primary,
-                padding: 12,
-                borderRadius: 8,
-                alignItems: 'center',
-                marginTop: 16
-              }}
-              onPress={handleLoadPortfolio}
-            >
-              <Text style={{color: '#FFF', fontWeight: 'bold'}}>추가하기</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={() => setShowLoadPortfolioModal(false)}
+        onConfirm={handleLoadPortfolio}
+        theme={theme}
+      />
 
-      {/* 계좌 비밀번호 모달 - 공통 컴포넌트 사용 */}
+      {/* 계좌 비밀번호 모달 */}
       <AccountPasswordModal
         theme={theme}
         visible={showAccountPasswordModal}
