@@ -33,6 +33,9 @@ export default function createStyles(theme: Theme) {
       borderRadius: 4,
       backgroundColor: theme.colors.primary,
     },
+    saveButtonDisabled: {
+      opacity: 0.6,
+    },
     saveButtonText: {
       color: 'white',
       fontWeight: 'bold',

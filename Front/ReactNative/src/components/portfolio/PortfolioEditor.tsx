@@ -26,7 +26,9 @@ import {
   PortfolioItem as BasePortfolioItem,
   createPortfolio,
   updatePortfolio,
-  searchStocks
+  searchStocks,
+  saveRebalancingRecord,
+  saveRebalancingStocks
 } from '../../api/rebalancingApi';
 
 // API 임포트 추가
@@ -82,7 +84,7 @@ interface PortfolioEditorProps {
 
 // PortfolioItem 인터페이스 확장
 interface ExtendedPortfolioItem extends BasePortfolioItem {
-  currency?: string; // 통화
+  // currency는 이미 BasePortfolioItem에 포함되어 있으므로 제거
 }
 
 const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ 
@@ -312,63 +314,125 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
 
   // 포트폴리오 저장 핸들러
   const handleSave = async () => {
+    console.log('handleSave function called');
+    
+    if (!loggedToken) {
+      Alert.alert('인증 오류', '로그인이 필요합니다.');
+      return;
+    }
+
     if (!portfolio.portfolio_name.trim()) {
+      console.log('Portfolio name is empty');
       Alert.alert('입력 오류', '포트폴리오 이름을 입력해주세요.');
       return;
     }
     
     if (!isValidPercentage) {
+      console.log('Invalid percentage:', totalPercentage);
       Alert.alert('비율 오류', '모든 항목의 비율 합계가 100%가 되어야 합니다.');
       return;
     }
     
     if (portfolio.assets.length < 2) {
+      console.log('Not enough assets:', portfolio.assets.length);
       Alert.alert('항목 오류', '최소 2개 이상의 항목이 필요합니다.');
       return;
     }
+
+    const accountNumber = stockAccounts[0]?.accountNumber || '716229952301';
+    console.log('Using account number:', accountNumber);
+    console.log('Using token:', loggedToken);
     
     setLoading(true);
     try {
-      // 실제 API 연결 전 더미 데이터 업데이트 (개발 중 테스트용)
-      if (portfolio.portfolio_id || portfolioId) {
-        const recordId = portfolio.portfolio_id || portfolioId!;
+      // 1. 첫 번째 API 호출 - 레코드 생성
+      const totalBalance = portfolio.assets.reduce((sum, asset) => {
+        const amount = asset.current_amount || 0;
+        return sum + (asset.currency === 'USD' ? amount * exchangeRate : amount);
+      }, 0);
+
+      const recordData = {
+        account: accountNumber,
+        totalBalance: totalBalance,
+        recordName: portfolio.portfolio_name,
+        memo: portfolio.description || '',
+        profitRate: 0 // 초기 수익률은 0으로 설정
+      };
+
+      console.log('레코드 생성 요청 데이터:', recordData);
+      
+      const recordResult = await saveRebalancingRecord(loggedToken, recordData);
+      if (!recordResult.success) {
+        if (axios.isAxiosError(recordResult.error)) {
+          if (recordResult.error.response?.status === 401) {
+            throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+          }
+        }
+        throw new Error('레코드 저장에 실패했습니다.');
+      }
+
+      console.log('레코드 생성 응답:', recordResult.data);
+
+      const recordId = recordResult.data.record_id;
+      if (!recordId) {
+        throw new Error('레코드 ID를 받지 못했습니다.');
+      }
+
+      // 2. 두 번째 API 호출 - 종목 정보 저장
+      const stocks = portfolio.assets.map(asset => ({
+        stock_name: asset.name,
+        expert_per: asset.target_percent,
+        market_order: asset.region === 2 ? (asset.current_amount || 0) : (asset.current_amount || 75000),
+        rate: asset.target_percent / 100,
+        nos: asset.current_qty || 0,
+        won: asset.currency === 'KRW' ? (asset.current_amount || 0) : 0,
+        dollar: asset.currency === 'USD' ? (asset.current_amount || 0) : 0,
+        rebalancing_dollar: asset.currency === 'USD' ? (asset.current_amount || 0) : 0,
+        market_type: asset.region === 0 ? '현금' : (asset.region === 1 ? '국장' : '미장'),
+        stock_region: asset.region
+      }));
+
+      console.log('종목 정보 저장 요청 데이터:', { recordId, stocks });
+
+      const stocksResult = await saveRebalancingStocks(loggedToken, accountNumber, recordId, stocks);
+      if (!stocksResult.success) {
+        if (axios.isAxiosError(stocksResult.error)) {
+          if (stocksResult.error.response?.status === 401) {
+            throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+          }
+        }
+        throw new Error('종목 정보 저장에 실패했습니다.');
+      }
+
+      console.log('종목 정보 저장 응답:', stocksResult.data);
+
+      if (stocksResult.data.message?.includes('성공')) {
+        Alert.alert('완료', '포트폴리오가 성공적으로 저장되었습니다.');
         
-        // 1. 레코드 이름 업데이트
-        updateRecordName(recordId, portfolio.portfolio_name);
-        
-        // 2. 레코드 상세 항목(RUDs) 업데이트
-        const success = updateRecordRuds(recordId, portfolio.assets);
-        
-        if (!success) {
-          throw new Error('포트폴리오 상세 정보 업데이트 실패');
+        if (propOnSave) {
+          propOnSave(portfolio);
         }
         
-        console.log('포트폴리오 업데이트 성공:', recordId);
-      }
-      
-      // 실제 API 호출 (서버 연결 후 활성화)
-      /*
-      if (portfolio.portfolio_id || portfolioId) {
-        // 수정
-        await updatePortfolio(loggedToken!, portfolio.portfolio_id || portfolioId!, portfolio);
+        handleClose();
       } else {
-        // 새로 생성
-        await createPortfolio(loggedToken!, portfolio);
+        throw new Error('종목 정보 저장에 실패했습니다.');
       }
-      */
-      
-      // 성공 알림
-      Alert.alert('완료', '포트폴리오가 성공적으로 저장되었습니다.');
-      
-      // props.onSave가 있으면 호출, 없으면 네비게이션으로 돌아가기
-      if (propOnSave) {
-        propOnSave(portfolio);
-      }
-      
-      handleClose();
     } catch (error) {
       console.error('포트폴리오 저장 에러:', error);
-      Alert.alert('저장 오류', '포트폴리오 저장 중 오류가 발생했습니다.');
+      let errorMessage = '포트폴리오 저장 중 오류가 발생했습니다.';
+      
+      if (axios.isAxiosError(error)) {
+        console.error('API 에러 응답:', error.response?.data);
+        if (error.response?.status === 401) {
+          errorMessage = '인증이 만료되었습니다. 다시 로그인해주세요.';
+        } else {
+          errorMessage += '\n' + (error.response?.data?.message || error.message);
+        }
+      } else if (error instanceof Error) {
+        errorMessage += '\n' + error.message;
+      }
+      
+      Alert.alert('저장 오류', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -607,9 +671,18 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             {(propPortfolioToEdit || portfolioId) ? '포트폴리오 수정' : '새 포트폴리오 생성'}
           </Text>
           <TouchableOpacity
-            onPress={handleSave}
+            onPress={() => {
+              console.log('Save button pressed');
+              console.log('Loading:', loading);
+              console.log('Portfolio name:', portfolio.portfolio_name);
+              console.log('Valid percentage:', isValidPercentage);
+              console.log('Total percentage:', totalPercentage);
+              console.log('Assets:', portfolio.assets);
+              
+              handleSave();
+            }}
             style={styles.saveButton}
-            disabled={loading || !isValidPercentage}
+            activeOpacity={0.7}
           >
             {loading ? (
               <ActivityIndicator size="small" color="white" />

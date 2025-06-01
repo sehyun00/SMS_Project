@@ -21,6 +21,7 @@ export interface PortfolioItem {
   target_percent: number; // 목표 비중
   current_amount?: number; // 현재 보유 금액
   current_qty?: number;  // 보유 수량
+  currency?: 'KRW' | 'USD'; // 통화 (KRW: 원화, USD: 달러)
 }
 
 // 포트폴리오 목록 가져오기
@@ -225,6 +226,89 @@ export const saveRebalancingResult = async (token: string, accountId: string, re
     };
   } catch (error) {
     console.error('리밸런싱 결과 저장 에러:', error);
+    return {
+      success: false,
+      error: error
+    };
+  }
+};
+
+// 리밸런싱 레코드 저장
+export const saveRebalancingRecord = async (token: string, recordData: {
+  account: string;
+  totalBalance: number;
+  recordName: string;
+  memo: string;
+  profitRate: number;
+}) => {
+  try {
+    const response = await axios.post(
+      `${SPRING_SERVER_URL}/mystockaccount/record/save`,
+      recordData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Platform': Platform.OS,
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('리밸런싱 레코드 저장 에러:', error);
+    return {
+      success: false,
+      error: error
+    };
+  }
+};
+
+// 리밸런싱 종목 정보 저장
+export const saveRebalancingStocks = async (
+  token: string,
+  accountNumber: string,
+  recordId: number,
+  stocks: Array<{
+    stock_name: string;
+    expert_per: number;
+    market_order: number;
+    rate: number;
+    nos: number;
+    won: number;
+    dollar: number;
+    rebalancing_dollar: number;
+    market_type: string;
+    stock_region: number;
+  }>
+) => {
+  try {
+    const response = await axios.post(
+      `${SPRING_SERVER_URL}/mystockaccount/record/account?account=${accountNumber}`,
+      {
+        record_id: recordId,
+        stocks: stocks
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Platform': Platform.OS,
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+    
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('리밸런싱 종목 정보 저장 에러:', error);
     return {
       success: false,
       error: error
