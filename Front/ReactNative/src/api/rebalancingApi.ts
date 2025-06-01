@@ -287,8 +287,16 @@ export const saveRebalancingStocks = async (
   }>
 ) => {
   try {
+    console.log('Token:', token);
+    console.log('Headers:', {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Platform': Platform.OS,
+      'Authorization': `Bearer ${token}`
+    });
+
     const response = await axios.post(
-      `${SPRING_SERVER_URL}/mystockaccount/record/account?account=${accountNumber}`,
+      `${SPRING_SERVER_URL}/mystockaccount/record/detail/save`,
       {
         record_id: recordId,
         stocks: stocks
@@ -309,9 +317,13 @@ export const saveRebalancingStocks = async (
     };
   } catch (error) {
     console.error('리밸런싱 종목 정보 저장 에러:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('API 에러 상태 코드:', error.response?.status);
+      console.error('API 에러 응답:', error.response?.data);
+    }
     return {
       success: false,
       error: error
     };
   }
-}; 
+};
