@@ -36,12 +36,15 @@ export const fetchStockAccounts = async (token: string) => {
       }
     );
     
-    // 응답 데이터 변환
+    // 응답 데이터 변환 - principal 값 포함
     const accounts = response.data.map((acc: any) => ({
       company: acc.company,
       accountNumber: acc.account,
+      principal: acc.principal || 0, // 백엔드에서 받은 principal 값 포함
       returnRate: 0
     }));
+    
+    console.log('계좌 API 응답:', accounts); // principal 값 확인용 로그
     
     return {
       success: true,

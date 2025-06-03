@@ -10,13 +10,14 @@ import { useAuth } from '../../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { fetchStockAccounts } from '../../../api/homeApi';
 import { findSecuritiesFirmByName } from '../../../data/organizationData';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchConnectedAccounts } from '../../../api/connectedAccountApi';
+import { fetchConnectedAccounts, getAccountBalance } from '../../../api/connectedAccountApi';
 import { FLASK_SERVER_URL } from '../../../constants/config';
 import axios from 'axios';
-import AccountPasswordModal from '../../../components/common/modals/AccountPasswordModal';
 import { useAccounts } from '../../../context/AccountsContext';
 import AddPortfolioModal from '../../../components/common/modals/AddPortfolioModal';
+import AccountPasswordModal from '../../../components/common/modals/AccountPasswordModal';
+import { fetchRebalancingRecords, fetchRebalancingDetail, saveRebalancingRecord, saveRebalancingStocks } from '../../../api/rebalancingApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 컴포넌트 임포트
 import RForeignComponent from './RForeignComponent';
@@ -50,6 +51,7 @@ import AccountSelectorComponent from '../../../components/account/AccountSelecto
 interface ApiAccountInfo {
   company: string;
   accountNumber: string;
+  principal?: number; // 백엔드에서 받는 원금 값
   returnRate: number;
 }
 
@@ -92,6 +94,9 @@ interface StockItem {
   targetPortion: number;
   rebalanceAmount: number;
   market_order?: number;
+  // 실시간 주식 가격 정보 추가
+  currentPrice?: number;  // 현재 주식 가격
+  requiredShares?: number; // 필요한 주식 수 (+ 매수, - 매도)
 }
 
 // 컴포넌트 props 인터페이스 정의
@@ -102,6 +107,42 @@ interface RebalancingComponentProps {
 
 import CurrencyToggle from '../../../components/common/ui/CurrencyToggle';
 
+// 파일 상단에 타입 정의 추가
+interface GetRebalancingResponse {
+  record_id: number;
+  account: string;
+  user_id: string;
+  record_date: string;
+  total_balance: number;
+  record_name: string;
+  memo: string;
+  profit_rate: number;
+}
+
+interface GetRebalancingStockResponse {
+  record_id: number;
+  stock_name: string;
+  expert_per: number;
+  market_order: number;
+  rate: number;
+  nos: number;
+  won: number;
+  dollar: number;
+  rebalancing_dollar: number;
+  stock_region: number;
+  market_type_name: string;
+}
+
+// 더미 데이터 타입 정의 추가
+interface Record extends GetRebalancingResponse {
+  user_id: string;
+}
+
+interface Rud extends GetRebalancingStockResponse {
+  rebalancing_dollar: number;
+  market_type_name: string;
+}
+
 const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navigation }) => {
   const insets = useSafeAreaInsets();
   const styles = createStyles(theme);
@@ -111,20 +152,30 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // navigation prop이 제공되지 않은 경우 useNavigation 훅 사용
   const nav = navigation || defaultNavigation;
   
-  // API에서 가져온 증권 계좌 정보 상태
-  const [stockAccounts, setStockAccounts] = useState<ApiAccountInfo[]>([]);
+  // 스크롤뷰 참조
+  const scrollViewRef = useRef<ScrollView>(null);
+  
+  // 기본 상태들
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accountDropdownVisible, setAccountDropdownVisible] = useState(false);
+  const [selectedAccountIndex, setSelectedAccountIndex] = useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentRecordIndex, setCurrentRecordIndex] = useState(0);
+  
+  // API 관련 상태들
+  const [stockAccounts, setStockAccounts] = useState<ApiAccountInfo[]>([]);
+  const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
+  const [accountRecords, setAccountRecords] = useState<GetRebalancingResponse[]>([]);
+  const [isLoadingRecords, setIsLoadingRecords] = useState(false);
+  const [recordDetails, setRecordDetails] = useState<GetRebalancingStockResponse[]>([]);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  
+  // 실시간 계좌 잔고 상태
+  const [realtimeBalance, setRealtimeBalance] = useState<any>(null);
+  const [isLoadingRealtimeBalance, setIsLoadingRealtimeBalance] = useState(false);
   
   // connectedId 정보 상태
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
-  
-  // 계좌 비밀번호 모달 상태
-  const [showAccountPasswordModal, setShowAccountPasswordModal] = useState(false);
-  const [accountPassword, setAccountPassword] = useState('');
-  const [selectedAccountForPassword, setSelectedAccountForPassword] = useState<{account: ApiAccountInfo, connectedId: string} | null>(null);
-  const [saveInProgress, setSaveInProgress] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
   
   // 계좌 정보 Context 사용
   const { accounts: savedAccounts, addAccount: saveAccount, updateAccount } = useAccounts();
@@ -132,13 +183,6 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 카드 너비 계산 수정
   const screenWidth = Dimensions.get('window').width;
   const cardWidth = screenWidth; // 전체 화면 너비로 설정
-
-  // 스크롤뷰 참조
-  const scrollViewRef = useRef<ScrollView>(null);
-  // 현재 스와이프된 기록 인덱스 (페이지 인디케이터용)
-  const [currentRecordIndex, setCurrentRecordIndex] = useState(0);
-  // 현재 화면에 보이는 페이지 인덱스 (0: 포트폴리오 추가, 1: 기록 또는 기록 없음)
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
   
   // 현재 현금 정보 가져오기
   const { exchangeRate, loading: exchangeRateLoading } = useExchangeRate();
@@ -147,165 +191,449 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 화폐 단위 상태 (기본값: 달러)
   const [currencyType, setCurrencyType] = useState<'dollar' | 'won'>('dollar');
 
-  // 선택된 계좌 상태 (기본값: 첫 번째 계좌)
-  const [selectedAccountIndex, setSelectedAccountIndex] = useState(0);
+  // 증권사 이름으로 기관코드 찾기
+  const getOrganizationCode = (companyName: string): string => {
+    const firm = findSecuritiesFirmByName(companyName);
+    if (firm) {
+      console.log(`증권사 ${companyName} -> 코드 ${firm.code} 변환 성공`);
+      return firm.code;
+    } else {
+      console.warn(`증권사 코드를 찾을 수 없음: ${companyName}`);
+      // 기본 코드 반환 (삼성증권)
+      return '0240';
+    }
+  };
+  
+  // 로컬에 저장된 계좌 정보 찾기
+  const findSavedAccount = (accountNumber: string, organization: string) => {
+    return savedAccounts.find(acc => 
+      acc.account === accountNumber && acc.organization === organization
+    );
+  };
 
-  // API에서 ConnectedAccounts 정보 가져오기
-  useEffect(() => {
-    const getConnectedAccounts = async () => {
-      if (!loggedToken) {
-        console.log('토큰 없음, Connected Accounts API 호출 안함');
+  // 계좌 비밀번호 모달 상태
+  const [showAccountPasswordModal, setShowAccountPasswordModal] = useState(false);
+  const [accountPassword, setAccountPassword] = useState('');
+  const [selectedAccountForPassword, setSelectedAccountForPassword] = useState<{account: ApiAccountInfo, connectedId: string} | null>(null);
+  const [saveInProgress, setSaveInProgress] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  
+  // 계좌별 비밀번호 상태 추적 추가
+  const [accountPasswordStatus, setAccountPasswordStatus] = useState<{[key: string]: boolean}>({});
+
+  // 계좌 비밀번호 확인
+  const checkSavedPassword = async (accountNumber: string, organization: string): Promise<boolean> => {
+    // Context에서 계좌 정보 찾기
+    const savedAccount = findSavedAccount(accountNumber, organization);
+    const hasContextPassword = !!(savedAccount && savedAccount.account_password);
+    
+    // AsyncStorage에서 확인
+    let hasDirectPassword = false;
+    try {
+      const directPassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
+      hasDirectPassword = !!directPassword;
+    } catch (err) {
+      console.error('직접 저장소 확인 오류:', err);
+    }
+    
+    return hasContextPassword || hasDirectPassword;
+  };
+
+  // 계좌 비밀번호 저장 - RecordComponent와 동일한 로직
+  const saveAccountPassword = async () => {
+    if (!selectedAccountForPassword || !accountPassword) {
+      Alert.alert('알림', '계좌 비밀번호를 입력해주세요.');
         return;
       }
       
       try {
-        setIsLoading(true);
-        console.log('Connected Accounts 정보 가져오기 시도...');
-        const accounts = await fetchConnectedAccounts();
-        
-        console.log('Connected Accounts 응답:', accounts);
-        setConnectedAccounts(accounts);
-        
-        // 증권 계좌 정보도 함께 가져오기
-        const stockAccountsResult = await fetchStockAccounts(loggedToken);
-        if (stockAccountsResult.success && stockAccountsResult.data) {
-          console.log('증권 계좌 API 응답:', stockAccountsResult.data);
-          setStockAccounts(stockAccountsResult.data);
-        } else {
-          console.log('증권 계좌 정보 가져오기 실패');
-          setStockAccounts([]);
-        }
-      } catch (error) {
-        console.error('Connected Accounts 정보 가져오기 오류:', error);
-        setConnectedAccounts([]);
-      } finally {
-        setIsLoading(false);
+      setSaveInProgress(true);
+      setPasswordError('');
+      
+      const organization = getOrganizationCode(selectedAccountForPassword.account.company);
+      const accountNumber = selectedAccountForPassword.account.accountNumber;
+      const connectedId = selectedAccountForPassword.connectedId;
+      
+      // organization 값이 숫자로만 구성되어 있는지 검증
+      if (!/^\d+$/.test(organization)) {
+        console.error('[계좌 비밀번호 저장] 잘못된 기관코드 형식:', organization);
+        throw new Error(`잘못된 기관코드 형식입니다: ${organization}`);
       }
-    };
-    
-    getConnectedAccounts();
-  }, [loggedToken]);
+      
+      console.log('[계좌 비밀번호 저장] 회사명:', selectedAccountForPassword.account.company);
+      console.log('[계좌 비밀번호 저장] 변환된 기관코드:', organization);
+      console.log('[계좌 비밀번호 저장] 계좌번호:', accountNumber);
+      console.log('[계좌 비밀번호 저장] connectedId:', connectedId);
+      
+      console.log('계좌 비밀번호 확인 시도:', {
+        connectedId,
+        organization,
+        account: accountNumber,
+        account_password: '******'
+      });
+      
+      try {
+        const response = await getAccountBalance({
+          organization,
+          connectedId,
+          account: accountNumber,
+          account_password: accountPassword
+        });
+        
+        if (response.data) {
+          console.log('계좌 비밀번호 확인 성공');
+          
+          const accountInfo = {
+            account: accountNumber,
+            account_password: accountPassword,
+            connectedId: connectedId,
+            organization: organization
+          };
+          
+          const existingAccount = findSavedAccount(accountNumber, organization);
+          
+          if (existingAccount) {
+            console.log(`기존 계좌 정보 업데이트: ${accountNumber}`);
+            const result = await updateAccount(accountInfo);
+            if (!result) {
+              console.error('계좌 정보 업데이트 실패');
+            }
+        } else {
+            console.log(`새 계좌 정보 저장: ${accountNumber}`);
+            const result = await saveAccount(accountInfo);
+            if (!result) {
+              console.error('계좌 정보 저장 실패');
+            }
+          }
+          
+          try {
+            await AsyncStorage.setItem(`direct_password_${accountNumber}`, accountPassword);
+            console.log(`계좌 ${accountNumber}의 비밀번호 직접 저장 완료`);
+          } catch (err) {
+            console.error('직접 저장 오류:', err);
+          }
+          
+          Alert.alert('성공', '계좌 비밀번호가 저장되었습니다.', [
+            { text: '확인', onPress: () => {
+              setShowAccountPasswordModal(false);
+              setAccountPassword('');
+              setSelectedAccountForPassword(null);
+              setPasswordError('');
+              
+              // 해당 계좌의 비밀번호 상태 업데이트
+              setAccountPasswordStatus(prev => ({
+                ...prev,
+                [accountNumber]: true
+              }));
+              
+              // 리밸런싱 기록 다시 조회
+              if (selectedAccountForPassword) {
+                loadRebalancingRecords(selectedAccountForPassword.account.accountNumber);
+              }
+            }}
+          ]);
+        } else {
+          throw new Error('계좌 비밀번호가 올바르지 않습니다.');
+        }
+      } catch (error: any) {
+        console.error('계좌 비밀번호 확인 실패:', error);
+        setPasswordError(error.response?.data?.result?.message || error.message || '계좌 비밀번호가 올바르지 않습니다.');
+      }
+    } catch (error: any) {
+      console.error('비밀번호 저장 오류:', error);
+      setPasswordError(error.message || '계좌 비밀번호 저장 중 오류가 발생했습니다.');
+      } finally {
+      setSaveInProgress(false);
+    }
+  };
 
-  // 페이지 진입 시 현재 선택된 계좌의 비밀번호 확인
-  useEffect(() => {
-    // 디버깅용 로그 추가
-    console.log('RebalancingComponent - 계좌 정보:', {
-      accountsCount: stockAccounts.length,
-      selectedIndex: selectedAccountIndex,
-      loading: isLoading
+  // 계좌 비밀번호 필요 시 모달 표시
+  const handleAccountPasswordRequired = (account: ApiAccountInfo, connectedId: string) => {
+    console.log('[비밀번호 모달] 모달 표시 함수 호출:', {
+      account: account.accountNumber,
+      company: account.company,
+      connectedId,
+      currentModalState: showAccountPasswordModal
     });
     
-    const checkSelectedAccountPassword = async () => {
-      // 로딩 중이거나 계좌 정보가 없으면 종료
-      if (isLoading || stockAccounts.length === 0 || connectedAccounts.length === 0) {
-        console.log('계좌 정보가 아직 로드되지 않았거나 로딩 중입니다.');
+    setSelectedAccountForPassword({ account, connectedId });
+    setAccountPassword('');
+    setPasswordError('');
+    setShowAccountPasswordModal(true);
+    
+    console.log('[비밀번호 모달] 모달 상태 설정 완료:', {
+      selectedAccount: account.accountNumber,
+      modalShouldShow: true
+    });
+  };
+
+  // 리밸런싱 기록 조회
+  const loadRebalancingRecords = async (accountNumber: string) => {
+    if (!loggedToken) {
+      console.log('리밸런싱 기록 조회 중단: 토큰 없음');
         return;
       }
       
-      console.log('페이지 진입 - 비밀번호 확인 시작...');
+    setIsLoadingRecords(true);
+    try {
+      console.log('[리밸런싱] 기록 조회 시도:', {
+        account: accountNumber,
+        token: loggedToken ? '토큰 있음' : '토큰 없음'
+      });
       
-      // 현재 선택된 계좌가 API 계좌인 경우만 확인
-      if (selectedAccountIndex < stockAccounts.length) {
-        const account = stockAccounts[selectedAccountIndex];
-        const accountNumber = account.accountNumber;
+      // API 호출
+      const result = await fetchRebalancingRecords(loggedToken, accountNumber);
+      console.log('[리밸런싱] 기록 조회 결과:', {
+        success: result.success,
+        isDummy: result.isDummy,
+        recordCount: result.data?.length || 0
+      });
+      
+      if (result.success && result.data !== undefined) {
+        setAccountRecords(result.data);
         
-        console.log(`페이지 진입 - 선택된 계좌: ${account.company} (${accountNumber})`);
-        
-        // 비밀번호 확인
-        const hasPassword = await checkAccountPassword(accountNumber);
-        
-        // 비밀번호 정보 로그
-        if (hasPassword) {
-          const maskedPassword = await getAccountPassword(accountNumber);
-          console.log(`페이지 진입 - 계좌 ${accountNumber}의 비밀번호: ${maskedPassword}`);
+        // 기록이 있으면 첫 번째 기록 선택
+        if (result.data.length > 0) {
+          setSelectedRecordId(result.data[0].record_id);
+          console.log('[리밸런싱] 첫 번째 기록 선택:', result.data[0].record_id);
         } else {
-          console.log(`페이지 진입 - 계좌 ${accountNumber}의 저장된 비밀번호가 없습니다. 모달 표시 필요`);
-          
-          // connectedId 찾기
-          let connectedId = '';
-          
-          // 인덱스 기반 매핑 시도
-          if (connectedAccounts.length > selectedAccountIndex) {
-            if (typeof connectedAccounts[selectedAccountIndex] === 'string') {
-              connectedId = connectedAccounts[selectedAccountIndex];
-            } else if (typeof connectedAccounts[selectedAccountIndex] === 'object' && 
-                      connectedAccounts[selectedAccountIndex] !== null) {
-              connectedId = connectedAccounts[selectedAccountIndex].connectedId || '';
-            }
-          }
-          
-          // 계좌번호 기반 매핑 시도
-          if (!connectedId) {
-            const foundConnectedId = findConnectedIdByAccountNumber(accountNumber);
-            if (foundConnectedId) {
-              connectedId = foundConnectedId;
-            }
-          }
-          
-          // 그래도 없으면 첫 번째 connectedId 사용
-          if (!connectedId && connectedAccounts.length > 0) {
-            if (typeof connectedAccounts[0] === 'string') {
-              connectedId = connectedAccounts[0];
-            } else if (typeof connectedAccounts[0] === 'object' && connectedAccounts[0] !== null) {
-              connectedId = connectedAccounts[0].connectedId || '';
-            }
-          }
-          
-          // connectedId가 있으면 모달 표시
-          if (connectedId) {
-            console.log(`페이지 진입 - 계좌 ${accountNumber}에 매핑된 connectedId: ${connectedId}`);
-            setSelectedAccountForPassword({account, connectedId});
-            setAccountPassword('');
-            setPasswordError('');
-            
-            // setTimeout으로 약간 지연시켜 모달 표시 (UI 렌더링 완료 후)
-            setTimeout(() => {
-              setShowAccountPasswordModal(true);
-            }, 500);
-          }
+          console.log('[리밸런싱] 해당 계좌에 리밸런싱 기록이 없음');
+          setSelectedRecordId(null);
+        }
+      } else {
+        console.log('[리밸런싱] API 호출 실패, 더미 데이터 사용');
+        const dummyRecords = getAccountRecords(accountNumber);
+        const convertedRecords = dummyRecords.map(record => ({
+          record_id: record.record_id,
+          account: record.account,
+          user_id: record.user_id,
+          record_date: record.record_date,
+          total_balance: record.total_balance,
+          record_name: record.record_name,
+          memo: record.memo,
+          profit_rate: record.profit_rate
+        }));
+        setAccountRecords(convertedRecords);
+        if (convertedRecords.length > 0) {
+          setSelectedRecordId(convertedRecords[0].record_id);
         }
       }
-    };
-    
-    // 계좌 정보와 connectedId 정보가 모두 로드된 후 실행
-    if (!isLoading && stockAccounts.length > 0 && connectedAccounts.length > 0) {
-      console.log('페이지 진입 - 계좌 정보 로드 완료, 비밀번호 확인 실행');
-      checkSelectedAccountPassword();
+      
+      // 실시간 계좌 잔고 조회 (원금과 원화 현금을 위해)
+      await loadRealtimeAccountBalance(accountNumber);
+      
+      // 데이터 로드 완료 후 스크롤 위치 초기화
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: 0, animated: false });
+        setCurrentPageIndex(0);
+        setCurrentRecordIndex(0);
+        console.log('[리밸런싱] 스크롤 위치 초기화 완료');
+      }, 100);
+      
+    } catch (error) {
+      console.error('[리밸런싱] 기록 조회 중 예상치 못한 오류:', error);
+      console.log('[리밸런싱] 예외 발생으로 더미 데이터 사용');
+      const dummyRecords = getAccountRecords(accountNumber);
+      const convertedRecords = dummyRecords.map(record => ({
+        record_id: record.record_id,
+        account: record.account,
+        user_id: record.user_id,
+        record_date: record.record_date,
+        total_balance: record.total_balance,
+        record_name: record.record_name,
+        memo: record.memo,
+        profit_rate: record.profit_rate
+      }));
+      setAccountRecords(convertedRecords);
+      if (convertedRecords.length > 0) {
+        setSelectedRecordId(convertedRecords[0].record_id);
+      }
+      
+      // 더미 데이터 사용 시에도 실시간 잔고 조회 시도
+      await loadRealtimeAccountBalance(accountNumber);
+      
+      // 더미 데이터 로드 후에도 스크롤 위치 초기화
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({ x: 0, animated: false });
+        setCurrentPageIndex(0);
+        setCurrentRecordIndex(0);
+        console.log('[리밸런싱] 더미 데이터 로드 후 스크롤 위치 초기화 완료');
+      }, 100);
+    } finally {
+      setIsLoadingRecords(false);
     }
-  }, [stockAccounts, connectedAccounts, isLoading, selectedAccountIndex]);
-
-  // 계좌번호로 해당 계좌의 connectedId 찾기
-  const findConnectedIdByAccountNumber = (accountNumber: string): string | undefined => {
-    const account = connectedAccounts.find(acc => 
-      (typeof acc === 'object' && acc.accountNumber === accountNumber) ||
-      (typeof acc === 'string' && acc.includes(accountNumber))
-    );
+  };
     
-    if (!account) return undefined;
+  // 유연한 계좌번호 매칭 함수
+  const findConnectedIdByAccount = (accountNumber: string): string | null => {
+    // MyStockAccountComponent와 동일한 방식으로 인덱스 기반 매칭 사용
+    const accountIndex = stockAccounts.findIndex(acc => acc.accountNumber === accountNumber);
     
-    return typeof account === 'object' ? account.connectedId : account;
+    if (accountIndex === -1) {
+      console.log(`계좌 ${accountNumber}를 stockAccounts에서 찾을 수 없음`);
+      return null;
+    }
+    
+    // 인덱스에 맞는 connectedId 사용
+    if (connectedAccounts.length > accountIndex) {
+      const connectedAccount = connectedAccounts[accountIndex];
+      if (typeof connectedAccount === 'string') {
+        console.log(`계좌 ${accountNumber} (인덱스: ${accountIndex})와 connectedId ${connectedAccount} 매칭됨`);
+        return connectedAccount;
+      } else if (typeof connectedAccount === 'object' && connectedAccount) {
+        const connectedId = connectedAccount.connectedId || '';
+        console.log(`계좌 ${accountNumber} (인덱스: ${accountIndex})와 connectedId ${connectedId} 매칭됨`);
+        return connectedId;
+      }
+    } else if (connectedAccounts.length > 0) {
+      // 인덱스가 없으면 첫 번째 connectedId 사용
+      const firstAccount = connectedAccounts[0];
+      if (typeof firstAccount === 'string') {
+        console.log(`계좌 ${accountNumber}: 인덱스 매칭 실패, 첫 번째 connectedId ${firstAccount} 사용`);
+        return firstAccount;
+      } else if (typeof firstAccount === 'object' && firstAccount) {
+        const connectedId = firstAccount.connectedId || '';
+        console.log(`계좌 ${accountNumber}: 인덱스 매칭 실패, 첫 번째 connectedId ${connectedId} 사용`);
+        return connectedId;
+      }
+    }
+    
+    return null;
   };
 
-  // 선택된 계좌의 리밸런싱 기록 목록
-  const accountRecords = useMemo(() => {
-    // 선택된 계좌가 API 계좌인 경우
-    if (stockAccounts.length > 0 && selectedAccountIndex < stockAccounts.length) {
-      const selectedAccount = stockAccounts[selectedAccountIndex];
-      return getAccountRecords(selectedAccount.accountNumber);
-    }
+  // 계좌 선택 핸들러 (계좌번호 기반 매칭으로 수정)
+  const handleAccountChange = (index: number) => {
+    console.log(`계좌 선택: ${index}번째 계좌`);
     
-    // 그 외에는 더미 데이터 사용
-    const dummyAccountIndex = stockAccounts.length > 0 ? 
-      selectedAccountIndex - stockAccounts.length : selectedAccountIndex;
-    const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0] as DummyAccount;
-    return getAccountRecords(account.account);
-  }, [selectedAccountIndex, stockAccounts]);
+    // 선택된 계좌의 인덱스 업데이트
+    setSelectedAccountIndex(index);
+    
+    // 현재 선택된 계좌의 정보 가져오기
+    const account = stockAccounts[index];
+    
+    // 유연한 계좌번호 매칭으로 connectedId 찾기
+    const connectedId = findConnectedIdByAccount(account.accountNumber);
+    
+          if (connectedId) {
+      console.log(`계좌 ${account.accountNumber}와 connectedId ${connectedId} 매칭됨`);
+            setSelectedAccountForPassword({account, connectedId});
+      
+      // 증권사 코드 찾기
+      const organizationCode = getOrganizationCode(account.company);
+      
+      // 저장된 계좌 정보 확인
+      const savedAccount = findSavedAccount(account.accountNumber, organizationCode);
+      
+      if (savedAccount && savedAccount.account_password) {
+        // 저장된 비밀번호가 있으면 바로 리밸런싱 기록 조회
+        console.log('저장된 계좌 비밀번호 사용');
+        loadRebalancingRecords(account.accountNumber);
+      } else {
+        // 저장된 비밀번호가 없으면 비밀번호 입력 요청
+        setAccountPassword("");
+        setPasswordError("");
+        console.log('저장된 비밀번호 없음, 모달 표시');
+              setShowAccountPasswordModal(true);
+      }
+    } else {
+      console.error(`계좌 ${account.accountNumber}에 매칭되는 connectedId를 찾을 수 없음`);
+      console.log('Available connectedAccounts:', connectedAccounts);
+      Alert.alert('오류', '해당 계좌의 연결 정보를 찾을 수 없습니다. 계좌를 다시 등록해주세요.');
+    }
+  };
+
+  // 스크롤 위치 강제 초기화 (페이지 진입 시 오른쪽 치우침 방지)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
+        setCurrentPageIndex(0);
+        setCurrentRecordIndex(0);
+        console.log('[초기화] 스크롤 위치 강제 초기화 완료');
+      }
+    }, 500); // 500ms 후에 실행
+
+    return () => clearTimeout(timer);
+  }, [accountRecords]); // accountRecords가 변경될 때마다 실행
+
+  // 리밸런싱 상세 정보 조회
+  useEffect(() => {
+    const loadRebalancingDetail = async () => {
+      if (!loggedToken || !selectedRecordId) {
+        console.log('리밸런싱 상세 정보 조회 중단:', {
+          hasToken: !!loggedToken,
+          recordId: selectedRecordId
+        });
+        return;
+      }
+      
+      setIsLoadingDetails(true);
+      try {
+        // API 호출
+        const result = await fetchRebalancingDetail(loggedToken, selectedRecordId);
+        console.log('[리밸런싱] 상세 정보 조회 결과:', {
+          success: result.success,
+          isDummy: result.isDummy,
+          detailCount: result.data?.length || 0
+        });
+        
+        if (result.success && result.data !== undefined) {
+          setRecordDetails(result.data);
+          
+          if (result.data.length === 0) {
+            console.log('[리밸런싱] 해당 기록에 상세 정보가 없음');
+          }
+        } else {
+          console.log('[리밸런싱] 상세 정보 API 호출 실패, 더미 데이터 사용');
+          const dummyDetails = getRecordRuds(selectedRecordId);
+          const convertedDetails = dummyDetails.map(rud => ({
+            record_id: rud.record_id,
+            stock_name: rud.stock_name,
+            expert_per: rud.expert_per,
+            market_order: rud.market_order,
+            rate: rud.rate,
+            nos: rud.nos,
+            won: rud.won,
+            dollar: rud.dollar,
+            rebalancing_dollar: rud.rebalancing_dollar,
+            stock_region: rud.stock_region,
+            market_type_name: rud.market_type_name
+          }));
+          setRecordDetails(convertedDetails);
+        }
+      } catch (error) {
+        console.error('[리밸런싱] 상세 정보 조회 중 예상치 못한 오류:', error);
+        console.log('[리밸런싱] 예외 발생으로 더미 데이터 사용');
+        const dummyDetails = getRecordRuds(selectedRecordId);
+        const convertedDetails = dummyDetails.map(rud => ({
+          record_id: rud.record_id,
+          stock_name: rud.stock_name,
+          expert_per: rud.expert_per,
+          market_order: rud.market_order,
+          rate: rud.rate,
+          nos: rud.nos,
+          won: rud.won,
+          dollar: rud.dollar,
+          rebalancing_dollar: rud.rebalancing_dollar,
+          stock_region: rud.stock_region,
+          market_type_name: rud.market_type_name
+        }));
+        setRecordDetails(convertedDetails);
+      } finally {
+        setIsLoadingDetails(false);
+      }
+    };
+
+    loadRebalancingDetail();
+  }, [selectedRecordId, loggedToken]);
+
+  // recordRuds를 실제 API 데이터로 대체
+  const recordRuds = useMemo(() => {
+    return recordDetails;
+  }, [recordDetails]);
 
   // 리밸런싱 기록 토글(드롭다운) 상태
   const [recordDropdownVisible, setRecordDropdownVisible] = useState(false);
-
-  // 선택된 리밸런싱 기록 ID (기본값: 가장 최근 기록)
-  const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
 
   // 선택된 리밸런싱 기록 확정 (없으면 가장 최근 것으로)
   const currentRecordId = useMemo(() => {
@@ -337,15 +665,9 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     }));
   }, [accountRecords, selectedAccountIndex]);
 
-  // 선택된 리밸런싱 기록 상세 데이터 가져오기
-  const recordRuds = useMemo(() => {
-    if (currentRecordId === null) return [];
-    return getRecordRuds(currentRecordId);
-  }, [currentRecordId]);
-
   // 1. value만 먼저 계산 (rebalanceAmount 없이)
   const cashItemsBase = useMemo(() => {
-    return recordRuds
+    const baseItems = recordRuds
       .filter(rud => rud.stock_region === 0)
       .map(rud => ({
         name: rud.stock_name,
@@ -353,7 +675,26 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
         krwValue: rud.won || (rud.dollar ? rud.dollar * currentExchangeRate : 0),
         targetPortion: rud.expert_per,
       }));
-  }, [recordRuds, currentExchangeRate]);
+
+    // 실시간 원화 현금이 있으면 교체
+    if (realtimeBalance && realtimeBalance.krwCash > 0) {
+      const krwIndex = baseItems.findIndex(item => item.name === '원화');
+      if (krwIndex !== -1) {
+        // 기존 원화 항목을 실시간 데이터로 교체
+        baseItems[krwIndex] = {
+          ...baseItems[krwIndex],
+          value: realtimeBalance.krwCash / currentExchangeRate, // 달러로 환산
+          krwValue: realtimeBalance.krwCash
+        };
+        console.log('[현금 계산] 실시간 원화 현금 적용:', {
+          krwCash: realtimeBalance.krwCash,
+          dollarValue: realtimeBalance.krwCash / currentExchangeRate
+        });
+      }
+    }
+
+    return baseItems;
+  }, [recordRuds, currentExchangeRate, realtimeBalance]);
 
   const foreignStocksBase = useMemo(() => {
     return recordRuds
@@ -401,18 +742,72 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   }, [cashItemsBase, totalBalance]);
 
   const getForeignStocks = useMemo((): StockItem[] => {
-    return foreignStocksBase.map(item => ({
-      ...item,
-      rebalanceAmount: (totalBalance * (item.targetPortion / 100)) - item.value,
-    }));
-  }, [foreignStocksBase, totalBalance]);
+    return foreignStocksBase.map(item => {
+      const rebalanceAmount = (totalBalance * (item.targetPortion / 100)) - item.value;
+      
+      // 실시간 주식 가격 정보 가져오기
+      const currentPrice = realtimeBalance?.stockPrices?.[item.name];
+      let requiredShares = 0;
+      
+      if (currentPrice && currentPrice > 0) {
+        // 조정금액을 주식 가격으로 나누어 필요한 주식 수 계산 (달러 기준)
+        requiredShares = rebalanceAmount / currentExchangeRate / currentPrice;
+      }
+      
+      return {
+        ...item,
+        rebalanceAmount,
+        currentPrice,
+        requiredShares
+      };
+    });
+  }, [foreignStocksBase, totalBalance, realtimeBalance, currentExchangeRate]);
 
   const getDomesticStocks = useMemo((): StockItem[] => {
-    return domesticStocksBase.map(item => ({
-      ...item,
-      rebalanceAmount: (totalBalance * (item.targetPortion / 100)) - item.value,
-    }));
-  }, [domesticStocksBase, totalBalance]);
+    return domesticStocksBase.map(item => {
+      const rebalanceAmount = (totalBalance * (item.targetPortion / 100)) - item.value;
+      
+      // 실시간 주식 가격 정보 가져오기 (국내주식은 원화)
+      const currentPrice = realtimeBalance?.stockPrices?.[item.name];
+      let requiredShares = 0;
+      
+      if (currentPrice && currentPrice > 0) {
+        // 조정금액을 주식 가격으로 나누어 필요한 주식 수 계산 (원화 기준)
+        requiredShares = (rebalanceAmount * currentExchangeRate) / currentPrice;
+        
+        console.log(`[국내주식 계산] ${item.name}:`, {
+          rebalanceAmount,
+          rebalanceAmountKRW: rebalanceAmount * currentExchangeRate,
+          currentPrice: currentPrice,
+          requiredShares: requiredShares.toFixed(2)
+        });
+      } else {
+        console.log(`[국내주식] ${item.name}: 실시간 가격 정보 없음`);
+      }
+      
+      return {
+        ...item,
+        rebalanceAmount,
+        currentPrice,
+        requiredShares
+      };
+    });
+  }, [domesticStocksBase, totalBalance, realtimeBalance, currentExchangeRate]);
+
+  // 총 현금 금액
+  const totalCash = useMemo(() => {
+    return getCashItems.reduce((sum, item) => sum + item.value, 0);
+  }, [getCashItems]);
+
+  // 총 해외주식 금액
+  const totalForeign = useMemo(() => {
+    return getForeignStocks.reduce((sum, item) => sum + item.value, 0);
+  }, [getForeignStocks]);
+
+  // 총 국내주식 금액
+  const totalDomestic = useMemo(() => {
+    return getDomesticStocks.reduce((sum, item) => sum + item.value, 0);
+  }, [getDomesticStocks]);
 
   // 계좌 정보 (dummyAccounts와 stockAccounts에서 선택된 계좌 사용)
   const accountInfo: AccountInfo = useMemo(() => {
@@ -420,32 +815,43 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     if (stockAccounts.length > 0 && selectedAccountIndex < stockAccounts.length) {
       const apiAccount = stockAccounts[selectedAccountIndex];
       
-      // API 계좌는 principal, pre_principal 값이 없을 수 있으므로 기본값 설정
-      const principal = 5000000; // 기본값
+      // 원금은 백엔드 API의 principal 값만 사용 (0도 정상)
+      const principal = apiAccount.principal || 0;
+      
+      // 실시간 잔고 = 현재 달러 현금 + 원화 현금 + 국내 주식 + 해외 주식 자산 합
+      const realtimeBalanceValue = totalCash + totalForeign + totalDomestic; // 달러 기준
+      
+      // 총 수익 = 실시간 잔고 - 원금 (달러 기준으로 통일)
+      const principalInDollar = principal / currentExchangeRate;
+      const totalProfit = realtimeBalanceValue - principalInDollar;
+      const totalProfitPercent = principalInDollar > 0 ? (totalProfit / principalInDollar) * 100 : 0;
+      
+      // 일간 손익은 기존 로직 유지 (더미 데이터)
       const prePrincipal = 4800000; // 기본값
-      
-      // 주식 잔액은 현재 API로 가져올 수 없으므로 더미 데이터 사용
-      const totalValue = currentRecordId ? calculateRecordValue(currentRecordId) : 5323773;
-      
-      // 원금 대비 손익 계산
-      const dollarPrincipal = principal / currentExchangeRate;
-      const profit = totalValue - dollarPrincipal;
-      const profitPercent = (profit / dollarPrincipal) * 100;
-      
-      // 일간 손익 계산 (전날 잔고 기준)
       const prePrincipalInDollars = prePrincipal / currentExchangeRate;
-      const dailyProfit = totalValue - prePrincipalInDollars;
-      const dailyProfitPercent = (dailyProfit / prePrincipalInDollars) * 100;
+      const dailyProfit = realtimeBalanceValue - prePrincipalInDollars;
+      const dailyProfitPercent = prePrincipalInDollars > 0 ? (dailyProfit / prePrincipalInDollars) * 100 : 0;
+      
+      console.log('[계좌 정보 계산]', {
+        principal,
+        principalInDollar,
+        realtimeBalanceValue,
+        totalProfit,
+        totalProfitPercent: totalProfitPercent.toFixed(1),
+        totalCash,
+        totalForeign,
+        totalDomestic
+      });
       
       return {
         name: apiAccount.company,
         number: apiAccount.accountNumber.slice(-4), // 계좌번호 마지막 4자리
         principal: principal,
-        valuation: totalValue,
+        valuation: realtimeBalanceValue,
         dailyProfit: dailyProfit,
         dailyProfitPercent: parseFloat(dailyProfitPercent.toFixed(1)),
-        totalProfit: profit,
-        totalProfitPercent: parseFloat(profitPercent.toFixed(1))
+        totalProfit: totalProfit,
+        totalProfitPercent: parseFloat(totalProfitPercent.toFixed(1))
       };
     }
     
@@ -477,22 +883,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
       totalProfit: profit,
       totalProfitPercent: parseFloat(profitPercent.toFixed(1))
     };
-  }, [selectedAccountIndex, currentRecordId, currentExchangeRate, stockAccounts]);
-
-  // 총 현금 금액
-  const totalCash = useMemo(() => {
-    return getCashItems.reduce((sum, item) => sum + item.value, 0);
-  }, [getCashItems]);
-
-  // 총 해외주식 금액
-  const totalForeign = useMemo(() => {
-    return getForeignStocks.reduce((sum, item) => sum + item.value, 0);
-  }, [getForeignStocks]);
-
-  // 총 국내주식 금액
-  const totalDomestic = useMemo(() => {
-    return getDomesticStocks.reduce((sum, item) => sum + item.value, 0);
-  }, [getDomesticStocks]);
+  }, [selectedAccountIndex, currentRecordId, currentExchangeRate, stockAccounts, totalCash, totalForeign, totalDomestic, realtimeBalance]);
 
   // 현재 비중 동적 계산을 위한 함수
   const calculateCurrentPortion = (amount: number): number => {
@@ -516,17 +907,6 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
       return `${sign}${Math.abs(Math.round(value * currentExchangeRate)).toLocaleString()}원`;
     }
     return `${sign}$${Math.abs(value).toFixed(2)}`;
-  };
-
-  // 스크롤 위치 조정을 위한 함수 (반복 사용 위해 추출)
-  const adjustScrollPosition = () => {
-    console.log('스크롤 위치 조정 - 맨 처음으로 이동');
-    requestAnimationFrame(() => {
-      // 맨 왼쪽(첫 번째 기록 또는 '기록 없음' 카드)으로 스크롤
-      scrollViewRef.current?.scrollTo({ x: 0, animated: false });
-      setCurrentPageIndex(0);
-      setCurrentRecordIndex(0);
-    });
   };
 
   // 포커스, 블러 상태 관리
@@ -567,324 +947,60 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     handleFocus();
   }, []);
   
-  // 로컬 스토리지에서 계좌 비밀번호 확인
-  const checkAccountPassword = async (accountNumber: string) => {
-    try {
-      // 1. AccountsContext에서 계좌 정보 찾기
-      const organizationCode = getOrganizationCode(stockAccounts.find(acc => acc.accountNumber === accountNumber)?.company || '');
-      const savedAccount = findSavedAccount(accountNumber, organizationCode);
-      
-      // 2. 직접 AsyncStorage에서도 확인
-      const directPassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
-      
-      // 둘 중 하나라도 비밀번호가 있으면 true 반환
-      const hasContextPassword = !!(savedAccount && savedAccount.account_password);
-      const hasDirectPassword = !!directPassword;
-      
-      console.log(`계좌 ${accountNumber} 비밀번호 확인 결과: Context=${hasContextPassword}, Direct=${hasDirectPassword}`);
-      
-      return hasContextPassword || hasDirectPassword;
-    } catch (error) {
-      console.error('비밀번호 확인 오류:', error);
-      return false;
-    }
+  // 포트폴리오 불러오기 핸들러
+  const handleLoadPortfolio = () => {
+    nav.navigate('PortfolioEditor');
+    setShowLoadPortfolioModal(false);
   };
 
-  // 로컬 스토리지에서 계좌 비밀번호 가져오기 (마스킹된 형태로)
-  const getAccountPassword = async (accountNumber: string): Promise<string | undefined> => {
-    try {
-      // 1. AccountsContext에서 계좌 정보 찾기
-      const organizationCode = getOrganizationCode(stockAccounts.find(acc => acc.accountNumber === accountNumber)?.company || '');
-      const savedAccount = findSavedAccount(accountNumber, organizationCode);
-      let storedPassword = savedAccount?.account_password || '';
-      
-      // 2. 직접 AsyncStorage에서도 확인
-      if (!storedPassword) {
-        const asyncStoragePassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
-        storedPassword = asyncStoragePassword || '';
-      }
-      
-      if (storedPassword) {
-        // 비밀번호의 앞 2자리와 나머지는 '*'로 마스킹
-        const maskedPassword = storedPassword.length > 2 
-          ? storedPassword.substring(0, 2) + '*'.repeat(storedPassword.length - 2)
-          : '*'.repeat(storedPassword.length);
-        return maskedPassword;
-      }
-      return undefined;
-    } catch (error) {
-      console.error('비밀번호 조회 오류:', error);
-      return undefined;
-    }
+  // 종목 평균 변화율 계산
+  const getForeignPercentChange = useMemo(() => {
+    if (getForeignStocks.length === 0) return 0;
+    const totalPercentChange = getForeignStocks.reduce((sum, stock) => sum + stock.percentChange, 0);
+    return parseFloat((totalPercentChange / getForeignStocks.length).toFixed(1));
+  }, [getForeignStocks]);
+
+  const getDomesticPercentChange = useMemo(() => {
+    if (getDomesticStocks.length === 0) return 0;
+    const totalPercentChange = getDomesticStocks.reduce((sum, stock) => sum + stock.percentChange, 0);
+    return parseFloat((totalPercentChange / getDomesticStocks.length).toFixed(1));
+  }, [getDomesticStocks]);
+
+  const { name, number, principal, valuation, dailyProfit, dailyProfitPercent, totalProfit, totalProfitPercent } = accountInfo;
+
+  // 화면 회전 핸들러
+  const handleRotateScreen = () => {
+    // 화면 회전 기능 구현 (향후 구현)
+    Alert.alert('알림', '화면 회전 기능은 준비 중입니다.');
   };
 
-  // 증권사 이름으로 기관코드 찾기
-  const getOrganizationCode = (companyName: string): string => {
-    const firm = findSecuritiesFirmByName(companyName);
-    if (firm) {
-      console.log(`증권사 ${companyName} -> 코드 ${firm.code} 변환 성공`);
-      return firm.code;
-    } else {
-      console.warn(`증권사 코드를 찾을 수 없음: ${companyName}`);
-      // 기본 코드 반환 (삼성증권)
-      return '0240';
-    }
-  };
-  
-  // 로컬에 저장된 계좌 정보 찾기
-  const findSavedAccount = (accountNumber: string, organization: string) => {
-    return savedAccounts.find(acc => 
-      acc.account === accountNumber && acc.organization === organization
-    );
-  };
+  // 포트폴리오 불러오기 모달 상태
+  const [showLoadPortfolioModal, setShowLoadPortfolioModal] = useState(false);
 
-  // 계좌 비밀번호 저장
-  const saveAccountPassword = async () => {
-    if (!selectedAccountForPassword || !accountPassword) {
-      Alert.alert('알림', '계좌 비밀번호를 입력해주세요.');
-      return;
-    }
-
-    try {
-      setSaveInProgress(true);
-      setPasswordError('');
-      
-      // 증권사 코드 찾기
-      const firmInfo = findSecuritiesFirmByName(selectedAccountForPassword.account.company);
-      if (!firmInfo) {
-        throw new Error(`증권사 ${selectedAccountForPassword.account.company}에 대한 코드를 찾을 수 없습니다.`);
-      }
-      
-      const organization = firmInfo.code;
-      const accountNumber = selectedAccountForPassword.account.accountNumber;
-      const connectedId = selectedAccountForPassword.connectedId;
-      
-      // 계좌 잔고 조회 시도 (비밀번호 확인)
-      console.log('계좌 비밀번호 확인 시도:', {
-        connectedId,
-        organization,
-        account: accountNumber,
-        account_password: '******' // 보안을 위해 마스킹
-      });
-      
-      try {
-        // Flask API 호출
-        const response = await axios.post(`${FLASK_SERVER_URL}/stock/balance`, {
-          connectedId,
-          organization,
-          account: accountNumber,
-          account_password: accountPassword
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        
-        // 응답 확인
-        if (response.data.result.code === 'CF-00000') {
-          console.log('계좌 비밀번호 확인 성공');
-          
-          // 계좌 정보 생성
-          const accountInfo = {
-            account: accountNumber,
-            account_password: accountPassword,
-            connectedId: connectedId,
-            organization: organization
-          };
-          
-          // 이미 저장된 계좌인지 확인
-          const existingAccount = findSavedAccount(accountNumber, organization);
-          
-          // 계좌 정보 저장 (비밀번호 포함) - 기존 계좌면 update, 없으면 add
-          if (existingAccount) {
-            console.log(`기존 계좌 정보 업데이트: ${accountNumber}`);
-            const result = await updateAccount(accountInfo);
-            if (!result) {
-              console.error('계좌 정보 업데이트 실패');
-            }
+  // 현재 선택된 계좌 표시 텍스트 생성
+  const getSelectedAccountLabel = () => {
+    if (stockAccounts.length > 0 && selectedAccountIndex < stockAccounts.length) {
+      // API 계좌 선택된 경우
+      const apiAccount = stockAccounts[selectedAccountIndex];
+      const secFirm = findSecuritiesFirmByName(apiAccount.company);
+      const displayName = secFirm?.shortName || apiAccount.company;
+      return `${displayName} (${apiAccount.accountNumber.slice(-4)})`;
           } else {
-            console.log(`새 계좌 정보 저장: ${accountNumber}`);
-            const result = await saveAccount(accountInfo);
-            if (!result) {
-              console.error('계좌 정보 저장 실패');
-            }
-          }
-          
-          // 확인을 위해 저장 후 계좌 정보 다시 조회
-          const savedAgain = findSavedAccount(accountNumber, organization);
-          console.log(`계좌 ${accountNumber}의 비밀번호 저장 확인:`, savedAgain ? '성공' : '실패');
-          
-          if (savedAgain && savedAgain.account_password) {
-            console.log(`계좌 ${accountNumber}의 비밀번호 저장 완료: ${accountPassword.substring(0, 2)}${'*'.repeat(accountPassword.length - 2)}`);
-            
-            // 추가로 AsyncStorage에 직접 저장 (이중 보장)
-            try {
-              await AsyncStorage.setItem(`direct_password_${accountNumber}`, accountPassword);
-              console.log(`계좌 ${accountNumber}의 비밀번호 직접 저장 완료`);
-            } catch (err) {
-              console.error('직접 저장 오류:', err);
-            }
-            
-            // 모달 닫기 전 성공 메시지
-            Alert.alert('성공', '계좌 비밀번호가 저장되었습니다.', [
-              { text: '확인', onPress: () => {
-                setShowAccountPasswordModal(false);
-                setAccountPassword('');
-                setSelectedAccountForPassword(null);
-                setPasswordError('');
-              }}
-            ]);
-          } else {
-            throw new Error('계좌 비밀번호가 저장되지 않았습니다. 다시 시도해주세요.');
-          }
-        } else {
-          throw new Error(response.data.result.message || '계좌 잔고 조회 실패');
-        }
-      } catch (error: any) {
-        console.error('계좌 비밀번호 확인 실패:', error);
-        setPasswordError(error.response?.data?.result?.message || error.message || '계좌 비밀번호가 올바르지 않습니다.');
-      }
-    } catch (error: any) {
-      console.error('비밀번호 저장 오류:', error);
-      setPasswordError(error.message || '계좌 비밀번호 저장 중 오류가 발생했습니다.');
-    } finally {
-      setSaveInProgress(false);
+      // 더미 계좌 선택된 경우
+      const dummyAccountIndex = stockAccounts.length > 0 ? 
+        selectedAccountIndex - stockAccounts.length : selectedAccountIndex;
+      const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0] as DummyAccount;
+      const secFirm = findSecuritiesFirmByName(account.company);
+      const displayName = secFirm?.shortName || account.company;
+      return `${displayName} (${account.account.slice(-4)})`;
     }
   };
-
-  // 계좌 선택 핸들러 - 수정
-  const handleAccountChange = async (index: number) => {
-    console.log('계좌 변경:', index);
-    setSelectedAccountIndex(index);
-    setSelectedRecordId(null); // 계좌 변경 시 리밸런싱 기록 선택 초기화
-    
-    // API 계좌인 경우 비밀번호 확인
-    if (stockAccounts.length > 0 && index < stockAccounts.length) {
-      const account = stockAccounts[index];
-      const accountNumber = account.accountNumber;
-      
-      // 로컬 스토리지에서 계좌 비밀번호 확인
-      const hasPassword = await checkAccountPassword(accountNumber);
-      
-      // 비밀번호 정보 로그 출력
-      if (hasPassword) {
-        const maskedPassword = await getAccountPassword(accountNumber);
-        console.log(`계좌 ${accountNumber}의 비밀번호: ${maskedPassword}`);
-      } else {
-        console.log(`계좌 ${accountNumber}의 저장된 비밀번호가 없습니다.`);
-      }
-      
-      // 비밀번호가 이미 저장되어 있으면 모달 표시하지 않고 처리 계속
-      if (hasPassword) {
-        console.log(`계좌 ${accountNumber}의 비밀번호가 이미 저장되어 있습니다.`);
-        // 계좌 변경 후 스크롤 위치 조정 (300ms 지연)
-        setTimeout(() => {
-          console.log('계좌 변경 후 스크롤 위치 조정');
-          scrollViewRef.current?.scrollTo({ x: 0, animated: false });
-          setCurrentPageIndex(0);
-          setCurrentRecordIndex(0);
-        }, 300);
-        return;
-      }
-      
-      // connectedId 찾기
-      let connectedId = '';
-      
-      // 1. 인덱스 기반 매핑 시도
-      if (connectedAccounts.length > index) {
-        if (typeof connectedAccounts[index] === 'string') {
-          connectedId = connectedAccounts[index];
-        } else if (typeof connectedAccounts[index] === 'object' && connectedAccounts[index] !== null) {
-          connectedId = connectedAccounts[index].connectedId || '';
-        }
-      }
-      
-      // 2. 계좌번호 기반 매핑 시도
-      if (!connectedId) {
-        const foundConnectedId = findConnectedIdByAccountNumber(accountNumber);
-        if (foundConnectedId) {
-          connectedId = foundConnectedId;
-        }
-      }
-      
-      // 3. 그래도 없으면 첫 번째 connectedId 사용
-      if (!connectedId && connectedAccounts.length > 0) {
-        if (typeof connectedAccounts[0] === 'string') {
-          connectedId = connectedAccounts[0];
-        } else if (typeof connectedAccounts[0] === 'object' && connectedAccounts[0] !== null) {
-          connectedId = connectedAccounts[0].connectedId || '';
-        }
-      }
-      
-      console.log(`계좌 ${accountNumber}에 매핑된 connectedId: ${connectedId}`);
-      
-      if (connectedId) {
-        // connectedId가 있고, 비밀번호가 없는 경우에만 모달 표시
-        if (!hasPassword) {
-          // 비밀번호가 없는 경우 모달 표시
-          setSelectedAccountForPassword({account, connectedId});
-          setAccountPassword('');
-          setPasswordError('');
-          setShowAccountPasswordModal(true);
-        }
-      } else {
-        // connectedId가 없으면 알림
-        Alert.alert('알림', '이 계좌와 연결된 Connected ID가 없습니다.');
-      }
-    }
-    
-    // 계좌 변경 후 스크롤 위치 조정 (300ms 지연)
-    setTimeout(() => {
-      console.log('계좌 변경 후 스크롤 위치 조정');
-      scrollViewRef.current?.scrollTo({ x: 0, animated: false });
-      setCurrentPageIndex(0);
-      setCurrentRecordIndex(0);
-    }, 300);
-  };
-
-  // 리밸런싱 기록 선택 핸들러 (수정)
-  const handleRecordSelect = (record_id: number) => {
-    setSelectedRecordId(record_id);
-    setRecordDropdownVisible(false);
-    
-    // 선택된 기록의 인덱스 찾기
-    const index = recordNames.findIndex(item => item.record_id === record_id);
-    if (index !== -1) {
-      setCurrentRecordIndex(index);
-      // 스크롤 뷰 위치 조정
-      scrollViewRef.current?.scrollTo({ x: index * screenWidth, animated: true });
-    }
-  };
-
-  // 컴포넌트 마운트 시 스크롤 위치 초기화
-  useEffect(() => {
-    console.log('컴포넌트 마운트 - 스크롤 위치 초기화');
-    // UI 렌더링 완료 후 스크롤 위치 설정 (지연 처리)
-    const delayAdjust = () => {
-      setTimeout(() => {
-        console.log('스크롤 위치 지연 조정 실행');
-        adjustScrollPosition();
-      }, 100);
-    };
-    
-    InteractionManager.runAfterInteractions(() => {
-      delayAdjust();
-      
-      // 추가 보장을 위해 0.5초, 1초 후에 한번 더 실행
-      const timer1 = setTimeout(delayAdjust, 500);
-      const timer2 = setTimeout(delayAdjust, 1000);
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    });
-  }, []);
 
   // 스와이프 종료 후 핸들러
   const handleScrollEnd = (event: any) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     // 카드 너비와 패딩을 고려한 페이지 계산
-    const newIndex = Math.round(contentOffsetX / (cardWidth + 16));
+    const newIndex = Math.round(contentOffsetX / screenWidth);
     
     // 현재 페이지 인덱스 업데이트
     setCurrentPageIndex(newIndex);
@@ -932,63 +1048,289 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     }
   };
 
-  // 포트폴리오 불러오기 핸들러
-  const handleLoadPortfolio = () => {
-    nav.navigate('PortfolioEditor');
-    setShowLoadPortfolioModal(false);
+  // 스크롤 위치 조정을 위한 함수 (반복 사용 위해 추출)
+  const adjustScrollPosition = () => {
+    console.log('스크롤 위치 조정 - 맨 처음으로 이동');
+    requestAnimationFrame(() => {
+      // 맨 왼쪽(첫 번째 기록 또는 '기록 없음' 카드)으로 스크롤
+      scrollViewRef.current?.scrollTo({ x: 0, animated: false });
+      setCurrentPageIndex(0);
+      setCurrentRecordIndex(0);
+    });
   };
 
-  // 종목 평균 변화율 계산
-  const getForeignPercentChange = useMemo(() => {
-    if (getForeignStocks.length === 0) return 0;
-    const totalPercentChange = getForeignStocks.reduce((sum, stock) => sum + stock.percentChange, 0);
-    return parseFloat((totalPercentChange / getForeignStocks.length).toFixed(1));
-  }, [getForeignStocks]);
+  // 초기 데이터 로딩 (MyStockAccountComponent 방식)
+  useEffect(() => {
+    // 연결된 계좌 ID 정보 가져오기
+    const getConnectedAccounts = async () => {
+      try {
+        // API에서 자체적으로 토큰을 가져오기 때문에 토큰을 전달할 필요가 없음
+        const accounts = await fetchConnectedAccounts();
+        
+        console.log('Connected Accounts:', accounts);
+        setConnectedAccounts(accounts);
+        
+        // 계좌 정보 조회도 같이 실행
+        getStockAccounts(accounts);
+      } catch (error) {
+        console.error('계좌 연결 ID 조회 실패:', error);
+      }
+    };
 
-  const getDomesticPercentChange = useMemo(() => {
-    if (getDomesticStocks.length === 0) return 0;
-    const totalPercentChange = getDomesticStocks.reduce((sum, stock) => sum + stock.percentChange, 0);
-    return parseFloat((totalPercentChange / getDomesticStocks.length).toFixed(1));
-  }, [getDomesticStocks]);
+    // 증권 계좌 정보 가져오기
+    const getStockAccounts = async (connectedAccountsList: any[]) => {
+      try {
+        if (!loggedToken) {
+          console.log('토큰 없음');
+          return;
+        }
 
-  const { name, number, principal, valuation, dailyProfit, dailyProfitPercent, totalProfit, totalProfitPercent } = accountInfo;
+        const stockAccountsResult = await fetchStockAccounts(loggedToken);
+        
+        console.log('=== 리밸런싱 페이지 계좌 API 응답 상세 로깅 ===');
+        console.log('API 성공 여부:', stockAccountsResult.success);
+        console.log('원본 응답 데이터:', JSON.stringify(stockAccountsResult.data, null, 2));
+        
+        if (stockAccountsResult.success && stockAccountsResult.data) {
+          // 각 계좌별로 principal 값 확인
+          stockAccountsResult.data.forEach((account: any, index: number) => {
+            console.log(`계좌 ${index + 1}:`, {
+              company: account.company,
+              accountNumber: account.accountNumber,
+              principal: account.principal,
+              principalType: typeof account.principal,
+              returnRate: account.returnRate
+            });
+          });
+          
+          setStockAccounts(stockAccountsResult.data);
+        } else {
+          console.error('계좌 정보 조회 실패');
+        }
+      } catch (error) {
+        console.error('증권 계좌 정보 조회 실패:', error);
+      }
+    };
 
-  // 화면 회전 핸들러
-  const handleRotateScreen = () => {
-    // 화면 회전 기능 구현 (향후 구현)
-    Alert.alert('알림', '화면 회전 기능은 준비 중입니다.');
-  };
-
-  const [showLoadPortfolioModal, setShowLoadPortfolioModal] = useState(false);
-
-  // 현재 선택된 계좌 표시 텍스트 생성
-  const getSelectedAccountLabel = () => {
-    if (stockAccounts.length > 0 && selectedAccountIndex < stockAccounts.length) {
-      // API 계좌 선택된 경우
-      const apiAccount = stockAccounts[selectedAccountIndex];
-      const secFirm = findSecuritiesFirmByName(apiAccount.company);
-      const displayName = secFirm?.shortName || apiAccount.company;
-      return `${displayName} (${apiAccount.accountNumber.slice(-4)})`;
+    getConnectedAccounts();
+    
+    return () => {
+      console.log('컴포넌트 언마운트');
+    };
+  }, [loggedToken]);
+  
+  // 계좌 정보 로드 완료 후 모든 계좌 비밀번호 상태 확인
+  useEffect(() => {
+    const loadAllAccountPasswords = async () => {
+      if (stockAccounts.length > 0 && connectedAccounts.length > 0) {
+        console.log('모든 계좌 데이터 로드 완료, 비밀번호 상태 확인 시작');
+        
+        const passwordStatusUpdates: {[key: string]: boolean} = {};
+        
+        for (let i = 0; i < stockAccounts.length; i++) {
+          const account = stockAccounts[i];
+          const organizationCode = getOrganizationCode(account.company);
+          
+          // 저장된 비밀번호가 있는지 확인
+          const hasPassword = await checkSavedPassword(account.accountNumber, organizationCode);
+          passwordStatusUpdates[account.accountNumber] = hasPassword;
+          
+          if (hasPassword && i === 0) {
+            // 첫 번째 계좌에 저장된 비밀번호가 있으면 자동 조회
+            console.log(`계좌 ${account.accountNumber}: 저장된 비밀번호로 자동 조회`);
+            
+            // 유연한 계좌번호 매칭으로 connectedId 찾기
+            const connectedId = findConnectedIdByAccount(account.accountNumber);
+            
+            if (connectedId) {
+              setSelectedAccountForPassword({account, connectedId});
+              setSelectedAccountIndex(i);
+              
+              // 리밸런싱 기록 자동 조회
+              await loadRebalancingRecords(account.accountNumber);
     } else {
-      // 더미 계좌 선택된 경우
-      const dummyAccountIndex = stockAccounts.length > 0 ? 
-        selectedAccountIndex - stockAccounts.length : selectedAccountIndex;
-      const account = dummyAccounts[dummyAccountIndex >= 0 ? dummyAccountIndex : 0] as DummyAccount;
-      const secFirm = findSecuritiesFirmByName(account.company);
-      const displayName = secFirm?.shortName || account.company;
-      return `${displayName} (${account.account.slice(-4)})`;
+              console.error(`계좌 ${account.accountNumber}에 매칭되는 connectedId를 찾을 수 없음`);
+            }
+          } else if (!hasPassword && i === 0) {
+            // 첫 번째 계좌에 저장된 비밀번호가 없으면 모달 표시
+            console.log(`계좌 ${account.accountNumber}: 저장된 비밀번호 없음, 모달 표시`);
+            
+            // 유연한 계좌번호 매칭으로 connectedId 찾기
+            const connectedId = findConnectedIdByAccount(account.accountNumber);
+            
+            if (connectedId) {
+              setSelectedAccountForPassword({account, connectedId});
+              setSelectedAccountIndex(i);
+              setAccountPassword('');
+              setPasswordError('');
+              
+              setTimeout(() => {
+                setShowAccountPasswordModal(true);
+              }, 800);
+            } else {
+              console.error(`계좌 ${account.accountNumber}에 매칭되는 connectedId를 찾을 수 없음`);
+            }
+          }
+        }
+        
+        // 모든 계좌의 비밀번호 상태 업데이트
+        setAccountPasswordStatus(passwordStatusUpdates);
+      }
+    };
+
+    loadAllAccountPasswords();
+  }, [stockAccounts, connectedAccounts, savedAccounts]);
+
+  // 실시간 계좌 잔고 조회 함수 추가
+  const loadRealtimeAccountBalance = async (accountNumber: string) => {
+    if (!loggedToken) {
+      console.log('실시간 잔고 조회 중단: 토큰 없음');
+      return;
+    }
+
+    setIsLoadingRealtimeBalance(true);
+    try {
+      const account = stockAccounts.find(acc => acc.accountNumber === accountNumber);
+      if (!account) {
+        console.error('계좌 정보를 찾을 수 없음:', accountNumber);
+        return;
+      }
+
+      const connectedId = findConnectedIdByAccount(accountNumber);
+      if (!connectedId) {
+        console.error('connectedId를 찾을 수 없음:', accountNumber);
+        return;
+      }
+
+      const organization = getOrganizationCode(account.company);
+      const savedAccount = findSavedAccount(accountNumber, organization);
+      
+      let password = '';
+      if (savedAccount && savedAccount.account_password) {
+        password = savedAccount.account_password;
+      } else {
+        try {
+          const directPassword = await AsyncStorage.getItem(`direct_password_${accountNumber}`);
+          password = directPassword || '';
+        } catch (err) {
+          console.error('직접 저장소에서 비밀번호 가져오기 오류:', err);
+        }
+      }
+
+      if (!password) {
+        console.log('저장된 비밀번호가 없어서 실시간 잔고 조회 불가');
+        return;
+      }
+
+      console.log('[실시간 잔고] API 호출 시작:', {
+        accountNumber,
+        organization,
+        connectedId
+      });
+
+      const response = await getAccountBalance({
+        organization,
+        connectedId,
+        account: accountNumber,
+        account_password: password
+      });
+
+      if (response.data.result.code === 'CF-00000') {
+        const apiData = response.data.data;
+        
+        console.log('[실시간 잔고] API 응답 원본 데이터:', {
+          rsTotAmt: apiData.rsTotAmt,
+          rsTotValAmt: apiData.rsTotValAmt,
+          resDepositReceivedD2: apiData.resDepositReceivedD2,
+          resDepositReceived: apiData.resDepositReceived,
+          resItemListLength: (apiData.resItemList || []).length
+        });
+        
+        // 실시간 총 자산 계산 (예수금 + 보유종목)
+        let totalAmount = parseFloat(apiData.rsTotAmt || apiData.rsTotValAmt || '0');
+        
+        // 총평가금액이 0이면 직접 계산
+        if (totalAmount === 0) {
+          const depositAmount = parseFloat(apiData.resDepositReceivedD2 || apiData.resDepositReceived || '0');
+          const stocksValue = (apiData.resItemList || []).reduce((total: number, item: any) => {
+            const itemValue = parseFloat(item.resValuationAmt || '0');
+            console.log('[실시간 잔고] 종목 평가금액:', {
+              name: item.resItemName,
+              value: itemValue
+            });
+            return total + itemValue;
+          }, 0);
+          totalAmount = depositAmount + stocksValue;
+          
+          console.log('[실시간 잔고] 직접 계산 결과:', {
+            depositAmount,
+            stocksValue,
+            totalAmount
+          });
+        }
+        
+        // 원금은 별도로 관리 (백엔드 API의 principal 값 사용)
+        const balanceData = {
+          krwCash: parseFloat(apiData.resDepositReceivedD2 || apiData.resDepositReceived || '0'), // 원화 현금
+          usdCash: 0, // USD 현금 (필요시 추가)
+          totalAmount, // 실시간 총 자산
+          // 실시간 주식 가격 정보 저장
+          stockPrices: (apiData.resItemList || []).reduce((prices: any, item: any) => {
+            const stockName = item.resItemName;
+            const currentPrice = parseFloat(item.resPresentAmt || '0');
+            const currency = item.resAccountCurrency;
+            const nation = item.resNation;
+            
+            console.log('[주식 가격 수집]', {
+              stockName,
+              currentPrice,
+              currency,
+              nation,
+              originalPriceField: item.resPresentAmt,
+              allFields: Object.keys(item)
+            });
+            
+            if (stockName && currentPrice > 0) {
+              prices[stockName] = currentPrice;
+              console.log(`[가격 저장] ${stockName}: ${currentPrice} (${currency || 'KRW'})`);
+            } else {
+              console.log(`[가격 저장 실패] ${stockName}: ${currentPrice}`);
+            }
+            return prices;
+          }, {})
+        };
+
+        console.log('[실시간 잔고] 조회 성공:', {
+          krwCash: balanceData.krwCash,
+          totalAmount: balanceData.totalAmount,
+          usdCash: balanceData.usdCash,
+          stockPricesCount: Object.keys(balanceData.stockPrices).length
+        });
+        
+        // 실시간 주식 가격 정보 상세 로깅
+        if (Object.keys(balanceData.stockPrices).length > 0) {
+          console.log('[실시간 주식 가격]:', balanceData.stockPrices);
+        }
+
+        setRealtimeBalance(balanceData);
+      } else {
+        console.error('실시간 잔고 조회 실패:', response.data.result.message);
+      }
+    } catch (error) {
+      console.error('[실시간 잔고] 조회 중 오류:', error);
+    } finally {
+      setIsLoadingRealtimeBalance(false);
     }
   };
 
   return (
     <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsHorizontalScrollIndicator={false}
+      style={[styles.container, { flex: 1 }]}
+      contentContainerStyle={[styles.contentContainer, { flexGrow: 1 }]}
+      showsVerticalScrollIndicator={false}
     >
-      {/* 계좌 선택 */}
+      {/* 계좌 선택 영역 */}
       <View style={styles.accountSelectorContainer}>
-        {/* 계좌 선택 컴포넌트 */}
         <AccountSelectorComponent 
           theme={theme}
           accounts={stockAccounts.length > 0 ? stockAccounts : []}
@@ -997,19 +1339,46 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           isLoading={isLoading}
         />
         
+        {/* 비밀번호 입력 버튼 */}
+        {stockAccounts.length > 0 && selectedAccountIndex < stockAccounts.length && 
+         !accountPasswordStatus[stockAccounts[selectedAccountIndex]?.accountNumber] && (
+          <TouchableOpacity
+            style={{marginTop: 8, padding: 8, backgroundColor: theme.colors.primary, borderRadius: 8, alignSelf: 'center'}}
+            onPress={() => {
+              const account = stockAccounts[selectedAccountIndex];
+              
+              // 유연한 계좌번호 매칭으로 connectedId 찾기
+              const connectedId = findConnectedIdByAccount(account.accountNumber);
+              
+              if (connectedId) {
+                handleAccountPasswordRequired(account, connectedId);
+              } else {
+                console.log('Available connectedAccounts:', connectedAccounts);
+                Alert.alert('오류', '해당 계좌의 연결 정보를 찾을 수 없습니다. 계좌를 다시 등록해주세요.');
+              }
+            }}
+          >
+            <Text style={{color: theme.colors.card, fontSize: 12}}>계좌 비밀번호 입력</Text>
+          </TouchableOpacity>
+        )}
+        
         {/* 로딩 상태 표시 */}
         {isLoading ? (
           <Text style={styles.accountText}>증권 계좌 정보를 불러오는 중...</Text>
+        ) : isLoadingRecords ? (
+          <Text style={styles.accountText}>리밸런싱 기록을 불러오는 중...</Text>
         ) : stockAccounts.length === 0 && loggedToken ? (
           <Text style={styles.accountText}>등록된 증권 계좌가 없습니다</Text>
         ) : null}
       </View>
 
-      {/* 리밸런싱 기록 스와이프 영역 */}
-      <View style={[styles.recordSwipeContainer, {
-        flex: 1,
-        alignItems: 'center'
-      }]}>
+      {/* 리밸런싱 기록 스와이프 영역 - 계좌 선택 바로 밑으로 이동 */}
+      <View style={[styles.recordSwipeContainer, { marginTop: 8, height: 200 }]}>
+        {isLoadingRecords ? (
+          <View style={[styles.recordItemContainer, styles.card, { justifyContent: 'center', alignItems: 'center', width: screenWidth - 32, marginHorizontal: 16 }]}>
+            <Text>리밸런싱 기록을 불러오는 중...</Text>
+          </View>
+        ) : (
         <ScrollView
           ref={scrollViewRef}
           horizontal
@@ -1017,19 +1386,13 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={handleScrollEnd}
           decelerationRate="fast"
-          snapToAlignment="start"
-          snapToInterval={cardWidth}
-          contentContainerStyle={{ 
-            flexGrow: 1,
-            alignItems: 'center',
-            paddingLeft: screenWidth / 2 - cardWidth / 2,
-            paddingRight: screenWidth / 2 - cardWidth / 2,
-            gap: 16  // 카드 간 간격 추가
-          }}
+          snapToAlignment="center"
+          snapToInterval={screenWidth}
+          contentOffset={{ x: 0, y: 0 }}
         >
-          {/* 기록이 없을 때 표시할 카드 */}
-          {recordNames.length === 0 ? (
-            <View style={[styles.recordItemContainer, styles.card]}>
+          {/* 기록이 없을 때 */}
+          {accountRecords.length === 0 ? (
+            <View style={[styles.recordItemContainer, styles.card, { width: screenWidth - 32, marginHorizontal: 16 }]}>
               <View style={{alignItems: 'center', justifyContent: 'center'}}>
                 <Ionicons name="document-text-outline" size={50} color={theme.colors.textLight} style={{marginBottom: 16}} />
                 <Text style={{fontSize: 18, fontWeight: 'bold', color: theme.colors.text, marginBottom: 8}}>
@@ -1041,9 +1404,9 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
               </View>
             </View>
           ) : (
-            // 기존 기록 카드들
-            recordNames.map((record, index) => (
-              <View key={record.record_id} style={[styles.recordItemContainer, styles.card]}>
+            // 기록 카드들
+            accountRecords.map((record, index) => (
+              <View key={record.record_id} style={[styles.recordItemContainer, styles.card, { width: screenWidth - 32, marginHorizontal: 16 }]}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <Text style={[styles.recordToggleText, {fontSize: 18, fontWeight: '600'}]}>
@@ -1058,7 +1421,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
                   </TouchableOpacity>
                 </View>
                 
-                {/* 계좌 정보 영역 - 수직 방향 정렬 */}
+                {/* 계좌 정보 영역 */}
                 <View style={{marginTop: 5}}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10}}>
                     <Text style={styles.infoLabel}>원금</Text>
@@ -1080,14 +1443,14 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
                   
                   <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10}}>
                     <Text style={styles.infoLabel}>총 수익</Text>
-                    <Text style={[getProfitStyle(totalProfit)]}>
+                    <Text style={[getProfitStyle(totalProfit), {flex: 1, textAlign: 'right', flexWrap: 'wrap'}]}>
                       {formatProfit(totalProfit, currencyType)}({totalProfitPercent.toFixed(1)}%)
                     </Text>
                   </View>
                   
-                  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                     <Text style={styles.infoLabel}>일간 수익</Text>
-                    <Text style={[getProfitStyle(dailyProfit)]}>
+                    <Text style={[getProfitStyle(dailyProfit), {flex: 1, textAlign: 'right', flexWrap: 'wrap', paddingLeft: 8}]}>
                       {formatProfit(dailyProfit, currencyType)}({dailyProfitPercent.toFixed(1)}%)
                     </Text>
                   </View>
@@ -1097,16 +1460,17 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           )}
           
           {/* 포트폴리오 추가 카드 */}
-          <View style={[styles.loadPortfolioContainer, styles.card, { backgroundColor: theme.colors.primary }]}>
+          <View style={[styles.loadPortfolioContainer, styles.card, { backgroundColor: theme.colors.primary, width: screenWidth - 32, marginHorizontal: 16 }]}>
             <Text style={styles.loadPortfolioIcon}>+</Text>
             <Text style={styles.addRecordText}>새 포트폴리오 추가하기</Text>
           </View>
         </ScrollView>
-        
-        {/* 페이지 인디케이터 */}
-        <View style={styles.recordPaginationContainer}>
-          {/* 기록 없음 인디케이터 (기록이 없을 때만 표시) 또는 기존 기록 인디케이터 */}
-          {recordNames.length === 0 ? (
+        )}
+      </View>
+
+      {/* 페이지 인디케이터 - 기록 카드 바로 아래로 이동 */}
+      <View style={[styles.recordPaginationContainer, { marginTop: 8, marginBottom: 16 }]}>
+        {accountRecords.length === 0 ? (
             <>
               <View
                 style={[
@@ -1114,7 +1478,6 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
                   currentPageIndex === 0 ? styles.activePaginationDot : null
                 ]}
               />
-              {/* 포트폴리오 추가 버튼 인디케이터 */}
               <View
                 style={[
                   styles.paginationDot,
@@ -1123,9 +1486,8 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
               />
             </>
           ) : (
-            /* 기존 기록 인디케이터 + 추가 버튼 인디케이터 */
             <>
-              {recordNames.map((_, index) => (
+            {accountRecords.map((_, index) => (
                 <View
                   key={index}
                   style={[
@@ -1134,23 +1496,21 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
                   ]}
                 />
               ))}
-              {/* 포트폴리오 추가 버튼 인디케이터 */}
               <View
                 style={[
                   styles.paginationDot,
-                  currentPageIndex === recordNames.length ? styles.activePaginationDot : null
+                currentPageIndex === accountRecords.length ? styles.activePaginationDot : null
                 ]}
               />
             </>
           )}
-        </View>
       </View>
 
-      {currentRecord && (
-        <>
-          {/* 통화 전환 버튼 - 현금 영역 위에 배치 */}
+      {/* 나머지 컴포넌트들 */}
+      {currentRecord && !isLoadingDetails && (
+        <View style={{ marginTop: 0 }}>
+          {/* 통화 전환 버튼 */}
           <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10, marginTop: 2, marginRight: 2}}>
-            {/* 화면 회전 버튼 */}
             <TouchableOpacity 
               style={styles.rotateButton}
               onPress={handleRotateScreen}
@@ -1196,7 +1556,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
             totalBalance={totalBalance}
             calculateCurrentPortion={calculateCurrentPortion}
           />
-        </>
+        </View>
       )}
 
       {/* 포트폴리오 추가 모달 */}
@@ -1217,7 +1577,7 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
             accountNumber: selectedAccountForPassword.account.accountNumber
           } : null}
         password={accountPassword}
-        onChangePassword={setAccountPassword}
+        onChangePassword={(password: string) => setAccountPassword(password)}
         onConfirm={saveAccountPassword}
         onCancel={() => setShowAccountPasswordModal(false)}
         isLoading={saveInProgress}

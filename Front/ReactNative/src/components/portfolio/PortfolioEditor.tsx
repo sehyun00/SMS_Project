@@ -129,6 +129,9 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   const [totalPercentage, setTotalPercentage] = useState(0);
   const [isValidPercentage, setIsValidPercentage] = useState(true);
   
+  // AI 추천 관련 상태 추가
+  const [isRecommendationLoading, setIsRecommendationLoading] = useState(false);
+  
   // 계좌 관련 상태 추가
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
   const [stockAccounts, setStockAccounts] = useState<AccountInfo[]>([]);
@@ -651,6 +654,98 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       : `${balance.toLocaleString()}원`;
   };
 
+  // AI 리밸런싱 추천 함수 추가
+  const handleAIRecommendation = async () => {
+    if (!loggedToken) {
+      Alert.alert('인증 오류', '로그인이 필요합니다.');
+      return;
+    }
+
+    if (portfolio.assets.length === 0) {
+      Alert.alert('데이터 부족', '추천을 받기 위해서는 최소 1개 이상의 자산이 필요합니다.');
+      return;
+    }
+
+    setIsRecommendationLoading(true);
+    try {
+      // 현재 포트폴리오 정보를 AI 모델에 전송할 형태로 변환
+      const portfolioData = {
+        assets: portfolio.assets.map(asset => ({
+          name: asset.name,
+          region: asset.region,
+          current_amount: asset.current_amount || 0,
+          current_percent: asset.target_percent,
+          currency: asset.currency || 'KRW'
+        })),
+        total_balance: portfolio.assets.reduce((sum, asset) => {
+          const amount = asset.current_amount || 0;
+          return sum + (asset.currency === 'USD' ? amount * exchangeRate : amount);
+        }, 0),
+        user_risk_profile: 'moderate', // 기본값, 추후 사용자 설정으로 변경 가능
+        market_conditions: 'normal' // 기본값, 추후 시장 상황 분석 결과로 변경 가능
+      };
+
+      console.log('AI 추천 요청 데이터:', portfolioData);
+
+      // AI 리밸런싱 추천 API 호출
+      const response = await axios.post(`${FLASK_SERVER_URL}/ai/rebalancing-recommendation`, portfolioData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${loggedToken}`,
+        }
+      });
+
+      if (response.data.success && response.data.recommendations) {
+        const recommendations = response.data.recommendations;
+        
+        // 추천받은 비율을 포트폴리오에 적용
+        const updatedAssets = portfolio.assets.map(asset => {
+          const recommendation = recommendations.find((rec: any) => 
+            rec.name === asset.name && rec.region === asset.region
+          );
+          
+          return {
+            ...asset,
+            target_percent: recommendation ? Math.round(recommendation.recommended_percent * 100) / 100 : asset.target_percent
+          };
+        });
+
+        setPortfolio({
+          ...portfolio,
+          assets: updatedAssets
+        });
+
+        // 추천 이유 표시 (선택사항)
+        if (response.data.reasoning) {
+          Alert.alert(
+            'AI 추천 완료', 
+            `추천 비율이 적용되었습니다.\n\n추천 이유: ${response.data.reasoning}`,
+            [{ text: '확인' }]
+          );
+        } else {
+          Alert.alert('AI 추천 완료', '추천 비율이 적용되었습니다.');
+        }
+      } else {
+        throw new Error(response.data.message || 'AI 추천을 받을 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('AI 추천 요청 실패:', error);
+      
+      let errorMessage = 'AI 추천 요청 중 오류가 발생했습니다.';
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          errorMessage = '인증이 만료되었습니다. 다시 로그인해주세요.';
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      }
+      
+      Alert.alert('AI 추천 실패', errorMessage);
+    } finally {
+      setIsRecommendationLoading(false);
+    }
+  };
+
   // Modal로 쓰일때는 isVisible=false면 null 반환
   if (!isVisible && propIsVisible !== undefined) return null;
 
@@ -723,12 +818,28 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
           <View style={styles.assetsContainer}>
             <View style={styles.sectionHeader}>
               <Text style={styles.label}>포트폴리오 구성 *</Text>
-              <Text style={[
-                styles.percentageTotal,
-                { color: isValidPercentage ? theme.colors.primary : theme.colors.negative }
-              ]}>
-                합계: {totalPercentage}%
-              </Text>
+              <View style={styles.headerActions}>
+                <TouchableOpacity
+                  style={[styles.aiRecommendButton, isRecommendationLoading && styles.disabledButton]}
+                  onPress={handleAIRecommendation}
+                  disabled={isRecommendationLoading}
+                >
+                  {isRecommendationLoading ? (
+                    <ActivityIndicator size="small" color="white" />
+                  ) : (
+                    <>
+                      <Ionicons name="bulb-outline" size={16} color="white" />
+                      <Text style={styles.aiRecommendButtonText}>AI 추천</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+                <Text style={[
+                  styles.percentageTotal,
+                  { color: isValidPercentage ? theme.colors.primary : theme.colors.negative }
+                ]}>
+                  합계: {totalPercentage}%
+                </Text>
+              </View>
             </View>
 
             {/* 현금 자산 그룹 */}

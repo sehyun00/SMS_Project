@@ -449,29 +449,23 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountComponentProps> = ({
       const account = accountNumber;                       // 사용자가 선택한 계좌번호
       const connected_id = connectedId;                    // 커넥티드 아이디
       
-      // 시작 잔고 계산: 예수금 + (외화예수금*환율) + 보유종목 평가금액(환율 적용)
-      let principal = parseFloat(response.data.resDepositReceived || 0);
+      // 시작 잔고 계산: resDepositReceivedD2 + resDepositReceivedF(환율적용) + resAvgPresentAmt(주식 종목, 해외주식은 환율적용)
+      let principal = parseFloat(response.data.resDepositReceivedD2 || 0);
       
-      // 외화예수금 계산
-      if (response.data.resDepositReceivedFList && response.data.resDepositReceivedFList.length > 0) {
-        response.data.resDepositReceivedFList.forEach(item => {
-          if (item.resAccountCurrency === 'USD') {
-            principal += parseFloat(item.resAmount || 0) * exchangeRate;
-          } else {
-            // 다른 통화가 있는 경우 처리 (향후 확장성 고려)
-            principal += parseFloat(item.resAmount || 0);
-          }
-        });
+      // 외화예수금 계산 - resDepositReceivedF 사용
+      if (response.data.resDepositReceivedF) {
+        principal += parseFloat(response.data.resDepositReceivedF || 0) * exchangeRate;
       }
       
-      // 보유종목 평가금액 계산
+      // 보유종목 평가금액 계산 - resAvgPresentAmt 사용
       if (response.data.resItemList && response.data.resItemList.length > 0) {
-        response.data.resItemList.forEach(item => {
+        response.data.resItemList.forEach((item: any) => {
           if (item.resAccountCurrency === 'USD') {
-            principal += parseFloat(item.resValuationAmt || 0) * exchangeRate;
+            // 해외주식은 환율 적용
+            principal += parseFloat(item.resAvgPresentAmt || 0) * exchangeRate;
           } else {
-            // 다른 통화가 있는 경우 처리
-            principal += parseFloat(item.resValuationAmt || 0);
+            // 국내주식은 환율 적용 안함
+            principal += parseFloat(item.resAvgPresentAmt || 0);
           }
         });
       }

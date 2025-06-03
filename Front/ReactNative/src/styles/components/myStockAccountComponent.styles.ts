@@ -35,6 +35,11 @@ export interface MyStockAccountComponentStylesType {
   stockName: TextStyle;
   stockValue: TextStyle;
   stockRatio: TextStyle;
+  
+  // 로딩 관련 스타일
+  loadingOverlay: ViewStyle;
+  loadingContainer: ViewStyle;
+  loadingText: TextStyle;
 }
 
 // 스타일 생성 함수
@@ -155,6 +160,40 @@ const createStyles = (theme: Theme): MyStockAccountComponentStylesType => StyleS
     fontSize: 14,
     color: theme.colors.text,
     fontWeight: 'bold',
+  },
+  
+  // 로딩 관련 스타일
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingContainer: {
+    backgroundColor: theme.colors.card,
+    padding: 24,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  loadingText: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 12,
+    textAlign: 'center',
   },
 });
 
