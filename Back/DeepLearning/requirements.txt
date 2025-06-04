@@ -1,0 +1,46 @@
+# Stock Data Fetcher 필요 라이브러리
+
+# 기본 데이터 처리
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 주식 데이터 수집 (SSL 문제 해결을 위한 안정 버전)
+yfinance>=0.1.87
+pykrx>=1.0.51
+pandas_market_calendars>=5.1.0
+
+# HTTP 요청 및 SSL 인증서 (SSL 문제 해결)
+requests>=2.31.0
+certifi>=2023.7.22
+urllib3>=1.26.16,<2.0.0
+
+# HTML 파싱 (pandas read_html 지원)
+lxml>=4.9.0
+html5lib>=1.1
+beautifulsoup4>=4.12.0
+
+# 웹 API 서버
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# 유틸리티
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# 머신러닝/통계 분석
+scikit-learn>=1.3.0
+
+# 날짜/시간 처리
+exchange-calendars>=4.10.1
+
+# GPU 가속 (선택사항)
+# cupy>=12.0.0
+# cudf>=23.0.0
+# cuml>=23.0.0
+
+# 시각화 (선택사항)
+matplotlib>=3.10.0
+
+# 추가 SSL 지원 패키지
+cryptography>=41.0.0 
