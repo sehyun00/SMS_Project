@@ -1,8 +1,8 @@
 import { Platform } from 'react-native';
 
-const ip = '192.168.0.3';
+// const ip = '192.168.0.3';
 // const ip = '10.20.32.211';
-
+const ip = '10.20.37.75';
 
 export const SPRING_SERVER_URL = Platform.OS === 'web'  // 스프링 백엔드 서버
   ? 'http://localhost:8081/upwardright'
