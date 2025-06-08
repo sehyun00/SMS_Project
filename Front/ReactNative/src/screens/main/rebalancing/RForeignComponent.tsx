@@ -17,6 +17,8 @@ interface StockItem {
   targetPortion: number;
   rebalanceAmount: number;
   market_order?: number;
+  currentPrice?: number;
+  requiredShares?: number;
 }
 
 interface RForeignComponentProps {
@@ -27,7 +29,7 @@ interface RForeignComponentProps {
   exchangeRate: number;
   totalBalance: number;
   calculateCurrentPortion: (amount: number) => number;
-  theme?: Theme;
+  theme: Theme;
 }
 
 const RForeignComponent: React.FC<RForeignComponentProps> = ({
@@ -40,6 +42,7 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
   calculateCurrentPortion,
   theme
 }) => {
+  if (!theme) return null;
   const styles = createTableStyles(theme);
 
   // 원화 기호 상수
@@ -137,16 +140,34 @@ const RForeignComponent: React.FC<RForeignComponentProps> = ({
                     { width: COLUMN_WIDTHS.rebalance }
                   ]}>
                     {formatProfit(stock.rebalanceAmount, currencyType)}
-
                   </Text>
-                  {stock.market_order ? (
+                  {/* 주식 수 표시 - market_order 기반 계산 우선 */}
+                  {stock.market_order && stock.market_order > 0 ? (
                     <Text style={[
                       styles.subAmount,
                       stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
                     ]}>
-                      {(stock.rebalanceAmount / stock.market_order).toFixed(2)}주
+                      {Math.abs(stock.rebalanceAmount / stock.market_order).toFixed(2)}주
                     </Text>
-                  ) : null}
+                  ) : stock.requiredShares !== undefined && stock.currentPrice ? (
+                    <Text style={[
+                      styles.subAmount,
+                      stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
+                    ]}>
+                      {Math.abs(stock.requiredShares).toFixed(2)}주
+                    </Text>
+                  ) : stock.rebalanceAmount !== 0 ? (
+                    <Text style={[
+                      styles.subAmount,
+                      stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
+                    ]}>
+                      {Math.abs(stock.rebalanceAmount / 100).toFixed(2)}주
+                    </Text>
+                  ) : (
+                    <Text style={[styles.subAmount, styles.subNegativeChange]}>
+                      -
+                    </Text>
+                  )}
                 </View>
               </View>
             ))}

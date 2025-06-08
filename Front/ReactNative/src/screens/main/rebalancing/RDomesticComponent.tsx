@@ -18,6 +18,8 @@ interface StockItem {
   targetPortion: number;
   rebalanceAmount: number;
   market_order?: number;
+  currentPrice?: number;  // 현재 주식 가격
+  requiredShares?: number; // 필요한 주식 수 (+ 매수, - 매도)
 }
 
 interface RDomesticComponentProps {
@@ -28,7 +30,7 @@ interface RDomesticComponentProps {
   exchangeRate: number;
   totalBalance: number;
   calculateCurrentPortion: (amount: number) => number;
-  theme?: Theme;
+  theme: Theme;
 }
 
 const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
@@ -41,6 +43,7 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
   calculateCurrentPortion,
   theme
 }) => {
+  if (!theme) return null; // theme이 없으면 렌더링하지 않음
   const styles = createTableStyles(theme);
 
   // 원화 기호 상수
@@ -140,16 +143,17 @@ const RDomesticComponent: React.FC<RDomesticComponentProps> = ({
                     { width: COLUMN_WIDTHS.rebalance }
                   ]}>
                     {formatProfit(stock.rebalanceAmount, currencyType)}
-
                   </Text>
-                  {stock.market_order ? (
-                    <Text style={[
-                      styles.subAmount,
-                      stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
-                    ]}>
-                      {(stock.rebalanceAmount / stock.market_order).toFixed(2)}주
-                    </Text>
-                  ) : null}
+                  {/* 주식 수 표시 */}
+                  <Text style={[
+                    styles.subAmount,
+                    stock.rebalanceAmount < 0 ? styles.subNegativeChange : styles.subPositiveChange
+                  ]}>
+                    {stock.requiredShares !== undefined 
+                      ? Math.abs(stock.requiredShares).toFixed(2)
+                      : Math.abs((stock.rebalanceAmount * exchangeRate) / 50000).toFixed(2)
+                    }주
+                  </Text>
                 </View>
               </View>
             ))}

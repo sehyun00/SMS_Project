@@ -23,7 +23,7 @@ interface RMoneyComponentProps {
   exchangeRate: number;
   totalBalance: number;
   calculateCurrentPortion: (amount: number) => number;
-  theme?: Theme;
+  theme: Theme;
 }
 
 const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
@@ -35,6 +35,7 @@ const RMoneyComponent: React.FC<RMoneyComponentProps> = ({
   calculateCurrentPortion,
   theme
 }) => {
+  if (!theme) return null;
   const styles = createTableStyles(theme);
 
   // 원화 기호 상수

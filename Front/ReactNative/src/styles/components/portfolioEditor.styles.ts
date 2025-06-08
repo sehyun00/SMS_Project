@@ -33,6 +33,9 @@ export default function createStyles(theme: Theme) {
       borderRadius: 4,
       backgroundColor: theme.colors.primary,
     },
+    saveButtonDisabled: {
+      opacity: 0.6,
+    },
     saveButtonText: {
       color: 'white',
       fontWeight: 'bold',
@@ -68,6 +71,28 @@ export default function createStyles(theme: Theme) {
       alignItems: 'center',
       marginBottom: 12,
     },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    aiRecommendButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 16,
+      backgroundColor: theme.colors.primary,
+      gap: 4,
+    },
+    disabledButton: {
+      opacity: 0.6,
+    },
+    aiRecommendButtonText: {
+      color: 'white',
+      fontSize: 12,
+      fontWeight: '600',
+    },
     percentageTotal: {
       fontSize: 16,
       fontWeight: 'bold',
@@ -87,6 +112,11 @@ export default function createStyles(theme: Theme) {
       fontSize: 16,
       fontWeight: '500',
       color: theme.colors.text,
+    },
+    itemAmount: {
+      fontSize: 14,
+      marginTop: 4,
+      color: theme.colors.text + '80',
     },
     itemRegion: {
       fontSize: 14,
@@ -230,6 +260,17 @@ export default function createStyles(theme: Theme) {
     emptyResultText: {
       fontSize: 16,
       color: theme.colors.text + '80',
+    },
+    categoryLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginTop: 20,
+      marginBottom: 8,
+      paddingHorizontal: 4,
+    },
+    categorySpacing: {
+      marginTop: 24,
     },
   });
 } 

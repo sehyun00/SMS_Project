@@ -1,14 +1,15 @@
 // 경로: src/styles/components/recordComponent.styles.ts
 import { StyleSheet } from 'react-native';
+import { Theme } from '../../types/theme';
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f7',
+        backgroundColor: theme.colors.background,
         padding: 16,
     },
     accountCard: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.card,
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
@@ -27,10 +28,12 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         paddingRight: 5,
+        color: theme.colors.text,
     },
     accountNumber: {
         fontSize: 14,
         fontWeight: 'bold',
+        color: theme.colors.text,
     },
     infoRow: {
         flexDirection: 'row',
@@ -39,30 +42,31 @@ export const styles = StyleSheet.create({
     },
     infoLabel: {
         fontSize: 14,
-        color: '#666666',
+        color: theme.colors.placeholder,
     },
     infoValue: {
         fontSize: 14,
         fontWeight: '500',
+        color: theme.colors.text,
     },
     positiveValue: {
-        color: '#37b24d',
+        color: theme.colors.positive,
     },
     negativeValue: {
-        color: '#f03e3e',
+        color: theme.colors.negative,
     },
     tableHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#eeeeee',
+        borderBottomColor: theme.colors.border,
         marginTop: 8,
     },
     headerText: {
         fontSize: 13,
         fontWeight: '500',
-        color: '#666666',
+        color: theme.colors.placeholder,
         flex: 1,
         textAlign: 'center',
     },
@@ -71,16 +75,17 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: theme.colors.border,
     },
     recordName: {
         fontSize: 13,
         flex: 1,
         paddingRight: 8,
+        color: theme.colors.text,
     },
     recordDate: {
         fontSize: 13,
-        color: '#666666',
+        color: theme.colors.placeholder,
         flex: 1,
         textAlign: 'center',
     },
@@ -89,21 +94,23 @@ export const styles = StyleSheet.create({
         fontWeight: '500',
         flex: 1,
         textAlign: 'right',
+        color: theme.colors.text,
     },
     selectedRecord: {
-        backgroundColor: '#f0f8ff', // 선택된 기록 행 배경색
+        backgroundColor: theme.colors.primary + '20', // 투명도 20% 적용
     },
     recordDetail: {
         marginTop: 10,
         padding: 12,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: theme.colors.background,
         borderRadius: 8,
         borderLeftWidth: 3,
-        borderLeftColor: '#4a90e2',
+        borderLeftColor: theme.colors.primary,
     },
     recordDetailTitle: {
         fontSize: 14,
         fontWeight: 'bold',
         marginBottom: 6,
+        color: theme.colors.text,
     },
 });

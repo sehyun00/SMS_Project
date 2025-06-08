@@ -68,8 +68,6 @@ export default function createStyles(theme: Theme, cardWidth?: number) {
     recordSwipeContainer: {
       marginBottom: 20,
       paddingVertical: 15,
-      alignItems: 'flex-start',
-      justifyContent: 'flex-start',
       overflow: 'visible',
     },
     recordItemContainer: {
@@ -89,7 +87,7 @@ export default function createStyles(theme: Theme, cardWidth?: number) {
       paddingHorizontal: 16,
       paddingVertical: 16,
       marginVertical: 5,
-      overflow: 'visible',
+      overflow: 'hidden',
     },
     addRecordContainer: {
       padding: 16,
@@ -140,10 +138,10 @@ export default function createStyles(theme: Theme, cardWidth?: number) {
       height: 6,
       borderRadius: 3,
       marginHorizontal: 3,
-      backgroundColor: '#DDDDDD',
+      backgroundColor: theme.colors.placeholder || '#DDDDDD',
     },
     activePaginationDot: {
-      backgroundColor: '#2F80ED',
+      backgroundColor: theme.colors.primary || '#2F80ED',
       width: 12,
     },
     // 리밸런싱 기록명 토글
@@ -238,7 +236,7 @@ export default function createStyles(theme: Theme, cardWidth?: number) {
     profitPositive: {
       fontSize: 16,
       fontWeight: 'bold',
-      color: '#FF3B30',
+      color: theme.colors.positive || '#FF3B30',
       textAlign: 'right',
     },
     profitNegative: {
@@ -301,7 +299,6 @@ export default function createStyles(theme: Theme, cardWidth?: number) {
       color: '#fff',
     },
     card: {
-      width: cardWidth || Dimensions.get('window').width - 32,
       padding: 20,
       backgroundColor: theme.colors.card,
       borderRadius: 12,
