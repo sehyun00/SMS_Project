@@ -954,7 +954,17 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 포트폴리오 불러오기 핸들러
   const handleLoadPortfolio = () => {
     console.log('[리밸런싱] 새 포트폴리오 생성으로 이동');
-    nav.navigate('PortfolioEditor');
+    
+    // 현재 선택된 계좌 정보 추가
+    const currentAccount = stockAccounts[selectedAccountIndex];
+    if (currentAccount) {
+      nav.navigate('PortfolioEditor', {
+        selectedAccountNumber: currentAccount.accountNumber,
+        selectedAccountCompany: currentAccount.company
+      });
+    } else {
+      nav.navigate('PortfolioEditor');
+    }
     setShowLoadPortfolioModal(false);
   };
 
@@ -1059,6 +1069,9 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
         rate: detail.rate || 0
       }));
 
+      // 현재 선택된 계좌 정보 추가
+      const currentAccount = stockAccounts[selectedAccountIndex];
+
       // 포트폴리오 에디터로 전달할 데이터
       const portfolioData = {
         portfolioId: currentRecord.record_id,
@@ -1068,14 +1081,17 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
         accountNumber: currentRecord.account,
         recordDate: currentRecord.record_date,
         profitRate: currentRecord.profit_rate || 0,
-        composition: portfolioComposition
+        composition: portfolioComposition,
+        selectedAccountNumber: currentAccount?.accountNumber,
+        selectedAccountCompany: currentAccount?.company
       };
 
       console.log('[포트폴리오 수정] 전달할 데이터:', {
         portfolioId: portfolioData.portfolioId,
         portfolioName: portfolioData.portfolioName,
         portfolioMemo: portfolioData.portfolioMemo,
-        compositionLength: portfolioData.composition.length
+        compositionLength: portfolioData.composition.length,
+        selectedAccountNumber: portfolioData.selectedAccountNumber
       });
 
       nav.navigate('PortfolioEditor', portfolioData);

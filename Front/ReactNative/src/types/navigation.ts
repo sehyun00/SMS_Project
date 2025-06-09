@@ -24,6 +24,8 @@ export type RootStackParamList = {
     accountNumber?: string;
     recordDate?: string;
     profitRate?: number;
+    selectedAccountNumber?: string;
+    selectedAccountCompany?: string;
   } | undefined;
 };
 

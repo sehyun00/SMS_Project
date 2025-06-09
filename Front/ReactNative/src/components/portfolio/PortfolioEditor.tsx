@@ -34,9 +34,10 @@ import {
 // API 임포트 추가
 import { 
   fetchConnectedAccounts, 
-  fetchStockAccounts,
   getStockBalance
 } from '../../api/connectedAccountApi';
+
+import { fetchStockAccounts } from '../../api/homeApi';
 
 // 더미 데이터 임포트
 import {
@@ -124,6 +125,8 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   const accountNumber = route.params?.accountNumber;
   const recordDate = route.params?.recordDate;
   const profitRate = route.params?.profitRate;
+  const selectedAccountNumber = route.params?.selectedAccountNumber;
+  const selectedAccountCompany = route.params?.selectedAccountCompany;
   
   // props나 route에서 isVisible 결정
   const [isVisible, setIsVisible] = useState(propIsVisible !== undefined ? propIsVisible : true);
@@ -401,10 +404,12 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       return;
     }
 
-    // 계좌 정보가 없으면 기본값 사용
-    let accountNumber = '716229952301'; // 기본 계좌번호
+    // 전달받은 계좌 정보 우선 사용, 없으면 기본값 사용
+    let accountNumber = selectedAccountNumber || '716229952301'; // 전달받은 계좌번호 또는 기본 계좌번호
     
-    if (stockAccounts.length > 0) {
+    if (selectedAccountNumber) {
+      console.log('[저장] 전달받은 계좌 사용:', selectedAccountNumber);
+    } else if (stockAccounts.length > 0) {
       accountNumber = stockAccounts[0].accountNumber;
       console.log('[저장] 연결된 계좌 사용:', accountNumber);
     } else {
@@ -426,6 +431,8 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     }
     
     console.log('[저장] 사용할 계좌번호:', accountNumber);
+    console.log('[저장] 전달받은 계좌번호:', selectedAccountNumber);
+    console.log('[저장] 전달받은 증권사:', selectedAccountCompany);
     console.log('[저장] 토큰 상태:', loggedToken ? '있음' : '없음');
     
     setLoading(true);
