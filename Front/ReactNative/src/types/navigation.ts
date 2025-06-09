@@ -1,10 +1,30 @@
 // 경로: src/types/navigation.ts
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+// 포트폴리오 구성 항목 인터페이스
+interface PortfolioCompositionItem {
+  name: string;
+  targetPortion: number;
+  stockRegion: number;
+  marketTypeName?: string;
+  currentShares?: number;
+  currentValue?: number;
+  rate?: number;
+}
+
 export type RootStackParamList = {
   '메인 페이지': undefined;
   '설정 페이지': undefined;
-  'PortfolioEditor': { portfolioId?: number } | undefined;
+  'PortfolioEditor': { 
+    portfolioId?: number;
+    portfolioName?: string;
+    portfolioMemo?: string;
+    composition?: PortfolioCompositionItem[];
+    totalBalance?: number;
+    accountNumber?: string;
+    recordDate?: string;
+    profitRate?: number;
+  } | undefined;
 };
 
 export type AuthStackParamList = {

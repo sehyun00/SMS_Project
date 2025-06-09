@@ -912,11 +912,13 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
   // 포커스, 블러 상태 관리
   const componentIsFocused = useRef(true);
   
-  // 앱이 활성화되거나 화면이 다시 포커스 받을 때 스크롤 위치 조정
+  // 앱이 활성화되거나 화면이 다시 포커스 받을 때 스크롤 위치 조정 및 데이터 새로고침
   useEffect(() => {
-    // 포커스 핸들러
+    // 포커스 핸들러 - 포트폴리오 에디터에서 돌아올 때 데이터 새로고침
     const handleFocus = () => {
       componentIsFocused.current = true;
+      
+      console.log('[리밸런싱] 화면 포커스 받음 - 데이터 새로고침 시작');
       
       // 포커스 받을 때 스크롤 위치 재조정
       setTimeout(() => {
@@ -924,31 +926,34 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
           adjustScrollPosition();
         }
       }, 100);
+      
+      // 현재 선택된 계좌의 리밸런싱 기록 새로고침
+      if (stockAccounts.length > 0 && selectedAccountIndex < stockAccounts.length) {
+        const currentAccount = stockAccounts[selectedAccountIndex];
+        console.log('[리밸런싱] 계좌 기록 새로고침:', currentAccount.accountNumber);
+        loadRebalancingRecords(currentAccount.accountNumber);
+      }
     };
     
     // 블러 핸들러
     const handleBlur = () => {
       componentIsFocused.current = false;
+      console.log('[리밸런싱] 화면 포커스 잃음');
     };
     
-    // 이벤트 리스너 추가 (실제 앱에서는 React Navigation의 이벤트 사용)
-    // 임시 구현 - 이벤트가 있을 때만 사용
-    /*
-    navigation.addListener('focus', handleFocus);
-    navigation.addListener('blur', handleBlur);
+    // React Navigation의 포커스/블러 이벤트 리스너 추가
+    const unsubscribeFocus = nav.addListener('focus', handleFocus);
+    const unsubscribeBlur = nav.addListener('blur', handleBlur);
     
     return () => {
-      navigation.removeListener('focus', handleFocus);
-      navigation.removeListener('blur', handleBlur);
+      unsubscribeFocus();
+      unsubscribeBlur();
     };
-    */
-    
-    // 초기 실행
-    handleFocus();
-  }, []);
+  }, [stockAccounts, selectedAccountIndex]);
   
   // 포트폴리오 불러오기 핸들러
   const handleLoadPortfolio = () => {
+    console.log('[리밸런싱] 새 포트폴리오 생성으로 이동');
     nav.navigate('PortfolioEditor');
     setShowLoadPortfolioModal(false);
   };
@@ -1041,10 +1046,41 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
 
   // 리밸런싱 기록 수정 버튼 핸들러
   const handleEditRecord = () => {
-    if (currentRecord) {
-      nav.navigate('PortfolioEditor', { portfolioId: currentRecord.record_id });
+    if (currentRecord && recordDetails) {
+      // 포트폴리오 구성 정보 변환
+      const portfolioComposition = recordDetails.map(detail => ({
+        name: detail.stock_name,
+        targetPortion: detail.expert_per,
+        stockRegion: detail.stock_region,
+        marketTypeName: detail.market_type_name,
+        currentShares: detail.nos || 0,
+        currentValue: detail.stock_region === 0 ? detail.dollar : 
+                     detail.stock_region === 1 ? detail.won : detail.dollar,
+        rate: detail.rate || 0
+      }));
+
+      // 포트폴리오 에디터로 전달할 데이터
+      const portfolioData = {
+        portfolioId: currentRecord.record_id,
+        portfolioName: currentRecord.record_name || `기록 ${currentRecord.record_id}`,
+        portfolioMemo: currentRecord.memo || '',
+        totalBalance: currentRecord.total_balance || totalBalance,
+        accountNumber: currentRecord.account,
+        recordDate: currentRecord.record_date,
+        profitRate: currentRecord.profit_rate || 0,
+        composition: portfolioComposition
+      };
+
+      console.log('[포트폴리오 수정] 전달할 데이터:', {
+        portfolioId: portfolioData.portfolioId,
+        portfolioName: portfolioData.portfolioName,
+        portfolioMemo: portfolioData.portfolioMemo,
+        compositionLength: portfolioData.composition.length
+      });
+
+      nav.navigate('PortfolioEditor', portfolioData);
     } else {
-      Alert.alert('알림', '수정할 리밸런싱 기록이 없습니다.');
+      Alert.alert('알림', '수정할 리밸런싱 기록이 없거나 데이터를 불러오는 중입니다.');
     }
   };
 

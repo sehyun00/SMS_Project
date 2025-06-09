@@ -35,11 +35,7 @@ import {
 import { 
   fetchConnectedAccounts, 
   fetchStockAccounts,
-  getStockBalance,
-  ConnectedAccount, 
-  AccountInfo,
-  BalanceInfo,
-  StockItem
+  getStockBalance
 } from '../../api/connectedAccountApi';
 
 // 더미 데이터 임포트
@@ -73,6 +69,23 @@ interface SearchResultItem {
   price?: number;
 }
 
+// 임시 타입 정의 (이미 있는 경우 제거)
+interface ConnectedAccount {
+  connectedId: string;
+}
+
+interface AccountInfo {
+  company: string;
+  accountNumber: string;
+  principal?: number;
+  returnRate: number;
+}
+
+interface BalanceInfo {
+  balance: number;
+  currency: string;
+}
+
 // 컴포넌트 props 인터페이스 정의
 interface PortfolioEditorProps {
   theme: Theme;
@@ -102,8 +115,15 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   const navigation = useNavigation<PortfolioEditorNavigationProp>();
   const route = useRoute<RouteProp<RootStackParamList, 'PortfolioEditor'>>();
   
-  // route.params에서 portfolioId 가져오기
+  // route.params에서 전달된 모든 정보 가져오기
   const portfolioId = route.params?.portfolioId;
+  const portfolioName = route.params?.portfolioName;
+  const portfolioMemo = route.params?.portfolioMemo;
+  const portfolioComposition = route.params?.composition;
+  const totalBalance = route.params?.totalBalance;
+  const accountNumber = route.params?.accountNumber;
+  const recordDate = route.params?.recordDate;
+  const profitRate = route.params?.profitRate;
   
   // props나 route에서 isVisible 결정
   const [isVisible, setIsVisible] = useState(propIsVisible !== undefined ? propIsVisible : true);
@@ -166,7 +186,46 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
         return;
       }
       
-      // route.params에서 ID만 전달된 경우
+      // route.params에서 전체 정보가 전달된 경우 (RebalancingComponent에서 수정 버튼 클릭)
+      if (portfolioId && portfolioName && portfolioComposition) {
+        console.log('[포트폴리오 에디터] 전달받은 데이터:', {
+          portfolioId,
+          portfolioName,
+          portfolioMemo,
+          compositionLength: portfolioComposition.length
+        });
+        
+        try {
+          // 전달받은 composition 데이터를 ExtendedPortfolioItem으로 변환
+          const portfolioAssets: ExtendedPortfolioItem[] = portfolioComposition.map(item => ({
+            name: item.name,
+            ticker: item.marketTypeName || undefined,
+            region: item.stockRegion as 0 | 1 | 2,
+            target_percent: item.targetPortion
+          }));
+          
+          const portfolioData: Portfolio = {
+            portfolio_id: portfolioId,
+            portfolio_name: portfolioName,
+            assets: portfolioAssets,
+            description: portfolioMemo || `리밸런싱 기록에서 불러온 포트폴리오입니다.`
+          };
+          
+          console.log('[포트폴리오 에디터] 구성된 포트폴리오 데이터:', {
+            portfolioName: portfolioData.portfolio_name,
+            description: portfolioData.description,
+            assetsCount: portfolioData.assets.length,
+            assets: portfolioData.assets
+          });
+          
+          setPortfolio(portfolioData);
+          return;
+        } catch (error) {
+          console.error('[포트폴리오 에디터] 전달받은 데이터 처리 오류:', error);
+        }
+      }
+      
+      // route.params에서 ID만 전달된 경우 (기존 로직)
       if (portfolioId) {
         try {
           // dummyData에서 해당 portfolioId(recordId)의 상세 데이터 가져오기
@@ -221,7 +280,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
     };
     
     fetchPortfolioData();
-  }, [propPortfolioToEdit, portfolioId, propIsVisible]);
+  }, [propPortfolioToEdit, portfolioId, portfolioName, portfolioComposition, portfolioMemo, propIsVisible]);
 
   // 총 비율 계산 및 검증
   useEffect(() => {
@@ -342,9 +401,32 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
       return;
     }
 
-    const accountNumber = stockAccounts[0]?.accountNumber || '716229952301';
-    console.log('Using account number:', accountNumber);
-    console.log('Using token:', loggedToken);
+    // 계좌 정보가 없으면 기본값 사용
+    let accountNumber = '716229952301'; // 기본 계좌번호
+    
+    if (stockAccounts.length > 0) {
+      accountNumber = stockAccounts[0].accountNumber;
+      console.log('[저장] 연결된 계좌 사용:', accountNumber);
+    } else {
+      console.log('[저장] 기본 계좌번호 사용:', accountNumber);
+      // 계좌 정보를 다시 로드 시도
+      try {
+        if (loggedToken) {
+          console.log('[저장] 계좌 정보 재로드 시도');
+          const response = await fetchStockAccounts(loggedToken);
+          if (response.success && response.data.length > 0) {
+            accountNumber = response.data[0].accountNumber;
+            setStockAccounts(response.data);
+            console.log('[저장] 계좌 정보 재로드 성공:', accountNumber);
+          }
+        }
+      } catch (error) {
+        console.error('[저장] 계좌 정보 재로드 실패:', error);
+      }
+    }
+    
+    console.log('[저장] 사용할 계좌번호:', accountNumber);
+    console.log('[저장] 토큰 상태:', loggedToken ? '있음' : '없음');
     
     setLoading(true);
     try {
@@ -543,17 +625,31 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
   // 초기화 시 보유종목 가져오기 수정
   useEffect(() => {
     const fetchPortfolioData = async () => {
+      // 계좌 정보는 항상 로드 (저장 시 필요하므로)
+      let accounts: any[] = [];
+      let stockAccountsData: any[] = [];
+      
+      try {
+        accounts = await fetchConnectedAccounts();
+        setConnectedAccounts(accounts);
+
+        if (loggedToken) {
+          const response = await fetchStockAccounts(loggedToken);
+          stockAccountsData = response.success ? response.data : [];
+          console.log('[포트폴리오 에디터] 계좌 정보 로드:', stockAccountsData);
+          setStockAccounts(stockAccountsData);
+        }
+      } catch (error) {
+        console.error('[포트폴리오 에디터] 계좌 정보 로드 실패:', error);
+      }
+      
+      // 기존 포트폴리오 수정인 경우 계좌 정보만 로드하고 포트폴리오 데이터는 건드리지 않음
       if (propPortfolioToEdit || portfolioId) {
         return;
       }
 
+      // 새 포트폴리오 생성 시에만 계좌 잔고 기반 초기화
       try {
-        const accounts = await fetchConnectedAccounts();
-        setConnectedAccounts(accounts);
-
-        const stockAccountsData = await fetchStockAccounts();
-        setStockAccounts(stockAccountsData);
-
         if (stockAccountsData.length > 0) {
           const firstAccount = stockAccountsData[0];
           const connectedId = typeof accounts[0] === 'string' ? accounts[0] : accounts[0]?.connectedId;

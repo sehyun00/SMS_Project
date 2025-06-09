@@ -45,6 +45,36 @@ export interface Rud {
   market_type_name: string; // 시장 유형 이름
 }
 
+// Codef API 관련 인터페이스 추가
+export interface ConnectedAccount {
+  connectedId: string;
+  accountNumber: string;
+}
+
+export interface AccountInfo {
+  accountNumber: string;
+  company: string;
+  returnRate: number;
+}
+
+export interface StockItem {
+  name: string;               // 종목명
+  price: string;              // 현재가
+  quantity: string;           // 보유수량
+  amount: string;             // 평가금액
+  availableQuantity: string;  // 거래가능수량
+  [key: string]: any;         // 기타 필드
+}
+
+export interface BalanceInfo {
+  accountNumber?: string;     // 계좌번호
+  accountName?: string;       // 계좌명
+  totalAmount?: string;       // 총평가금액
+  balance?: string;           // 예수금
+  stocks?: StockItem[];       // 보유주식 상세정보
+  [key: string]: any;         // 기타 응답 필드
+}
+
 // 더미 사용자 데이터
 export const dummyUsers: User[] = [
   {
@@ -73,6 +103,101 @@ export const dummyAccounts: Account[] = [
     company: '카카오',
     principal: 10000000,
     pre_principal: 9800000
+  }
+];
+
+// Codef API 관련 더미 데이터
+export const DUMMY_CONNECTED_ACCOUNTS: ConnectedAccount[] = [
+  { connectedId: 'dummy_conn_1', accountNumber: '20901920648' },
+  { connectedId: 'dummy_conn_2', accountNumber: '716229952301' }
+];
+
+export const DUMMY_STOCK_ACCOUNTS: AccountInfo[] = [
+  { accountNumber: "20901920648", company: "NH투자증권 모바일증권 나무", returnRate: 8.5 },
+  { accountNumber: "716229952301", company: "삼성증권", returnRate: 12.3 }
+];
+
+export const DUMMY_BALANCE_DATA: { [accountNumber: string]: BalanceInfo } = {
+  "20901920648": {
+    accountNumber: "20901920648",
+    accountName: "NH투자증권 계좌",
+    totalAmount: "1,250,000",
+    balance: "150,000",
+    stocks: [
+      {
+        name: "삼성전자",
+        price: "72,500",
+        quantity: "10",
+        amount: "725,000",
+        availableQuantity: "10"
+      },
+      {
+        name: "LG에너지솔루션",
+        price: "425,000",
+        quantity: "1",
+        amount: "425,000",
+        availableQuantity: "1"
+      }
+    ]
+  },
+  "716229952301": {
+    accountNumber: "716229952301",
+    accountName: "삼성증권 계좌",
+    totalAmount: "2,340,000",
+    balance: "340,000",
+    stocks: [
+      {
+        name: "SK하이닉스",
+        price: "125,000",
+        quantity: "8",
+        amount: "1,000,000",
+        availableQuantity: "8"
+      },
+      {
+        name: "NAVER",
+        price: "200,000",
+        quantity: "5",
+        amount: "1,000,000",
+        availableQuantity: "5"
+      }
+    ]
+  }
+};
+
+// 홈 API 관련 더미 데이터
+export const DUMMY_ACCOUNT_DATA = [
+  {
+    accountNumber: "20901920648",
+    company: "NH투자증권 모바일증권 나무",
+    balance: "1,250,000",
+    lastUpdated: new Date().toISOString()
+  },
+  {
+    accountNumber: "716229952301", 
+    company: "삼성증권",
+    balance: "2,340,000",
+    lastUpdated: new Date().toISOString()
+  }
+];
+
+export const DUMMY_REBALANCING_RECORDS = [
+  {
+    id: 1,
+    accountNumber: "20901920648",
+    date: "2024-01-15",
+    portfolioName: "안정형 포트폴리오",
+    totalBalance: "1,250,000",
+    profitRate: 8.5,
+    memo: "정기 리밸런싱"
+  },
+  {
+    id: 2,
+    accountNumber: "716229952301",
+    date: "2024-01-10",
+    portfolioName: "성장형 포트폴리오", 
+    totalBalance: "2,340,000",
+    profitRate: 12.3,
+    memo: "시장 상황에 따른 조정"
   }
 ];
 
@@ -130,7 +255,7 @@ export const dummyRecords: Record[] = [
   }
 ];
 
-// 더미 거래 데이터 (업데이트된 구조)
+// 더미 거래 데이터 (업데이트된 구조) - linter 에러 수정
 export const dummyRuds: Rud[] = [
   {
     record_id: 1,
@@ -204,6 +329,7 @@ export const dummyRuds: Rud[] = [
     market_order: 176.50,
     rate: 12.4,
     nos: 10,
+    won: 0,
     dollar: 1765.0,
     rebalancing_dollar: 235.0,
     stock_region: 2,
@@ -217,6 +343,7 @@ export const dummyRuds: Rud[] = [
     rate: -10.2,
     nos: 20.5,
     won: 785400,
+    dollar: 0,
     rebalancing_dollar: 120.0,
     stock_region: 1,
     market_type_name: 'KOSPI'
@@ -228,6 +355,7 @@ export const dummyRuds: Rud[] = [
     market_order: 435.50,
     rate: 8.2,
     nos: 15,
+    won: 0,
     dollar: 6532.5,
     rebalancing_dollar: 800.0,
     stock_region: 2,
@@ -324,6 +452,60 @@ export function getCurrentExchangeRate(): number {
   return exchangeRates.USD_KRW;
 }
 
+// Codef API 관련 헬퍼 함수들
+export function getCodefDummyBalance(accountNumber: string): BalanceInfo {
+  return DUMMY_BALANCE_DATA[accountNumber] || {
+    accountNumber: accountNumber,
+    accountName: "더미 계좌",
+    totalAmount: "1,000,000",
+    balance: "100,000",
+    stocks: [
+      {
+        name: "삼성전자",
+        price: "72,500",
+        quantity: "5",
+        amount: "362,500",
+        availableQuantity: "5"
+      }
+    ]
+  };
+}
+
+export function getCodefConnectedAccounts(): ConnectedAccount[] {
+  return DUMMY_CONNECTED_ACCOUNTS;
+}
+
+export function getCodefStockAccounts(): AccountInfo[] {
+  return DUMMY_STOCK_ACCOUNTS;
+}
+
+export function getCodefAccountData(): any[] {
+  return DUMMY_ACCOUNT_DATA;
+}
+
+export function getCodefRebalancingRecords(): any[] {
+  return DUMMY_REBALANCING_RECORDS;
+}
+
+// 계좌번호로 증권사 코드 매핑 (더미용)
+export function getOrganizationCodeByAccount(accountNumber: string): string {
+  switch (accountNumber) {
+    case "20901920648":
+      return "1247"; // NH투자증권 모바일증권 나무
+    case "716229952301":
+      return "0240"; // 삼성증권
+    default:
+      return "0247"; // 기본 NH투자증권
+  }
+}
+
+// 더미 데이터 연동 확인
+export function isDummyModeActive(): boolean {
+  // config.ts의 USE_CODEF_DUMMY_DATA 값을 참조하려면 import가 필요하지만,
+  // 순환 참조를 피하기 위해 여기서는 환경변수나 다른 방법으로 확인
+  return process.env.NODE_ENV === 'development' || true; // 임시로 항상 true
+}
+
 // 총 자산 계산 헬퍼 함수 (특정 리밸런싱 기록의 현재 가치 계산)
 export function calculateRecordValue(recordId: number): number {
   const ruds = getRecordRuds(recordId);
@@ -338,4 +520,79 @@ export function calculateRecordValue(recordId: number): number {
       return total + (rud.dollar || 0);
     }
   }, 0);
+}
+
+// 새로운 리밸런싱 기록 추가 함수
+export function addNewRecord(accountNumber: string, recordName: string, memo: string, totalBalance: number, assets: any[]): number {
+  console.log('[더미 데이터] 새로운 기록 추가 시작:', {
+    accountNumber,
+    recordName,
+    memo,
+    totalBalance,
+    assetsCount: assets.length
+  });
+  
+  // 새로운 record_id 생성 (현재 최대 ID + 1)
+  const maxRecordId = Math.max(...dummyRecords.map(r => r.record_id), 0);
+  const newRecordId = maxRecordId + 1;
+  
+  // 새로운 Record 객체 생성
+  const newRecord: Record = {
+    record_id: newRecordId,
+    account: accountNumber,
+    user_id: 'test_user', // 기본값
+    record_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD 형식
+    total_balance: totalBalance,
+    record_name: recordName,
+    memo: memo,
+    profit_rate: 0 // 초기 수익률은 0
+  };
+  
+  // dummyRecords 배열에 추가
+  dummyRecords.push(newRecord);
+  
+  // 자산 정보를 Rud 객체로 변환하여 추가
+  const exchangeRate = getCurrentExchangeRate();
+  
+  assets.forEach(asset => {
+    const newRud: Rud = {
+      record_id: newRecordId,
+      stock_name: asset.name,
+      expert_per: asset.target_percent || 0,
+      market_order: 0,
+      rate: 0,
+      nos: asset.current_qty || 0,
+      won: 0,
+      dollar: 0,
+      rebalancing_dollar: 0,
+      stock_region: asset.region,
+      market_type_name: asset.region === 0 ? 'CASH' : 
+                       asset.region === 1 ? 'KOSPI' : 'NYSE'
+    };
+    
+    // 지역별 금액 설정
+    if (asset.region === 0) { // 현금
+      if (asset.name === '원화') {
+        newRud.won = asset.current_amount || 0;
+      } else if (asset.name === '달러') {
+        newRud.dollar = asset.current_amount || 0;
+      }
+    } else if (asset.region === 1) { // 국내주식
+      newRud.won = asset.current_amount || 0;
+      newRud.market_order = (asset.current_amount || 0) / (asset.current_qty || 1);
+    } else { // 해외주식
+      newRud.dollar = asset.current_amount || 0;
+      newRud.market_order = (asset.current_amount || 0) / (asset.current_qty || 1);
+    }
+    
+    dummyRuds.push(newRud);
+  });
+  
+  console.log('[더미 데이터] 새로운 기록 추가 완료:', {
+    newRecordId,
+    totalRecords: dummyRecords.length,
+    totalRuds: dummyRuds.length
+  });
+  
+  return newRecordId;
 }
