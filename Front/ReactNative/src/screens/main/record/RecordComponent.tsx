@@ -753,14 +753,211 @@ const RecordComponent: React.FC<RecordComponentProps> = ({ navigation }) => {
             </TouchableOpacity>
           ))}
           
-          {/* 선택된 기록의 상세 정보 표시 (옵션) */}
-          {selectedRecord && summary.records.some(r => r.record_id === selectedRecord) && (
-            <View style={styles.recordDetail}>
-              <Text style={styles.recordDetailTitle}>리밸런싱 상세 정보</Text>
-              <Text>기록 ID: {selectedRecord}</Text>
-              <Text>구현중입니다.^^</Text>
-            </View>
-              )}
+          {/* 선택된 기록의 상세 정보 표시 */}
+          {selectedRecord && summary.records.some(r => r.record_id === selectedRecord) && (() => {
+            const selectedRecordData = summary.records.find(r => r.record_id === selectedRecord);
+            const recordRuds = getRecordRuds(selectedRecord);
+            
+            // 현금, 국내주식, 해외주식으로 분류
+            const cashAssets = recordRuds.filter(rud => rud.stock_region === 0);
+            const domesticStocks = recordRuds.filter(rud => rud.stock_region === 1);
+            const foreignStocks = recordRuds.filter(rud => rud.stock_region === 2);
+            
+            // 총 평가액 계산 (원화 기준)
+            const totalValueKRW = recordRuds.reduce((total, rud) => {
+              if (rud.stock_region === 0) { // 현금
+                return total + rud.won + (rud.dollar * currentExchangeRate);
+              } else if (rud.stock_region === 1) { // 국내주식
+                return total + rud.won;
+              } else { // 해외주식
+                return total + (rud.dollar * currentExchangeRate);
+              }
+            }, 0);
+
+            return (
+              <View style={styles.recordDetail}>
+                {/* 헤더 */}
+                <View style={styles.recordDetailHeader}>
+                  <Text style={styles.recordDetailTitle}>📊 리밸런싱 상세 분석</Text>
+                  <TouchableOpacity 
+                    style={styles.closeButton}
+                    onPress={() => setSelectedRecord(null)}
+                  >
+                    <Text style={styles.closeButtonText}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* 기본 정보 */}
+                <View style={styles.detailSection}>
+                  <Text style={styles.sectionTitle}>📋 기본 정보</Text>
+                  <View style={styles.detailInfoRow}>
+                    <Text style={styles.detailLabel}>전략명</Text>
+                    <Text style={styles.detailValue}>{selectedRecordData?.record_name || '기본 전략'}</Text>
+                  </View>
+                  <View style={styles.detailInfoRow}>
+                    <Text style={styles.detailLabel}>저장일시</Text>
+                    <Text style={styles.detailValue}>{formatDate(selectedRecordData?.record_date || '')}</Text>
+                  </View>
+                  <View style={styles.detailInfoRow}>
+                    <Text style={styles.detailLabel}>총 평가액</Text>
+                    <Text style={styles.detailValue}>{totalValueKRW.toLocaleString()}원</Text>
+                  </View>
+                  <View style={styles.detailInfoRow}>
+                    <Text style={styles.detailLabel}>전체 수익률</Text>
+                    <Text style={[
+                      styles.detailValue,
+                      (selectedRecordData?.profit_rate || 0) >= 0 ? styles.positiveValue : styles.negativeValue
+                    ]}>
+                      {(selectedRecordData?.profit_rate || 0) >= 0 ? '+' : ''}
+                      {(selectedRecordData?.profit_rate || 0).toFixed(1)}%
+                    </Text>
+                  </View>
+                  {selectedRecordData?.memo && (
+                    <View style={styles.detailInfoRow}>
+                      <Text style={styles.detailLabel}>메모</Text>
+                      <Text style={styles.detailValue}>{selectedRecordData.memo}</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* 현금 보유 현황 */}
+                {cashAssets.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.sectionTitle}>💰 현금 보유 현황</Text>
+                    {cashAssets.map((asset, idx) => (
+                      <View key={idx} style={styles.assetRow}>
+                        <View style={styles.assetInfo}>
+                          <Text style={styles.assetName}>{asset.stock_name}</Text>
+                          <Text style={styles.assetWeight}>{asset.expert_per}%</Text>
+                        </View>
+                        <View style={styles.assetValues}>
+                          <Text style={styles.assetAmount}>
+                            {asset.stock_name === '원화' ? 
+                              `${asset.won.toLocaleString()}원` : 
+                              `$${asset.dollar.toLocaleString()}`
+                            }
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* 국내 주식 */}
+                {domesticStocks.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.sectionTitle}>🇰🇷 국내 주식</Text>
+                    {domesticStocks.map((stock, idx) => (
+                      <View key={idx} style={styles.assetRow}>
+                        <View style={styles.assetInfo}>
+                          <Text style={styles.assetName}>{stock.stock_name}</Text>
+                          <Text style={styles.assetDetails}>
+                            {stock.nos}주 × {stock.market_order.toLocaleString()}원
+                          </Text>
+                        </View>
+                        <View style={styles.assetValues}>
+                          <Text style={styles.assetWeight}>{stock.expert_per}%</Text>
+                          <Text style={[
+                            styles.assetReturn,
+                            stock.rate >= 0 ? styles.positiveValue : styles.negativeValue
+                          ]}>
+                            {stock.rate >= 0 ? '+' : ''}{stock.rate.toFixed(1)}%
+                          </Text>
+                          <Text style={styles.assetAmount}>{stock.won.toLocaleString()}원</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* 해외 주식 */}
+                {foreignStocks.length > 0 && (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.sectionTitle}>🌍 해외 주식</Text>
+                    {foreignStocks.map((stock, idx) => (
+                      <View key={idx} style={styles.assetRow}>
+                        <View style={styles.assetInfo}>
+                          <Text style={styles.assetName}>{stock.stock_name}</Text>
+                          <Text style={styles.assetDetails}>
+                            {stock.nos}주 × ${stock.market_order.toFixed(2)}
+                          </Text>
+                        </View>
+                        <View style={styles.assetValues}>
+                          <Text style={styles.assetWeight}>{stock.expert_per}%</Text>
+                          <Text style={[
+                            styles.assetReturn,
+                            stock.rate >= 0 ? styles.positiveValue : styles.negativeValue
+                          ]}>
+                            {stock.rate >= 0 ? '+' : ''}{stock.rate.toFixed(1)}%
+                          </Text>
+                          <Text style={styles.assetAmount}>
+                            ${stock.dollar.toLocaleString()}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* 포트폴리오 구성 차트 (간단한 막대 그래프) */}
+                <View style={styles.detailSection}>
+                  <Text style={styles.sectionTitle}>📈 포트폴리오 구성</Text>
+                  <View style={styles.chartContainer}>
+                    {recordRuds.map((asset, idx) => (
+                      <View key={idx} style={styles.chartRow}>
+                        <Text style={styles.chartLabel}>{asset.stock_name}</Text>
+                        <View style={styles.chartBarContainer}>
+                          <View 
+                            style={[
+                              styles.chartBar, 
+                              { 
+                                width: `${asset.expert_per}%`,
+                                backgroundColor: asset.stock_region === 0 ? '#FFD700' : 
+                                                asset.stock_region === 1 ? '#4CAF50' : '#2196F3'
+                              }
+                            ]} 
+                          />
+                          <Text style={styles.chartPercentage}>{asset.expert_per}%</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* 액션 버튼들 */}
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
+                    onPress={() => {
+                      if (navigation) {
+                        navigation.navigate('PortfolioEditor', { portfolioId: selectedRecord });
+                      }
+                    }}
+                  >
+                    <Text style={styles.actionButtonText}>✏️ 편집하기</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, { backgroundColor: '#FF9800' }]}
+                    onPress={() => {
+                      Alert.alert(
+                        '포트폴리오 복사',
+                        '이 포트폴리오를 새로운 리밸런싱의 기준으로 사용하시겠습니까?',
+                        [
+                          { text: '취소', style: 'cancel' },
+                          { text: '복사', onPress: () => {
+                            // TODO: 포트폴리오 복사 기능 구현
+                            Alert.alert('알림', '포트폴리오가 복사되었습니다.');
+                          }}
+                        ]
+                      );
+                    }}
+                  >
+                    <Text style={styles.actionButtonText}>📋 복사하기</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })()}
             </>
           )}
         </View>

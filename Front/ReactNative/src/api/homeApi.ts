@@ -1,8 +1,17 @@
 import axios from 'axios';
-import { FLASK_SERVER_URL, SPRING_SERVER_URL } from '../constants/config';
+import { FLASK_SERVER_URL, SPRING_SERVER_URL, USE_CODEF_DUMMY_DATA } from '../constants/config';
 import { Platform } from 'react-native';
+import { DUMMY_ACCOUNT_DATA, DUMMY_REBALANCING_RECORDS } from '../data/dummyData';
 
 export const fetchAccountData = async () => {
+  // 더미 모드가 활성화된 경우
+  if (USE_CODEF_DUMMY_DATA) {
+    console.log('더미 모드: 계좌 데이터 더미 반환');
+    // 실제 API 호출을 시뮬레이션하기 위해 약간의 지연 추가
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return DUMMY_ACCOUNT_DATA;
+  }
+
   try {
     const response = await axios.get(`${FLASK_SERVER_URL}/accounts`);
     return response.data;
@@ -13,6 +22,14 @@ export const fetchAccountData = async () => {
 };
 
 export const fetchRebalancingRecords = async () => {
+  // 더미 모드가 활성화된 경우
+  if (USE_CODEF_DUMMY_DATA) {
+    console.log('더미 모드: 리밸런싱 기록 더미 반환');
+    // 실제 API 호출을 시뮬레이션하기 위해 약간의 지연 추가
+    await new Promise(resolve => setTimeout(resolve, 600));
+    return DUMMY_REBALANCING_RECORDS;
+  }
+
   try {
     const response = await axios.get(`${FLASK_SERVER_URL}/rebalancing-records`);
     return response.data;

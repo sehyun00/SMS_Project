@@ -47,7 +47,7 @@ export interface TableComponentStyles {
 // 공통 스타일 생성 함수
 export const createTableStyles = (theme: Theme): TableComponentStyles => StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,

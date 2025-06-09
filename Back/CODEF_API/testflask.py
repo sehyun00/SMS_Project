@@ -8,6 +8,7 @@ import urllib.parse
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
+import time
 
 # .env 파일 로드
 load_dotenv()
@@ -20,10 +21,82 @@ CLIENT_ID = os.getenv('CODEF_CLIENT_ID')
 CLIENT_SECRET = os.getenv('CODEF_CLIENT_SECRET')
 PUBLIC_KEY = os.getenv('CODEF_PUBLIC_KEY')
 
-# 환경변수 검증
-if not all([CLIENT_ID, CLIENT_SECRET, PUBLIC_KEY]):
+# 더미 모드 설정 (11일까지 API 작동 안함)
+USE_DUMMY_MODE = os.getenv('USE_CODEF_DUMMY', 'true').lower() == 'true'
+
+# 환경변수 검증 (더미 모드가 아닐 때만)
+if not USE_DUMMY_MODE and not all([CLIENT_ID, CLIENT_SECRET, PUBLIC_KEY]):
     raise Exception("필요한 환경변수가 설정되지 않았습니다. .env 파일을 확인해주세요.")
 
+# 더미 데이터 정의
+DUMMY_ACCOUNT_LISTS = {
+    '0247': ['20901920648'],  # NH투자증권
+    '1247': ['20901920648'],  # NH투자증권 모바일증권 나무  
+    '0240': ['716229952301']  # 삼성증권
+}
+
+DUMMY_BALANCE_DATA = {
+    '20901920648': {
+        'result': {
+            'code': 'CF-00000',
+            'message': '성공'
+        },
+        'data': {
+            'resAccount': '20901920648',
+            'resAccountName': 'NH투자증권 계좌',
+            'rsTotAmt': '1,250,000',
+            'resDepositReceived': '150,000',
+            'resItemList': [
+                {
+                    'resIsName': '삼성전자',
+                    'resPrice': '72,500',
+                    'resQuantity': '10',
+                    'resAmount': '725,000',
+                    'resAvailQuantity': '10'
+                },
+                {
+                    'resIsName': 'LG에너지솔루션',
+                    'resPrice': '425,000',
+                    'resQuantity': '1',
+                    'resAmount': '425,000', 
+                    'resAvailQuantity': '1'
+                }
+            ]
+        }
+    },
+    '716229952301': {
+        'result': {
+            'code': 'CF-00000',
+            'message': '성공'
+        },
+        'data': {
+            'resAccount': '716229952301',
+            'resAccountName': '삼성증권 계좌',
+            'rsTotAmt': '2,340,000',
+            'resDepositReceived': '340,000',
+            'resItemList': [
+                {
+                    'resIsName': 'SK하이닉스',
+                    'resPrice': '125,000',
+                    'resQuantity': '8', 
+                    'resAmount': '1,000,000',
+                    'resAvailQuantity': '8'
+                },
+                {
+                    'resIsName': 'NAVER',
+                    'resPrice': '200,000',
+                    'resQuantity': '5',
+                    'resAmount': '1,000,000',
+                    'resAvailQuantity': '5'
+                }
+            ]
+        }
+    }
+}
+
+def simulate_api_delay():
+    """API 호출을 시뮬레이션하기 위한 지연"""
+    time.sleep(0.5)
 
 def get_access_token():
     try:
@@ -248,6 +321,25 @@ def get_stock_account_list():
 
 @app.route('/stock/balance', methods=['POST'])
 def stock_balance():
+    # 더미 모드가 활성화된 경우
+    if USE_DUMMY_MODE:
+        try:
+            print("더미 모드: 계좌 잔고 더미 데이터 반환")
+            data = request.get_json()
+            account = data.get('account', '20901920648')
+            
+            # API 호출 시뮬레이션을 위한 지연
+            simulate_api_delay()
+            
+            # 해당 계좌의 더미 데이터 반환, 없으면 기본 데이터
+            dummy_response = DUMMY_BALANCE_DATA.get(account, DUMMY_BALANCE_DATA['20901920648'])
+            return jsonify(dummy_response)
+            
+        except Exception as e:
+            return jsonify({
+                'error': f'더미 모드 에러: {str(e)}'
+            }), 500
+
     try:
         # 액세스 토큰 발급
         access_token = get_access_token()
@@ -304,6 +396,29 @@ def stock_balance():
 
 @app.route('/stock/create-and-list', methods=['POST'])
 def create_account_and_list():
+    # 더미 모드가 활성화된 경우
+    if USE_DUMMY_MODE:
+        try:
+            print("더미 모드: 계좌 생성 및 목록 조회 더미 데이터 반환")
+            data = request.get_json()
+            organization = data.get('organization', '0247')
+            
+            # API 호출 시뮬레이션을 위한 지연
+            simulate_api_delay()
+            
+            # 증권사에 따른 더미 계좌 목록 반환
+            account_list = DUMMY_ACCOUNT_LISTS.get(organization, ['20901920648'])
+            
+            return jsonify({
+                'connectedId': f'dummy_conn_{int(time.time())}',
+                'accountList': account_list
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'error': f'더미 모드 에러: {str(e)}'
+            }), 500
+
     try:
         # 액세스 토큰 발급
         access_token = get_access_token()
@@ -399,5 +514,23 @@ def create_account_and_list():
             'error': str(e)
         }), 500
 
+# 더미 모드 상태 확인 및 제어 엔드포인트
+@app.route('/dummy-mode/status', methods=['GET'])
+def get_dummy_mode_status():
+    return jsonify({
+        'dummyMode': USE_DUMMY_MODE,
+        'message': '더미 모드가 활성화되어 있습니다.' if USE_DUMMY_MODE else 'Codef API가 정상 작동중입니다.'
+    })
+
+@app.route('/dummy-mode/toggle', methods=['POST'])
+def toggle_dummy_mode():
+    global USE_DUMMY_MODE
+    USE_DUMMY_MODE = not USE_DUMMY_MODE
+    return jsonify({
+        'dummyMode': USE_DUMMY_MODE,
+        'message': f'더미 모드가 {"활성화" if USE_DUMMY_MODE else "비활성화"}되었습니다.'
+    })
+
 if __name__ == '__main__':
+    print(f"Flask 서버 시작 - 더미 모드: {'활성화' if USE_DUMMY_MODE else '비활성화'}")
     app.run(debug=True, host='0.0.0.0', port=5000)
