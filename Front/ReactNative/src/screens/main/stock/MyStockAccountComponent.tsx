@@ -18,12 +18,38 @@ import CurrencyToggle from '../../../components/common/ui/CurrencyToggle';
 import { 
   fetchConnectedAccounts, 
   fetchStockAccounts, 
-  getAccountBalance,
-  ConnectedAccount, 
-  AccountInfo,
-  BalanceInfo,
-  StockItem
+  getAccountBalance
 } from '../../../api/connectedAccountApi';
+
+// 로컬 타입 정의 (API 모듈에서 export되지 않는 타입들)
+interface ConnectedAccount {
+  connectedId: string;
+  accountNumber: string;
+}
+
+interface AccountInfo {
+  company: string;
+  accountNumber: string;
+  principal?: string;
+  returnRate?: number;
+}
+
+interface BalanceInfo {
+  accountNumber: string;
+  accountName: string;
+  totalAmount: string;
+  balance: string;
+  stocks?: StockItem[];
+  usdBalance?: string;
+}
+
+interface StockItem {
+  name: string;
+  price: string;
+  quantity: string;
+  amount: string;
+  availableQuantity: string;
+}
 
 // 증권사 데이터 매핑 임포트
 import { findSecuritiesFirmByName } from '../../../data/organizationData';
@@ -65,6 +91,8 @@ interface StockWithRatioAndColor extends StockData {
 interface EnhancedStockItem extends StockItem {
   currency: 'KRW' | 'USD'; // 통화 정보 추가
   isForeign: boolean;     // 해외주식 여부
+  originalPrice?: string; // 원본 가격 (USD인 경우)
+  originalAmount?: string; // 원본 금액 (USD인 경우)
 }
 
 // 컴포넌트 props 인터페이스 정의
@@ -604,10 +632,10 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
             console.log(`종목 정보 필드:`, Object.keys(item));
             
             // API 응답에서 확인된 정확한 필드명 사용
-            const itemName = item.resItemName || '알 수 없음';
-            const itemPrice = item.resPresentAmt || '0';
+            const itemName = item.resIsName || item.resItemName || '알 수 없음';
+            const itemPrice = item.resPrice || item.resPresentAmt || '0';
             const itemQuantity = item.resQuantity || '0';
-            const itemAmount = item.resValuationAmt || '0';
+            const itemAmount = item.resAmount || item.resValuationAmt || '0';
               
             // 해외 주식인 경우 확인 (resAccountCurrency 필드 활용)
             const isForeign = 
@@ -750,7 +778,8 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
   // 총 자산 가치 계산을 위한 변수 추가
   const totalValue = useMemo(() => {
     if (!selectedBalanceInfo) return 0;
-    return parseFloat(selectedBalanceInfo.totalAmount || '0');
+    // 콤마 제거 후 숫자로 변환
+    return parseFloat((selectedBalanceInfo.totalAmount || '0').replace(/,/g, ''));
   }, [selectedBalanceInfo]);
 
   const totalValueUSD = useMemo(() => {
@@ -767,8 +796,8 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
     const stocks = selectedBalanceInfo.stocks as EnhancedStockItem[];
     let stockData: StockData[] = stocks.map(stock => {
       const stockValue = stock.currency === 'USD' 
-        ? parseFloat(stock.amount) * exchangeRate
-        : parseFloat(stock.amount);
+        ? parseFloat((stock.amount || '0').replace(/,/g, '')) * exchangeRate
+        : parseFloat((stock.amount || '0').replace(/,/g, ''));
       
       return {
         name: stock.name,
@@ -784,7 +813,7 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
     });
     
     // 원화 현금 자산 추가 (예수금)
-    if (selectedBalanceInfo.balance && parseFloat(selectedBalanceInfo.balance) > 0) {
+    if (selectedBalanceInfo.balance && parseFloat((selectedBalanceInfo.balance || '0').replace(/,/g, '')) > 0) {
       stockData.push({
         name: '원화 현금 (예수금)',
         price: '0',
@@ -816,7 +845,7 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
     }
     
     // 총 자산 가치 계산 (원화 기준)
-    const totalValue: number = stockData.reduce((total, stock) => total + parseFloat(stock.amount), 0);
+    const totalValue: number = stockData.reduce((total, stock) => total + parseFloat((stock.amount || '0').replace(/,/g, '')), 0);
   
     // 색상 배열 정의
     const colors: string[] = [
@@ -842,9 +871,9 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
     return stockData
       .map(stock => ({
         ...stock,
-        value: parseFloat(stock.amount),
-        ratio: parseFloat(((parseFloat(stock.amount) / totalValue) * 100).toFixed(1)),
-        valueUSD: stock.currency === 'USD' ? parseFloat(stock.originalAmount || stock.amount) : undefined
+        value: parseFloat((stock.amount || '0').replace(/,/g, '')),
+        ratio: parseFloat(((parseFloat((stock.amount || '0').replace(/,/g, '')) / totalValue) * 100).toFixed(1)),
+        valueUSD: stock.currency === 'USD' ? parseFloat((stock.originalAmount || stock.amount || '0').replace(/,/g, '')) : undefined
       }))
       .sort((a, b) => b.ratio - a.ratio)
       .map((stock, index) => ({
@@ -950,7 +979,7 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
         {/* 보유 종목 리스트 - 통화 형식에 맞게 표시 */}
         <View style={styles.stockList}>
           {stocksWithRatioAndColor
-            .filter(stock => parseFloat(stock.amount) > 0)
+            .filter(stock => parseFloat((stock.amount || '0').replace(/,/g, '')) > 0)
             .map((stock, index) => (
               <View key={index} style={styles.stockItemContainer}>
                 <View style={[styles.colorIndicator, { backgroundColor: stock.color }]} />
@@ -959,11 +988,11 @@ const MyStockAccountComponent = ({ theme }: MyStockAccountComponentProps): React
                   <Text style={styles.stockValue}>
                     {currencyType === 'KRW' ? 
                       (stock.currency === 'USD' ? 
-                        `${parseFloat(stock.amount).toLocaleString()}원` : 
-                        `${parseFloat(stock.amount).toLocaleString()}원`) : 
+                        `${stock.value.toLocaleString()}원` : 
+                        `${stock.value.toLocaleString()}원`) : 
                       (stock.currency === 'USD' ? 
-                        `$${Number(stock.originalAmount || (parseFloat(stock.amount) / exchangeRate)).toFixed(2)}` : 
-                        `$${Number(parseFloat(stock.amount) / exchangeRate).toFixed(2)}`)
+                        `$${Number(stock.valueUSD || (stock.value / exchangeRate)).toFixed(2)}` : 
+                        `$${Number(stock.value / exchangeRate).toFixed(2)}`)
                     }
                   </Text>
                 </View>

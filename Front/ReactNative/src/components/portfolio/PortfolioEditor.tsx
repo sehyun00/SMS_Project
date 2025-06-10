@@ -567,9 +567,12 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
         
         // NH투자증권 형식 (resItemList)
         if (apiData.resItemList) {
-          // 현금 잔고 처리
-          cashBalance.krw = parseFloat(apiData.resCashBalance || apiData.resDepositReceived || '0');
-          cashBalance.usd = parseFloat(apiData.resOverseasCashBalance || '0');
+          // 현금 잔고 처리 (콤마 제거 후 숫자 변환)
+          const krwBalance = apiData.resCashBalance || apiData.resDepositReceived || '0';
+          cashBalance.krw = parseFloat(krwBalance.toString().replace(/,/g, ''));
+          
+          const usdBalance = apiData.resOverseasCashBalance || '0';
+          cashBalance.usd = parseFloat(usdBalance.toString().replace(/,/g, ''));
 
           stocks = apiData.resItemList.map((item: any) => {
             const isForeign = 
@@ -581,9 +584,9 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             const currency = item.resAccountCurrency === 'USD' ? 'USD' : 'KRW';
             
             return {
-              name: item.resItemName || '알 수 없음',
+              name: item.resIsName || item.resItemName || '알 수 없음',
               amount: parseFloat(item.resQuantity || '0'),
-              balance: parseFloat(item.resValuationAmt || item.resEvaluation || '0'),
+              balance: parseFloat((item.resAmount || item.resValuationAmt || item.resEvaluation || '0').toString().replace(/,/g, '')),
               isForeign,
               currency,
               region: isForeign ? 2 : 1
@@ -592,9 +595,12 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
         }
         // 삼성증권 등 다른 형식 (resAccountStock)
         else if (apiData.resAccountStock && Array.isArray(apiData.resAccountStock)) {
-          // 현금 잔고 처리
-          cashBalance.krw = parseFloat(apiData.resBalance || apiData.resAccountBalance || '0');
-          cashBalance.usd = parseFloat(apiData.resUsdBalance || '0');
+          // 현금 잔고 처리 (콤마 제거 후 숫자 변환)
+          const krwBalance = apiData.resBalance || apiData.resAccountBalance || '0';
+          cashBalance.krw = parseFloat(krwBalance.toString().replace(/,/g, ''));
+          
+          const usdBalance = apiData.resUsdBalance || '0';
+          cashBalance.usd = parseFloat(usdBalance.toString().replace(/,/g, ''));
 
           stocks = apiData.resAccountStock.map((item: any) => {
             const isForeign = 
@@ -608,7 +614,7 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({
             return {
               name: item.name || item.stockName || '알 수 없음',
               amount: parseFloat(item.quantity || '0'),
-              balance: parseFloat(item.evaluation || item.amount || '0'),
+              balance: parseFloat((item.evaluation || item.amount || '0').toString().replace(/,/g, '')),
               isForeign,
               currency,
               region: isForeign ? 2 : 1
