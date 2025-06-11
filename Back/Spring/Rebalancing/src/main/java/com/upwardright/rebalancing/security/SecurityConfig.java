@@ -42,7 +42,7 @@ public class SecurityConfig {
                 "http://localhost:8081",
                 "http://192.168.0.9:8081",
                 "http://192.168.0.3:8081",
-                "http://10.20.32.166:8081"));
+                "http://10.20.38.84:8081"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization")); // Authorization 헤더를 노출
