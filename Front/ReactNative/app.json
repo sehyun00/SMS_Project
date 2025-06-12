@@ -3,6 +3,7 @@
     "name": "SMS",
     "slug": "SMS",
     "version": "1.0.0",
+    "entryPoint": "./index.js",
     "orientation": "portrait",
     "icon": "./assets/super_ant.png",
     "userInterfaceStyle": "light",

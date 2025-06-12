@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import base64
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5 as Cipher_PKCS1_v1_5
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Cipher import PKCS1_v1_5 as Cipher_PKCS1_v1_5
 import requests
 import json
 import urllib.parse

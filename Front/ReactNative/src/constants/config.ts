@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-// const ip = '192.168.0.3';
+// const ip = '192.168.0.109';
 // const ip = '10.20.32.211';
 const ip = '10.20.38.84';
 
