@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
+/*
+    추후 개발 사항 사용자 정보 변경
+ */
 @RequiredArgsConstructor
 @RestController
 public class FindMyAccountController {

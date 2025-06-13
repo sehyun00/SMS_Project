@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
+/*
+    사용자에게 이메일을 보낼 때 제공 양식
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailService {

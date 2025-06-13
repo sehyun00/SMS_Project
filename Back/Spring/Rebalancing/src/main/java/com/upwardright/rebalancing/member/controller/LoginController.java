@@ -9,6 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+/*
+    로그인 처리방식
+    로그인 성공시 Front로 200
+    오류시 401 인증 오류 제공
+ */
 @RestController
 @RequiredArgsConstructor
 public class LoginController {

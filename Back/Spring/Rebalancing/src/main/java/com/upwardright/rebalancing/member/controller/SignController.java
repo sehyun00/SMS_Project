@@ -10,6 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/*
+    회원가입 로직
+    Front로 올바른 request를 받을 경우 사용자 저장, 만약 사용자가 이미 있을경우 오류처리
+    회원가입 중 이메일 인증을 위해 redis를 이용하여 이메일 발송 로직 구현
+ */
 @RequiredArgsConstructor
 @RestController
 public class SignController {
