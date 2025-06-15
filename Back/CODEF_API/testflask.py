@@ -22,7 +22,7 @@ CLIENT_SECRET = os.getenv('CODEF_CLIENT_SECRET')
 PUBLIC_KEY = os.getenv('CODEF_PUBLIC_KEY')
 
 # 더미 모드 설정 (11일까지 API 작동 안함)
-USE_DUMMY_MODE = os.getenv('USE_CODEF_DUMMY', 'true').lower() == 'true'
+USE_DUMMY_MODE = os.getenv('USE_CODEF_DUMMY', 'true').lower() == 'false'
 
 # 환경변수 검증 (더미 모드가 아닐 때만)
 if not USE_DUMMY_MODE and not all([CLIENT_ID, CLIENT_SECRET, PUBLIC_KEY]):

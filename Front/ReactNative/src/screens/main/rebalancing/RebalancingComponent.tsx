@@ -23,6 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RForeignComponent from './RForeignComponent';
 import RDomesticComponent from './RDomesticComponent';
 import RMoneyComponent from './RMoneyComponent';
+import RAnalysisComponent from './RAnalysisComponent';
 
 // 더미 데이터 임포트 - 새로운 구조
 import {
@@ -46,6 +47,10 @@ import { Theme } from '../../../types/theme';
 
 // 계좌 선택 컴포넌트 임포트
 import AccountSelectorComponent from '../../../components/account/AccountSelectorComponent';
+
+// NLP API 임포트
+import { analyzePortfolio, PortfolioAnalysisResponse } from '../../../api/nlpApi';
+import { getStockCodeFromName } from '../../../data/stockCodeMapping';
 
 // API에서 가져오는 계좌 정보 인터페이스
 interface ApiAccountInfo {
@@ -190,6 +195,11 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
 
   // 화폐 단위 상태 (기본값: 달러)
   const [currencyType, setCurrencyType] = useState<'dollar' | 'won'>('dollar');
+
+  // 포트폴리오 분석 관련 상태
+  const [analysisResult, setAnalysisResult] = useState<PortfolioAnalysisResponse | undefined>(undefined);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | undefined>(undefined);
 
   // 증권사 이름으로 기관코드 찾기
   const getOrganizationCode = (companyName: string): string => {
@@ -1111,6 +1121,68 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
     });
   };
 
+  // 포트폴리오 분석 실행
+  const handleAnalyzePortfolio = async () => {
+    if (!currentRecord || recordDetails.length === 0) {
+      setAnalysisError('분석할 포트폴리오 데이터가 없습니다.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisError(undefined);
+
+    try {
+      console.log('[포트폴리오 분석] 분석 시작');
+
+      // 주식 종목만 필터링 (현금 제외, stock_region이 1 또는 2인 것만)
+      const stockRecords = recordDetails.filter(record => 
+        record.stock_region === 1 || record.stock_region === 2
+      );
+
+      if (stockRecords.length === 0) {
+        setAnalysisError('분석할 주식 종목이 없습니다.');
+        return;
+      }
+
+      // 주식명을 코드로 변환
+      const portfolioStocks = stockRecords.map(record => {
+        const stockCode = getStockCodeFromName(record.stock_name);
+        console.log(`[주식 코드 변환] ${record.stock_name} -> ${stockCode}`);
+        return stockCode;
+      });
+
+      // 목표 비중 (expert_per) 사용
+      const rawWeights = stockRecords.map(record => record.expert_per);
+
+      console.log('[포트폴리오 분석] API 요청 데이터:', {
+        portfolioStocks,
+        rawWeights,
+        totalStocks: portfolioStocks.length
+      });
+
+      // API 호출
+      const result = await analyzePortfolio({
+        portfolio_stocks: portfolioStocks,
+        raw_weights: rawWeights
+      });
+
+      if (result.success && result.data) {
+        console.log('[포트폴리오 분석] 분석 성공:', result.data);
+        setAnalysisResult(result.data);
+        setAnalysisError(undefined);
+      } else {
+        console.error('[포트폴리오 분석] 분석 실패:', result.error);
+        setAnalysisError(result.error || '분석 중 오류가 발생했습니다.');
+      }
+
+    } catch (error) {
+      console.error('[포트폴리오 분석] 예상치 못한 오류:', error);
+      setAnalysisError('분석 중 예상치 못한 오류가 발생했습니다.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   // 초기 데이터 로딩 (MyStockAccountComponent 방식)
   useEffect(() => {
     // 연결된 계좌 ID 정보 가져오기
@@ -1607,6 +1679,14 @@ const RebalancingComponent: React.FC<RebalancingComponentProps> = ({ theme, navi
             exchangeRate={currentExchangeRate}
             totalBalance={totalBalance}
             calculateCurrentPortion={calculateCurrentPortion}
+          />
+
+          {/* 포트폴리오 분석 카드 */}
+          <RAnalysisComponent
+            analysisResult={analysisResult}
+            isLoading={isAnalyzing}
+            onAnalyze={handleAnalyzePortfolio}
+            error={analysisError}
           />
         </View>
       )}
