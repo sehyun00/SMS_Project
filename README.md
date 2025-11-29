@@ -582,7 +582,7 @@ curl http://localhost:5000/dummy-mode/status
 
 - **GitHub**: [sehyun00](https://github.com/sehyun00)
 - **Repository**: [SMS_Project](https://github.com/sehyun00/SMS_Project)
-- **email**: [sh000917@gmail.com].
+- **email**: sh000917@gmail.com.
 
 ---
 
