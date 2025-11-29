@@ -575,13 +575,6 @@ curl http://localhost:5000/dummy-mode/status
 **Team 우상향 (Woosanghyang)**
 
 - 선문대학교 컴퓨터공학부
-- Event 2025 참가
-
----
-
-## 📄 라이선스
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -589,6 +582,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **GitHub**: [sehyun00](https://github.com/sehyun00)
 - **Repository**: [SMS_Project](https://github.com/sehyun00/SMS_Project)
+- **email**: [sh000917@gmail.com].
 
 ---
 
